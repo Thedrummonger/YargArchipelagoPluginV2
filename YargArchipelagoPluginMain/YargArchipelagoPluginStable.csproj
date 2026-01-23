@@ -71,8 +71,26 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="..\CommonData\*.cs">
-      <Link>%(Filename)%(Extension)</Link>
+    <Compile Include="..\CommonData\APPatches.cs">
+      <Link>APPatches.cs</Link>
+    </Compile>
+    <Compile Include="..\CommonData\ArchipelagoEventManager.cs">
+      <Link>ArchipelagoEventManager.cs</Link>
+    </Compile>
+    <Compile Include="..\CommonData\ArchipelagoPlugin.cs">
+      <Link>ArchipelagoPlugin.cs</Link>
+    </Compile>
+    <Compile Include="..\CommonData\ArchipelagoService.cs">
+      <Link>ArchipelagoService.cs</Link>
+    </Compile>
+    <Compile Include="..\CommonData\CommonData.cs">
+      <Link>CommonData.cs</Link>
+    </Compile>
+    <Compile Include="..\CommonData\YargAPUtils.cs">
+      <Link>YargAPUtils.cs</Link>
+    </Compile>
+    <Compile Include="..\CommonData\YargEngineActions.cs">
+      <Link>YargEngineActions.cs</Link>
     </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

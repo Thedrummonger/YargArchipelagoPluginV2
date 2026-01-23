@@ -1,4 +1,5 @@
 ﻿using BepInEx;
+using HarmonyLib;
 
 namespace YargArchipelagoPlugin
 {
@@ -6,7 +7,7 @@ namespace YargArchipelagoPlugin
     public class ArchipelagoPlugin : BaseUnityPlugin
     {
         public const string pluginGuid = "thedrummonger.yarg.archipelago";
-        public const string pluginVersion = "0.1.0.0";
+        public const string pluginVersion = "0.2.0.0";
 #if NIGHTLY
         public const string pluginName = "YARG Nightly Archipelago Plugin";
 #else
@@ -15,13 +16,10 @@ namespace YargArchipelagoPlugin
 
         public void Awake()
         {
-            var APHandler = new ArchipelagoService(Logger);
-            APPatches.EventManager = new ArchipelagoEventManager(APHandler);
-
-            APHandler.GetPatcher().PatchAll();
+            var patcher = new Harmony(ArchipelagoPlugin.pluginGuid);
+            patcher.PatchAll();
 
             Logger.LogInfo("Starting AP");
-            APHandler.StartAPPacketServer();
         }
     }
 }

@@ -1,51 +1,168 @@
 ﻿//Don't Let visual studios lie to me these are needed
+using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
+using System.Linq;
+using System.Reflection;
 //----------------------------------------------------
 
 namespace YargArchipelagoCommon
 {
     public class CommonData
     {
+
+        private static T ParseEnum<T>(string value) where T : struct => (T)Enum.Parse(typeof(T), value);
         public static string DataFolder => Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "YARChipelago");
         public static string ConnectionCachePath => Path.Combine(DataFolder, "connection.json");
         public static string SongExportFile => Path.Combine(DataFolder, "SongExport.json");
         public static string userConfigFile => Path.Combine(DataFolder, "UserConfig.json");
         public static string SeedConfigPath => Path.Combine(DataFolder, "seeds");
+
+        [AttributeUsage(AttributeTargets.Field)]
+        public class ActionableAttribute : Attribute { }
+
+        public enum StaticItems
+        {
+            [Description("Victory")]
+            Victory,
+            [Description("Fame Point")]
+            FamePoint,
+            [Description("Song Completion")]
+            SongCompletion,
+            [Description("Star Power"), Actionable]
+            StarPower,
+            [Description("Swap Song (Random)")]
+            SwapRandom,
+            [Description("Swap Song (Pick)")]
+            SwapPick,
+            [Description("Lower Difficulty")]
+            LowerDifficulty,
+            [Description("Restart Trap"), Actionable]
+            TrapRestart,
+            [Description("Rock Meter Trap"), Actionable]
+            TrapRockMeter
+        }
+
         public enum SupportedInstrument
         {
-            // Instruments are reserved in multiples of 10
-            // 0-9: 5-fret guitar\
-            FiveFretGuitar = 0,
-            FiveFretBass = 1,
-            Keys = 4,
+            [Description("Five Fret Guitar")]
+            FiveFretGuitar,
+            [Description("Five Fret Bass")]
+            FiveFretBass,
+            [Description("Keys")]
+            Keys,
+            [Description("Six Fret Guitar")]
+            SixFretGuitar,
+            [Description("Six Fret Bass")]
+            SixFretBass,
+            [Description("Four Lane Drums")]
+            FourLaneDrums,
+            [Description("Pro Drums")]
+            ProDrums,
+            [Description("Five Lane Drums")]
+            FiveLaneDrums,
+            [Description("Pro Keys")]
+            ProKeys,
+            [Description("Vocals")]
+            Vocals,
+            [Description("Harmony")]
+            Harmony
+        }
 
-            // 10-19: 6-fret guitar
-            SixFretGuitar = 10,
-            SixFretBass = 11,
+        public static readonly Dictionary<string, StaticItems> StaticItemsByName =
+        Enum.GetValues(typeof(StaticItems))
+            .Cast<StaticItems>()
+            .ToDictionary(item => item.GetType().GetField(item.ToString()).GetCustomAttribute<DescriptionAttribute>().Description, item => item);
 
-            // 20-29: Drums
-            FourLaneDrums = 20,
-            ProDrums = 21,
-            FiveLaneDrums = 22,
+        public static readonly Dictionary<long, StaticItems> StaticItemsById =
+        Enum.GetValues(typeof(StaticItems))
+            .Cast<StaticItems>()
+            .Select((item, index) => new { item, index })
+            .ToDictionary(x => (long)x.index, x => x.item);
 
-            // 30-39: Pro instruments
-            ProKeys = 34,
+        public static readonly Dictionary<string, SupportedInstrument> InstrumentItemsByName =
+            Enum.GetValues(typeof(SupportedInstrument))
+                .Cast<SupportedInstrument>()
+                .ToDictionary(item => item.GetType().GetField(item.ToString()).GetCustomAttribute<DescriptionAttribute>().Description, item => item);
 
-            // 40-49: Vocals
-            Vocals = 40,
-            Harmony = 41,
+        public static readonly Dictionary<long, SupportedInstrument> InstrumentItemsById =
+            Enum.GetValues(typeof(SupportedInstrument))
+                .Cast<SupportedInstrument>()
+                .Select((item, index) => new { item, index = index + StaticItemsById.Count })
+                .ToDictionary(x => (long)x.index, x => x.item);
+
+        public enum CompletionReq
+        {
+            Clear,
+            OneStar,
+            TwoStar,
+            ThreeStar,
+            FourStar,
+            FiveStar,
+            GoldStar,
+            FullCombo
+        }
+
+        public enum SupportedDifficulty
+        {
+            Easy = 1,
+            Medium = 2,
+            Hard = 3,
+            Expert = 4,
+        }
+
+        public class BaseYargAPItem
+        {
+            public BaseYargAPItem(long itemID, int sendingSlot, long sendingLocationID, string Game)
+            {
+                ItemID = itemID;
+                SendingPlayerGame = Game;
+                SendingPlayerLocation = sendingLocationID;
+                SendingPlayerSlot = sendingSlot;
+            }
+            public long ItemID;
+            public int SendingPlayerSlot;
+            public long SendingPlayerLocation;
+            public string SendingPlayerGame;
+        }
+
+        public class StaticYargAPItem : BaseYargAPItem
+        {
+            public StaticItems Type;
+
+            public StaticYargAPItem(StaticItems type, long itemID, int sendingSlot, long sendingLocationID, string Game) : base(itemID, sendingSlot, sendingLocationID, Game)
+            {
+                Type = type;
+            }
+
+            private string FillerHash() => $"{Type}|{ItemID}|{SendingPlayerSlot}|{SendingPlayerLocation}|{SendingPlayerGame}";
+
+            public override int GetHashCode() => FillerHash().GetHashCode();
+
+            public override bool Equals(object obj)
+            {
+                if (obj == null || GetType() != obj.GetType()) return false;
+                StaticYargAPItem other = (StaticYargAPItem)obj;
+                return FillerHash() == other.FillerHash();
+            }
+
+            public static bool operator ==(StaticYargAPItem left, StaticYargAPItem right)
+            {
+                if (ReferenceEquals(left, right)) return true;
+                if (left is null || right is null) return false;
+                return left.Equals(right);
+            }
+
+            public static bool operator !=(StaticYargAPItem left, StaticYargAPItem right) => !(left == right);
         }
 
         public class SongData
         {
             public string Name;
             public string Artist;
-            public string Album;
             public string Charter;
-            public string Path;
             public string SongChecksum;
             public Dictionary<SupportedInstrument, int> Difficulties = new Dictionary<SupportedInstrument, int>();
             public bool TryGetDifficulty(SupportedInstrument instrument, out int Difficulty) => Difficulties.TryGetValue(instrument, out Difficulty);
@@ -74,13 +191,6 @@ namespace YargArchipelagoCommon
             public bool FC;
             public int Score;
             public float Percentage;
-        }
-        public enum SupportedDifficulty
-        {
-            Easy = 1,
-            Medium = 2,
-            Hard = 3,
-            Expert = 4,
         }
 
         public enum ItemLog
@@ -120,79 +230,161 @@ namespace YargArchipelagoCommon
             public string Cause;
             public DeathLinkType Type;
         }
-        public class ActionItemData
+
+        public class CompletionRequirements
         {
-            public ActionItemData(APActionItem t, string sender)
+            public CompletionReq Reward1Req { get; set; }
+            public SupportedDifficulty Reward1Diff { get; set; }
+            public CompletionReq Reward2Req { get; set; }
+            public SupportedDifficulty Reward2Diff { get; set; }
+
+            public static CompletionRequirements FromJson(JObject json)
             {
-                type = t;
-                Sender = sender;
+                return new CompletionRequirements
+                {
+                    Reward1Req = ParseEnum<CompletionReq>(json["reward1_req"].ToObject<string>()),
+                    Reward1Diff = ParseEnum<SupportedDifficulty>(json["reward1_diff"].ToObject<string>()),
+                    Reward2Req = ParseEnum<CompletionReq>(json["reward2_req"].ToObject<string>()),
+                    Reward2Diff = ParseEnum<SupportedDifficulty>(json["reward2_diff"].ToObject<string>())
+                };
             }
-            public APActionItem type;
-            public string Sender;
-        }
-        public class CurrentlyPlayingData
-        {
-            public CurrentlyPlayingData(SongData t) { song = t; }
-            public SongData song;
-            public static CurrentlyPlayingData CurrentlyPlayingSong(SongData t) => new CurrentlyPlayingData(t);
-            public static CurrentlyPlayingData CurrentlyPlayingNone() => new CurrentlyPlayingData(null);
-        }
-        public enum APActionItem
-        {
-            RockMeterTrap,
-            Restart,
-            StarPower,
-            NonFiller
         }
 
-        public class UserConfig
+        public class SongPool
         {
-            public string HOST = "127.0.0.1";
-            public int PORT = 26569;
-            public string PipeName = "yarg_ap_pipe";
-            public bool UsePipe = true;
-        }
+            public SupportedInstrument Instrument { get; set; }
+            public long AmountInPool { get; set; }
+            public long MinDifficulty { get; set; }
+            public long MaxDifficulty { get; set; }
+            public CompletionRequirements CompletionRequirements { get; set; }
 
-        public static class Networking
-        {
-            public class YargAPPacket
+            public static SongPool FromJson(JObject json)
             {
-                //YARG PARSED
-                /// <summary>
-                /// Sent to Yarg when a deathlink happens in AP. Causes the current song to fail and exit.
-                /// </summary>
-                public DeathLinkData deathLinkData = null;
-                /// <summary>
-                /// Sent to Yarg when an item is recieved that causes yarg to perform an action, such as adding start power or triggering traps
-                /// </summary>
-                public ActionItemData ActionItem = null;
-                /// <summary>
-                /// Sent to Yarg to update the game with what songs are available
-                /// </summary>
-                public (string SongHash, string Profile)[] AvailableSongs = null;
-
-                //AP Parsed
-                /// <summary>
-                /// Sent to AP Client when a song is completed including whether it passed or failed and what the score was.
-                /// </summary>
-                public SongCompletedData SongCompletedInfo = null;
-                /// <summary>
-                /// Sent to AP Client when the currently playing song is changed to update the client title
-                /// </summary>
-                public CurrentlyPlayingData CurrentlyPlaying = null;
-
-                //DUAL PARSED
-                /// <summary>
-                /// A log Message. When sent to AP client, prints to the chat log. When sent to Yarg, prints to a toast message
-                /// </summary>
-                public string Message = null;
+                return new SongPool
+                {
+                    Instrument = ParseEnum<SupportedInstrument>(json["instrument"].ToObject<string>()),
+                    AmountInPool = json["amount_in_pool"].ToObject<int>(),
+                    MinDifficulty = json["min_difficulty"].ToObject<int>(),
+                    MaxDifficulty = json["max_difficulty"].ToObject<int>(),
+                    CompletionRequirements = CompletionRequirements.FromJson(json["completion_requirements"] as JObject)
+                };
             }
+        }
 
-            public readonly static Newtonsoft.Json.JsonSerializerSettings PacketSerializeSettings = new Newtonsoft.Json.JsonSerializerSettings()
+        public class SongAPData
+        {
+            public string Hash { get; set; }
+            public string PoolName { get; set; }
+            public long MainLocationID { get; set; }
+            public long ExtraLocationID { get; set; }
+            public long CompletionLocationID { get; set; }
+            public long UnlockItemID { get; set; }
+
+            public SongPool GetPool(YargSlotData slotData) => slotData.Pools[PoolName];
+
+            public static SongAPData FromTuple(JArray tuple, string hash, string pool)
             {
-                Formatting = Newtonsoft.Json.Formatting.None,
-                NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore,
-            };
+                return new SongAPData
+                {
+                    Hash = hash,
+                    PoolName = pool,
+                    MainLocationID = tuple[0].ToObject<long>(),
+                    ExtraLocationID = tuple[1].ToObject<long>(),
+                    CompletionLocationID = tuple[2].ToObject<long>(),
+                    UnlockItemID = tuple[3].ToObject<long>()
+                };
+            }
+        }
+
+        public class GoalData
+        {
+            public string SongHash { get; set; }
+            public string SongPool { get; set; }
+            public long GoalLocationID { get; set; }
+            public long UnlockItemID { get; set; }
+
+            public static GoalData FromTuple(JArray tuple)
+            {
+                return new GoalData
+                {
+                    SongHash = tuple[0].ToObject<string>(),
+                    SongPool = tuple[1].ToObject<string>(),
+                    GoalLocationID = tuple[2].ToObject<long>(),
+                    UnlockItemID = tuple[3].ToObject<long>()
+                };
+            }
+        }
+
+        public class YargSlotData
+        {
+            public int FamePointsForGoal { get; set; }
+            public int SetlistNeededForGoal { get; set; }
+            public GoalData GoalData { get; set; }
+            public bool DeathLink { get; set; }
+            public bool EnergyLink { get; set; }
+            // Dictionary of pool_name -> SongPool configuration
+            public Dictionary<string, SongPool> Pools { get; set; }
+            // dict[song_hash, dict[pool_name, SongPoolData]]
+            public Dictionary<string, Dictionary<string, SongAPData>> SongHashToAPData { get; set; }
+            // dict[pool_name, dict[song_hash, SongPoolData]]
+            public Dictionary<string, Dictionary<string, SongAPData>> SongPoolToAPData { get; set; }
+            // dict[instrument, dict[song_hash, SongPoolData]]
+            public Dictionary<SupportedInstrument, Dictionary<string, SongAPData>> InstrumentToAPData { get; set; }
+            public Dictionary<long, SongAPData> LocationIDtoAPData { get; set; }
+            public Dictionary<long, SongAPData> ItemIDtoAPData { get; set; }
+
+            public static YargSlotData Parse(Dictionary<string, object> slotData)
+            {
+                var result = new YargSlotData
+                {
+                    FamePointsForGoal = Convert.ToInt32(slotData["fame_points_for_goal"]),
+                    SetlistNeededForGoal = Convert.ToInt32(slotData["setlist_needed_for_goal"]),
+                    GoalData = GoalData.FromTuple(slotData["goal_data"] as JArray),
+                    DeathLink = Convert.ToBoolean(slotData["death_link"]),
+                    EnergyLink = Convert.ToBoolean(slotData["energy_link"]),
+                    Pools = new Dictionary<string, SongPool>(),
+                    SongHashToAPData = new Dictionary<string, Dictionary<string, SongAPData>>(),
+                    SongPoolToAPData = new Dictionary<string, Dictionary<string, SongAPData>>(),
+                    InstrumentToAPData = new Dictionary<SupportedInstrument, Dictionary<string, SongAPData>>(),
+                    LocationIDtoAPData = new Dictionary<long, SongAPData>(),
+                    ItemIDtoAPData = new Dictionary<long, SongAPData>(),
+                };
+
+                var poolsJson = slotData["pools"] as JObject;
+                foreach (var pool in poolsJson)
+                    result.Pools[pool.Key] = SongPool.FromJson(pool.Value as JObject);
+
+                var songDataJson = slotData["song_data"] as JObject;
+                foreach (var songHash in songDataJson)
+                {
+                    result.SongHashToAPData[songHash.Key] = new Dictionary<string, SongAPData>();
+
+                    var poolsDataJson = songHash.Value as JObject;
+                    foreach (var poolData in poolsDataJson)
+                    {
+                        var PoolData = SongAPData.FromTuple(poolData.Value as JArray, songHash.Key, poolData.Key);
+
+                        if (!result.SongPoolToAPData.ContainsKey(poolData.Key))
+                            result.SongPoolToAPData[poolData.Key] = new Dictionary<string, SongAPData>();
+                        result.SongPoolToAPData[poolData.Key][songHash.Key] = PoolData;
+
+                        var Pool = PoolData.GetPool(result);
+                        if (!result.InstrumentToAPData.ContainsKey(Pool.Instrument))
+                            result.InstrumentToAPData[Pool.Instrument] = new Dictionary<string, SongAPData>();
+                        result.InstrumentToAPData[Pool.Instrument][songHash.Key] = PoolData;
+
+                        result.SongHashToAPData[songHash.Key][poolData.Key] = PoolData;
+                        result.LocationIDtoAPData[PoolData.MainLocationID] = PoolData;
+                        if (PoolData.ExtraLocationID >= 0)
+                            result.LocationIDtoAPData[PoolData.ExtraLocationID] = PoolData;
+                        if (PoolData.CompletionLocationID >= 0)
+                            result.LocationIDtoAPData[PoolData.CompletionLocationID] = PoolData;
+                        result.ItemIDtoAPData[PoolData.UnlockItemID] = PoolData;
+                    }
+                }
+
+                return result;
+            }
         }
     }
 }

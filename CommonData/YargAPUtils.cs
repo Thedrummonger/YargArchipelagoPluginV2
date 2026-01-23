@@ -35,11 +35,8 @@ namespace YargArchipelagoPlugin
         {
             return new CommonData.SongData()
             {
-                Album = RichTextUtils.StripRichTextTags(song.Album),
-                Artist = RichTextUtils.StripRichTextTags(song.Artist),
-                Charter = RichTextUtils.StripRichTextTags(song.Charter),
                 Name = RichTextUtils.StripRichTextTags(song.Name),
-                Path = song.ActualLocation,
+                Artist = RichTextUtils.StripRichTextTags(song.Artist),
                 SongChecksum = Convert.ToBase64String(song.Hash.HashBytes),
                 Difficulties = new Dictionary<CommonData.SupportedInstrument, int>()
             };
@@ -51,11 +48,11 @@ namespace YargArchipelagoPlugin
             foreach (var player in __instance.Players)
             {
                 var Profile = player.Player.Profile;
-                if (!YargAPUtils.IsSupportedInstrument(Profile.CurrentInstrument, out var SupportedInstrument)) continue;
+                if (!IsSupportedInstrument(Profile.CurrentInstrument, out var SupportedInstrument)) continue;
                 if (!ScoreContainer.IsSoloScoreValid(__instance.SongSpeed, player.Player)) continue;
                 var Participant = new CommonData.SongParticipantInfo()
                 {
-                    Difficulty = YargAPUtils.GetSupportedDifficulty(Profile.CurrentDifficulty),
+                    Difficulty = GetSupportedDifficulty(Profile.CurrentDifficulty),
                     instrument = SupportedInstrument,
                     FC = player.IsFc,
                     Percentage = player.BaseStats.Percent,
@@ -67,5 +64,14 @@ namespace YargArchipelagoPlugin
             }
             return participants.ToArray();
         }
+        public static (string Ip, int Port) ParseIpAddress(string input)
+        {
+            if (string.IsNullOrWhiteSpace(input)) return (null, 0);
+            var parts = input.Split(':');
+            string ip = parts[0];
+            int port = parts.Length > 1 && int.TryParse(parts[1], out var parsedPort) ? parsedPort : 38281;
+            return (ip, port);
+        }
+
     }
 }
