@@ -31,10 +31,24 @@ namespace YargArchipelagoPlugin
         public HashSet<long> CheckedLocations { get; } = new HashSet<long>();
         public DeathLinkService DeathLinkService { get; private set; } = null;
 
+        private DateTime CurrentSongStartTime = DateTime.Now;
         private GameManager CurrentlyPlaying = null;
-        public void SetCurrentSong(GameManager game) => CurrentlyPlaying = game;
+        public void SetCurrentSong(GameManager game)
+        {
+            CurrentSongStartTime = DateTime.Now;
+            CurrentlyPlaying = game;
+        }
         public void ClearCurrentSong() => CurrentlyPlaying = null;
-        public bool IsInSong() => CurrentlyPlaying != null;
+        public bool IsInSong(out GameManager song, out TimeSpan buffer)
+        {
+            song = null;
+            buffer = TimeSpan.Zero;
+            if (CurrentlyPlaying is null)
+                return false;
+            song = CurrentlyPlaying;
+            buffer = DateTime.Now - CurrentSongStartTime;
+            return true;
+        }
 
         private readonly ArchipelagoEventManager eventManager;
 
@@ -94,6 +108,7 @@ namespace YargArchipelagoPlugin
             }
             AddListeners();
             eventManager.UpdateAPData();
+            UpdateDeathLinkTags();
             return true;
         }
 
@@ -118,11 +133,14 @@ namespace YargArchipelagoPlugin
         {
             if (_Listening) return;
             APSyncTimer.ConstantCallback += eventManager.VerifyServerConnection;
+            APSyncTimer.ConstantCallback += eventManager.ApplyPendingTrapsFiller;
             APSyncTimer.OnUpdateCallback += eventManager.UpdateAPData;
 
             Session.Items.ItemReceived += eventManager.Items_ItemReceived;
             Session.Locations.CheckedLocationsUpdated += eventManager.Locations_CheckedLocationsUpdated;
             Session.MessageLog.OnMessageReceived += eventManager.RelayChatToYARG;
+
+            DeathLinkService.OnDeathLinkReceived += eventManager.OnDeathLinkReceived;
 
             APPatches.OnCreateNormalView += eventManager.InsertAPSongs;
             APPatches.OnSongStarted += eventManager.SetSong;
@@ -133,16 +151,18 @@ namespace YargArchipelagoPlugin
             _Listening = true;
         }
 
-
         public void RemoveListeners()
         {
             if (!_Listening) return;
             APSyncTimer.ConstantCallback -= eventManager.VerifyServerConnection;
+            APSyncTimer.ConstantCallback -= eventManager.ApplyPendingTrapsFiller;
             APSyncTimer.OnUpdateCallback -= eventManager.UpdateAPData;
 
             Session.Items.ItemReceived -= eventManager.Items_ItemReceived;
             Session.Locations.CheckedLocationsUpdated -= eventManager.Locations_CheckedLocationsUpdated;
             Session.MessageLog.OnMessageReceived -= eventManager.RelayChatToYARG;
+
+            DeathLinkService.OnDeathLinkReceived -= eventManager.OnDeathLinkReceived;
 
             APPatches.OnCreateNormalView -= eventManager.InsertAPSongs;
             APPatches.OnSongStarted -= eventManager.SetSong;
@@ -189,6 +209,16 @@ namespace YargArchipelagoPlugin
             }
         }
 
+        public void UpdateDeathLinkTags()
+        {
+            if (!IsSessionConnected)
+                return;
+            if (seedConfig.DeathLinkMode > DeathLinkType.None)
+                DeathLinkService.EnableDeathLink();
+            else
+                DeathLinkService.DisableDeathLink();
+        }
+
     }
 
     public class PersistantData
@@ -226,6 +256,13 @@ namespace YargArchipelagoPlugin
                 return configData;
             }
             catch { return null; }
+        }
+        public void Save(APConnectionContainer container)
+        {
+            if (!container.IsSessionConnected) return;
+            Directory.CreateDirectory(SeedConfigPath);
+            var path = Path.Combine(SeedConfigPath, getSaveFileName(container));
+            File.WriteAllText(path, JsonConvert.SerializeObject(this, Formatting.Indented));
         }
         private static string getSaveFileName(APConnectionContainer container) =>
             $"{container.GetSession()?.RoomState?.Seed}_{container.GetSession()?.Players?.ActivePlayer?.Slot}_" +

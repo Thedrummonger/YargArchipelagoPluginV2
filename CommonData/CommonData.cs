@@ -10,6 +10,7 @@ using UnityEngine.Profiling;
 using YARG.Core;
 using YARG.Core.Game;
 using YARG.Core.Song;
+using YARG.Core.Utility;
 using YARG.Gameplay;
 using YARG.Menu.Persistent;
 using YARG.Scores;
@@ -19,7 +20,7 @@ using YargArchipelagoPlugin;
 
 namespace YargArchipelagoCommon
 {
-    public class CommonData
+    public static class CommonData
     {
 
         private static T ParseEnum<T>(string value) where T : struct => (T)Enum.Parse(typeof(T), value);
@@ -52,6 +53,12 @@ namespace YargArchipelagoCommon
             TrapRestart,
             [Description("Rock Meter Trap"), Actionable]
             TrapRockMeter
+        }
+
+        public static bool IsActionable(this StaticItems item)
+        {
+            var fieldInfo = item.GetType().GetField(item.ToString());
+            return fieldInfo?.GetCustomAttribute<ActionableAttribute>() != null;
         }
 
         public enum SupportedInstrument
@@ -203,12 +210,23 @@ namespace YargArchipelagoCommon
             AnySong = 3,
         }
 
-        public class DeathLinkData
+        public class SongExportData
         {
-            public DeathLinkData(string source, string cause, DeathLinkType type = DeathLinkType.None) { Source = source; Cause = cause; Type = type; }
-            public string Source;
-            public string Cause;
-            public DeathLinkType Type;
+            public string Name;
+            public string Artist;
+            public string SongChecksum;
+            public Dictionary<SupportedInstrument, int> Difficulties = new Dictionary<SupportedInstrument, int>();
+            public bool TryGetDifficulty(SupportedInstrument instrument, out int Difficulty) => Difficulties.TryGetValue(instrument, out Difficulty);
+            public static SongExportData FromSongEntry(SongEntry song)
+            {
+                return new SongExportData()
+                {
+                    Artist = RichTextUtils.StripRichTextTags(song.Artist),
+                    Name = RichTextUtils.StripRichTextTags(song.Name),
+                    SongChecksum = Convert.ToBase64String(song.Hash.HashBytes),
+                    Difficulties = new Dictionary<CommonData.SupportedInstrument, int>()
+                };
+            }
         }
 
         public class CompletionRequirements

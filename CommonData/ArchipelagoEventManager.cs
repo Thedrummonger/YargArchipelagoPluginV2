@@ -2,14 +2,9 @@
 using Archipelago.MultiClient.Net.BounceFeatures.DeathLink;
 using Archipelago.MultiClient.Net.MessageLog.Messages;
 using HarmonyLib;
-using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Linq;
-using System.Reflection;
-using System.Security.Cryptography;
-using System.Text;
 using System.Timers;
 using YARG.Core;
 using YARG.Core.IO;
@@ -18,7 +13,6 @@ using YARG.Gameplay;
 using YARG.Menu.MusicLibrary;
 using YARG.Menu.Persistent;
 using YARG.Settings;
-using YARG.Song;
 using YargArchipelagoCommon;
 using static YargArchipelagoCommon.CommonData;
 
@@ -162,10 +156,51 @@ namespace YargArchipelagoPlugin
         {
             parent.UpdateReceivedItems();
             parent.UpdateCheckedLocations();
-            if (parent.IsInSong() || !YargEngineActions.UpdateRecommendedSongsMenu())
+            if (parent.IsInSong(out _, out _) || !YargEngineActions.UpdateRecommendedSongsMenu())
                 APPatches.HasAvailableAPSongUpdate = true;
+            PendingTrapsFiller = true;
         }
 
+        public bool PendingTrapsFiller = false;
+
+        public void ApplyPendingTrapsFiller()
+        {
+            if (!PendingTrapsFiller) return;
+            if (!parent.IsInSong(out _, out var buffer)) return;
+            if (buffer == null || buffer < TimeSpan.FromSeconds(5)) return;
+
+            var Pending = parent.ApItemsRecieved
+                .Where(x => CommonData.IsActionable(x.Type) && !parent.seedConfig.ApItemsUsed.Contains(x)).ToList();
+
+            if (Pending.Count == 0)
+            {
+                PendingTrapsFiller = false;
+                return;
+            }
+
+            var Item = Pending[0];
+            switch (Item.Type)
+            {
+                case StaticItems.StarPower:
+                    YargEngineActions.ApplyStarPowerItem(parent);
+                    break;
+                case StaticItems.TrapRestart:
+                    YargEngineActions.ForceRestartSong(parent);
+                    break;
+                case StaticItems.TrapRockMeter:
+                    YargEngineActions.ApplyRockMetertrapItem(parent);
+                    break;
+            }
+            parent.seedConfig.ApItemsUsed.Add(Item);
+            parent.seedConfig.Save(parent);
+        }
+
+        internal void OnDeathLinkReceived(DeathLink deathLink)
+        {
+            if (!parent.HasActiveSession) return;
+            if (parent.seedConfig.DeathLinkMode <= DeathLinkType.None) return;
+            YargEngineActions.ApplyDeathLink(parent, deathLink);
+        }
     }
 
     public class SyncTimer
@@ -201,4 +236,82 @@ namespace YargArchipelagoPlugin
             OnUpdateCallback?.Invoke();
         }
     }
+    public static partial class ExtraAPFunctionalityHelper
+    {
+        public const long minEnergyLinkScale = 20000;
+        public const long maxEnergyLinkScale = 1000000;
+
+        public const long SwapSongRandomPrice = 17_000_000_000;
+        public const long SwapSongPickPrice = 20_000_000_000;
+        public const long LowerDifficultyPrice = 15_000_000_000;
+
+        public static string EnergyLinkKey(ArchipelagoSession session) => $"EnergyLink{session.Players.ActivePlayer.Team}";
+        public static bool TryPurchaseItem(APConnectionContainer container, StaticItems Type, long Price)
+        {
+            var CurrentEnergy = GetEnergy(container);
+            if (!TryUseEnergy(container, Price))
+                return false;
+            var CurCount = container.seedConfig.ApItemsPurchased.Where(x => x.Type == Type).Count();
+            container.seedConfig.ApItemsPurchased.Add(new StaticYargAPItem(Type, StaticItemIDbyValue[Type], -99, CurCount, "YAYARG"));
+            container.seedConfig.Save(container);
+            return true;
+        }
+
+        public static string FormatLargeNumber(long number)
+        {
+            if (number >= 1_000_000_000_000)
+                return (number / 1_000_000_000_000.0).ToString("0.##") + " Trillion";
+            if (number >= 1_000_000_000)
+                return (number / 1_000_000_000.0).ToString("0.##") + " Billion";
+            if (number >= 1_000_000)
+                return (number / 1_000_000.0).ToString("0.##") + " Million";
+            if (number >= 1_000)
+                return (number / 1_000.0).ToString("0.##") + " Thousand";
+
+            return number.ToString("N0");
+        }
+        public static void SendScoreAsEnergy(APConnectionContainer container, long BaseScore, bool WasLocationChecked)
+        {
+            if (container.seedConfig.EnergyLinkMode <= CommonData.EnergyLinkType.None) return;
+            if (container.seedConfig.EnergyLinkMode == CommonData.EnergyLinkType.CheckSong && !WasLocationChecked) return;
+            if (container.seedConfig.EnergyLinkMode == CommonData.EnergyLinkType.OtherSong && WasLocationChecked) return;
+
+            var Session = container.GetSession();
+            Session.DataStorage[EnergyLinkKey(Session)].Initialize(0);
+            Session.DataStorage[EnergyLinkKey(Session)] += ScaleEnergyValue(container, BaseScore);
+        }
+
+        public static long ScaleEnergyValue(APConnectionContainer container, long baseAmount)
+        {
+            int AmountOfLocationsTotal = container.GetSession().Locations.AllLocations.Count;
+            int AmountOfLocationsChecked = container.GetSession().Locations.AllLocationsChecked.Count;
+            double completionPercentage = AmountOfLocationsChecked / AmountOfLocationsTotal;
+            double scale = minEnergyLinkScale + (completionPercentage * (maxEnergyLinkScale - minEnergyLinkScale));
+            long Energy = (long)(baseAmount * scale);
+            return Energy;
+        }
+
+        public static long GetEnergy(APConnectionContainer container)
+        {
+            if (container.seedConfig.EnergyLinkMode <= CommonData.EnergyLinkType.None) return 0;
+            var Session = container.GetSession();
+            Session.DataStorage[EnergyLinkKey(Session)].Initialize(0);
+            return Session.DataStorage[EnergyLinkKey(Session)];
+        }
+
+        public static bool TryUseEnergy(APConnectionContainer container, long Amount)
+        {
+            if (container.seedConfig.EnergyLinkMode <= CommonData.EnergyLinkType.None) return false;
+            var Session = container.GetSession();
+            Session.DataStorage[EnergyLinkKey(Session)].Initialize(0);
+            if (Session.DataStorage[EnergyLinkKey(Session)] >= Amount)
+            {
+                Session.DataStorage[EnergyLinkKey(Session)] -= Amount;
+                return true;
+            }
+            return false;
+
+        }
+    }
+
 }
