@@ -85,7 +85,7 @@ namespace YargArchipelagoPlugin
             var tempSession = ArchipelagoSessionFactory.CreateSession(Ip, Port);
 
             var Result = tempSession.TryConnectAndLogin("YAYARG", connectionDetails.SlotName,
-                Archipelago.MultiClient.Net.Enums.ItemsHandlingFlags.AllItems, password: connectionDetails.Password);
+                Archipelago.MultiClient.Net.Enums.ItemsHandlingFlags.AllItems, new Version(0,6,1), password: connectionDetails.Password);
             if (Result is LoginFailure failure)
             {
                 ToastManager.ToastError($"Failed to connect!\n{connectionDetails.SlotName}@{connectionDetails.Address}:\n{string.Join("\n", failure.Errors)}");
@@ -97,6 +97,7 @@ namespace YargArchipelagoPlugin
             DeathLinkService = Session.CreateDeathLinkService();
             SeededRNG = new Random(GetAPSeed());
             SlotData = YargSlotData.Parse(Session.DataStorage.GetSlotData());
+            File.WriteAllText(Path.Combine(CommonData.DataFolder, "Debug.json"), JsonConvert.SerializeObject(SlotData, Formatting.Indented));
             seedConfig = PersistantData.Load(this);
             if (seedConfig is null)
             {
@@ -193,19 +194,17 @@ namespace YargArchipelagoPlugin
                     }
                     ApItemsRecieved.Add(new StaticYargAPItem(item, i.ItemId, i.Player.Slot, i.Player.Slot == 0 ? ServerLocProxy[item] : i.LocationId, i.LocationGame));
                     if (item == StaticItems.Victory) Session.SetGoalAchieved();
-                    continue;
                 }
                 else if (InstrumentItemsById.TryGetValue(i.ItemId, out var instrument))
-                {
                     ReceivedInstruments[instrument] = new BaseYargAPItem(i.ItemId, i.Player.Slot, i.LocationId, i.LocationGame);
-                    continue;
-                }
-                else if (SlotData.ItemIDtoAPData.ContainsKey(i.ItemId) || i.ItemName.ToLower().StartsWith("song pack"))
-                {
+                else if (SlotData.ItemIDtoAPData.ContainsKey(i.ItemId))
                     ReceivedSongUnlockItems[i.ItemId] = new BaseYargAPItem(i.ItemId, i.Player.Slot, i.LocationId, i.LocationGame);
-                    continue;
-                }
-                throw new Exception($"Error, received unknown item {i.ItemName} [{i.ItemId}]");
+                else if (i.ItemId == SlotData.GoalData.UnlockItemID)
+                    ReceivedSongUnlockItems[i.ItemId] = new BaseYargAPItem(i.ItemId, i.Player.Slot, i.LocationId, i.LocationGame);
+                else if (i.ItemName.ToLower().StartsWith("song pack"))
+                    ReceivedSongUnlockItems[i.ItemId] = new BaseYargAPItem(i.ItemId, i.Player.Slot, i.LocationId, i.LocationGame);
+                else
+                    throw new Exception($"Error, received unknown item {i.ItemName} [{i.ItemId}]");
             }
         }
 
@@ -271,14 +270,8 @@ namespace YargArchipelagoPlugin
 
     public class ConnectionDetails
     {
-        public ConnectionDetails(string address, string slotname, string password)
-        {
-            Address = address;
-            SlotName = slotname;
-            Password = password;
-        }
-        public string Address { get; private set; }
-        public string SlotName { get; private set; }
-        public string Password { get; private set; }
+        public string Address { get; set; } = "localhost";//"Archipleago.gg:38281";
+        public string SlotName { get; set; } = "TDMYarg";//string.Empty;
+        public string Password { get; set; } = string.Empty;
     }
 }

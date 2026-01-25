@@ -1,5 +1,7 @@
 ﻿using BepInEx;
 using HarmonyLib;
+using UnityEngine;
+using UnityEngine.Windows;
 
 namespace YargArchipelagoPlugin
 {
@@ -14,6 +16,8 @@ namespace YargArchipelagoPlugin
         public const string pluginName = "YARG Archipelago Plugin";
 #endif
         public static APConnectionContainer APcontainer;
+
+        private ArchipelagoConnectionDialog dialog;
         public void Awake()
         {
             var patcher = new Harmony(pluginGuid);
@@ -26,7 +30,29 @@ namespace YargArchipelagoPlugin
 
         private void Update()
         {
+            if (!Application.isFocused) return;
 
+            if (UnityEngine.InputSystem.Keyboard.current != null &&
+                UnityEngine.InputSystem.Keyboard.current.f10Key.wasPressedThisFrame)
+            {
+                ToggleArchipelagoDialog();
+            }
+        }
+        private void ToggleArchipelagoDialog()
+        {
+            var dialog = GetOrCreateApDialog();
+            dialog.Show = !dialog.Show;
+        }
+        private static ArchipelagoConnectionDialog GetOrCreateApDialog()
+        {
+            if (ArchipelagoConnectionDialog.Instance != null)
+                return ArchipelagoConnectionDialog.Instance;
+
+            var DialogObject = new GameObject("ArchipelagoConnectionDialog");
+            DontDestroyOnLoad(DialogObject);
+            var dialog = DialogObject.AddComponent<ArchipelagoConnectionDialog>();
+            dialog.Initialize(APcontainer);
+            return dialog;
         }
     }
 }

@@ -31,7 +31,7 @@ namespace YargArchipelagoPlugin
         {
             if (!parent.IsSessionConnected)
                 return;
-            List<(SongEntry, string)> SongEntries = new List<(SongEntry, string)>();
+            List<(SongEntry, SongAPData)> SongEntries = new List<(SongEntry, SongAPData)>();
             foreach (var i in parent.SlotData.InstrumentToAPData)
             {
                 if (!parent.ReceivedInstruments.ContainsKey(i.Key)) continue;
@@ -41,12 +41,10 @@ namespace YargArchipelagoPlugin
                     if (!song.Value.HasAvailableLocations(parent)) continue;
                     var songObj = song.Value.GetYargSongEntry();
                     if (songObj != null)
-                        SongEntries.Add((songObj, i.Key.GetDescription()));
+                        SongEntries.Add((songObj, song.Value));
                 }
             }
-            YargEngineActions.InsertAPListViewSongs(__instance, __result, SongEntries);
-            var calc = AccessTools.Method(typeof(MusicLibraryMenu), "CalculateCategoryHeaderIndices");
-            calc.Invoke(__instance, new object[] { __result });
+            YargEngineActions.InsertAPListViewSongs(parent, __instance, __result, SongEntries);
         }
 
         public void SetSong(GameManager gameManager) => parent.SetCurrentSong(gameManager);
@@ -67,6 +65,8 @@ namespace YargArchipelagoPlugin
 
         public void TryCheckSongLocations(GameManager gameManager)
         {
+            bool ShouldCheat = APPatches.IgnoreScoreForNextSong;
+            APPatches.IgnoreScoreForNextSong = false;
             if (!parent.IsSessionConnected)
                 return;
             var LocationsPlayed = parent.SlotData.LocationIDtoAPData.Values.Where(x => x.WasActiveSongInGame(gameManager));
@@ -80,20 +80,20 @@ namespace YargArchipelagoPlugin
                     continue;
                 var pool = i.GetPool(parent.SlotData);
 
-                var MetStandard = pool.MetStandard(gameManager, out var deathLinkStandard);
+                var MetStandard = pool.MetStandard(gameManager, out var deathLinkStandard) || ShouldCheat;
                 if (!MetStandard && deathLinkStandard) DoDeathlink = true;
                 if (MetStandard) LocationsToComplete.Add(i.MainLocationID);
 
                 var MetExtra = true;
                 if (i.ExtraLocationID >= 0)
                 {
-                    MetExtra = pool.MetExtra(gameManager, out var deathLinkExtra);
+                    MetExtra = pool.MetExtra(gameManager, out var deathLinkExtra) || ShouldCheat;
                     if (!MetExtra && deathLinkExtra) DoDeathlink = true;
                     if (MetExtra) LocationsToComplete.Add(i.ExtraLocationID);
                 }
 
-                if (i.CompletionLocationID >= 0)
-                    if (MetStandard && MetExtra) LocationsToComplete.Add(i.ExtraLocationID);
+                if (i.CompletionLocationID >= 0 && MetStandard && MetExtra)
+                    LocationsToComplete.Add(i.CompletionLocationID);
             }
 
             if (LocationsToComplete.Count > 0)

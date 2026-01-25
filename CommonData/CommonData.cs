@@ -351,7 +351,7 @@ namespace YargArchipelagoCommon
 
             public bool IsSongUnlocked(APConnectionContainer connectionContainer)
             {
-                var HasUnlockItem = UnlockItemID < 0 || connectionContainer.ReceivedSongUnlockItems.ContainsKey(UnlockItemID);
+                var HasUnlockItem = connectionContainer.ReceivedSongUnlockItems.ContainsKey(UnlockItemID);
                 var CurrentSongCompletions = connectionContainer.ApItemsRecieved.Count(x => x.Type == StaticItems.SongCompletion);
                 var HasEnoughCompletions = CurrentSongCompletions >= connectionContainer.SlotData.SetlistNeededForGoal;
                 var CurrentFamePoints = connectionContainer.ApItemsRecieved.Count(x => x.Type == StaticItems.FamePoint);

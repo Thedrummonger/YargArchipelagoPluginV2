@@ -77,21 +77,32 @@ namespace YargArchipelagoPlugin
             return insertIndex;
         }
 
-        public static void InsertAPListViewSongs(MusicLibraryMenu menu, List<ViewType> listView, IEnumerable<(SongEntry song, string Instrument)> entries)
+        public static void InsertAPListViewSongs(APConnectionContainer container, MusicLibraryMenu menu, List<ViewType> listView, IEnumerable<(SongEntry song, SongAPData APData)> entries)
         {
             int insertIndex = GetListViewIndex(listView, "Menu.MusicLibrary.AllSongs");
-            var groups = entries.GroupBy(t => t.Instrument, StringComparer.OrdinalIgnoreCase).OrderBy(g => g.Key, StringComparer.OrdinalIgnoreCase);
+            if (insertIndex < 0) return;
 
-            foreach (var grp in groups)
+            var allSongs = entries.Select(e => e.song).ToArray();
+            listView.Insert(insertIndex++, new CategoryViewType("ARCHIPELAGO SONGS", allSongs.Length, allSongs, menu.RefreshAndReselect));
+
+            foreach (var pool in entries
+                .OrderBy(e => e.APData.GetPool(container.SlotData).Instrument.GetDescription(), StringComparer.OrdinalIgnoreCase)
+                .ThenBy(e => e.APData.PoolName, StringComparer.OrdinalIgnoreCase)
+                .GroupBy(e => e.APData.PoolName))
             {
-                var songs = grp.Select(t => t.song).OrderBy<SongEntry, string>(s => s.Name, StringComparer.OrdinalIgnoreCase).ToArray();
+                var poolSongs = pool.Select(e => e.song).OrderBy(s => s.Name, StringComparer.OrdinalIgnoreCase).ToArray();
+                listView.Insert(insertIndex++, new CategoryViewType(pool.Key.ToUpper(), poolSongs.Length, poolSongs, () => ShowPoolData(container, pool.Key)));
 
-                string header = $"Archipelago Songs: {grp.Key}".ToUpper();
-                listView.Insert(insertIndex++, new CategoryViewType(header, songs.Length, songs, menu.RefreshAndReselect));
-
-                foreach (var song in songs)
+                foreach (var song in poolSongs)
                     listView.Insert(insertIndex++, new SongViewType(menu, song));
             }
+        }
+
+        public static void ShowPoolData(APConnectionContainer container, string poolName)
+        {
+            if (!container.SlotData.Pools.TryGetValue(poolName, out var SongPool))
+                return;
+            DialogManager.Instance.ShowMessage($"Data for pool: {poolName}", JsonConvert.SerializeObject(SongPool, Formatting.Indented));
         }
 
         public static void ApplyStarPowerItem(APConnectionContainer handler)
@@ -140,8 +151,7 @@ namespace YargArchipelagoPlugin
                         return;
                 }
 #endif
-                ToastManager.ToastInformation($"DeathLink Received!\n\n{deathLinkData.Source} {deathLinkData.Cause}");
-                //DialogManager.Instance.ShowMessage("DeathLink Received!", $"{deathLinkData.Source} {deathLinkData.Cause}");
+                ToastManager.ToastInformation($"DeathLink Received!\n\n{deathLink.Source} {deathLink.Cause}");
             }
             catch (Exception e)
             {

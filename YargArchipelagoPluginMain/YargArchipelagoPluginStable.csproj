@@ -60,11 +60,17 @@
     <Reference Include="UniTask">
       <HintPath>Libraries\UniTask.dll</HintPath>
     </Reference>
+    <Reference Include="Unity.InputSystem">
+      <HintPath>Libraries\Unity.InputSystem.dll</HintPath>
+    </Reference>
     <Reference Include="UnityEngine">
       <HintPath>Libraries\UnityEngine.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.CoreModule">
       <HintPath>Libraries\UnityEngine.CoreModule.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.IMGUIModule">
+      <HintPath>Libraries\UnityEngine.IMGUIModule.dll</HintPath>
     </Reference>
     <Reference Include="YARG.Core.Package">
       <HintPath>Libraries\YARG.Core.Package.dll</HintPath>
@@ -85,6 +91,9 @@
     </Compile>
     <Compile Include="..\CommonData\CommonData.cs">
       <Link>CommonData.cs</Link>
+    </Compile>
+    <Compile Include="..\CommonData\Forms.cs">
+      <Link>Forms.cs</Link>
     </Compile>
     <Compile Include="..\CommonData\YargAPUtils.cs">
       <Link>YargAPUtils.cs</Link>

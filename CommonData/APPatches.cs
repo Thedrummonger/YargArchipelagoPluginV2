@@ -1,8 +1,11 @@
-﻿using System;
+﻿using HarmonyLib;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using HarmonyLib;
+using UnityEngine;
+using UnityEngine.InputSystem;
+using YARG;
 using YARG.Core.Engine;
 using YARG.Core.Game;
 using YARG.Core.Replays;
@@ -12,6 +15,7 @@ using YARG.Gameplay;
 using YARG.Gameplay.Player;
 using YARG.Localization;
 using YARG.Menu.MusicLibrary;
+using YARG.Playback;
 using YARG.Scores;
 using YARG.Settings;
 using YARG.Song;
@@ -28,6 +32,7 @@ namespace YargArchipelagoPlugin
         public static event Action<GameManager> OnRecordScore;
         public static event Action<GameManager> OnSongFail;
         public static bool HasAvailableAPSongUpdate = false;
+        public static bool IgnoreScoreForNextSong = false;
 
         [HarmonyPatch(typeof(GameManager), "Awake")]
         [HarmonyPostfix]
@@ -40,7 +45,7 @@ namespace YargArchipelagoPlugin
 
         [HarmonyPatch(typeof(GameManager), "RecordScores")]
         [HarmonyPostfix]
-        public static void GameManager_RecordScores_Postfix(GameManager __instance, ReplayInfo replayInfo) => 
+        public static void GameManager_RecordScores_Postfix(GameManager __instance, ReplayInfo replayInfo) =>
             OnRecordScore?.Invoke(__instance);
 
 #if NIGHTLY 
@@ -69,5 +74,19 @@ namespace YargArchipelagoPlugin
             OnCreateNormalView?.Invoke(__instance, __result);
         }
 
+        [HarmonyPatch(typeof(GameManager), "Update")]
+        [HarmonyPostfix]
+        public static void GameManager_Update_Postfix(GameManager __instance)
+        {
+            if (Keyboard.current.ctrlKey.isPressed && Keyboard.current.qKey.wasPressedThisFrame)
+            {
+                var songRunner = AccessTools.Field(typeof(GameManager), "_songRunner").GetValue(__instance) as SongRunner;
+                songRunner.SetSongTime(__instance.SongLength + 3.0, 0.0);
+
+                var endSongMethod = typeof(GameManager).GetMethod("EndSong", BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public);
+                IgnoreScoreForNextSong = true;
+                endSongMethod?.Invoke(__instance, new object[] { });
+            }
+        }
     }
 }
