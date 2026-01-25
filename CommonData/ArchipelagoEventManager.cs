@@ -43,7 +43,7 @@ namespace YargArchipelagoPlugin
                 if (!parent.ReceivedInstruments.ContainsKey(i.Key)) continue;
                 foreach (var song in i.Value)
                 {
-                    if (!parent.ReceivedSongs.ContainsKey(song.Value.UnlockItemID)) continue;
+                    if (!parent.ReceivedSongUnlockItems.ContainsKey(song.Value.UnlockItemID)) continue;
                     if (!song.Value.HasAvailableLocations(parent)) continue;
                     var songObj = song.Value.GetYargSongEntry();
                     if (songObj != null)

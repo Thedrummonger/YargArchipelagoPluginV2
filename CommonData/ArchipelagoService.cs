@@ -25,7 +25,7 @@ namespace YargArchipelagoPlugin
         private ArchipelagoSession Session;
         public BepInEx.Logging.ManualLogSource logger;
         private Random SeededRNG = null;
-        public Dictionary<long, BaseYargAPItem> ReceivedSongs { get; } = new Dictionary<long, BaseYargAPItem>();
+        public Dictionary<long, BaseYargAPItem> ReceivedSongUnlockItems { get; } = new Dictionary<long, BaseYargAPItem>();
         public Dictionary<SupportedInstrument, BaseYargAPItem> ReceivedInstruments { get; } = new Dictionary<SupportedInstrument, BaseYargAPItem>();
         public HashSet<StaticYargAPItem> ApItemsRecieved { get; } = new HashSet<StaticYargAPItem>();
         public HashSet<long> CheckedLocations { get; } = new HashSet<long>();
@@ -102,7 +102,7 @@ namespace YargArchipelagoPlugin
             RemoveListeners();
             if (Session?.Socket?.Connected ?? false)
                 Session.Socket.DisconnectAsync();
-            ReceivedSongs.Clear();
+            ReceivedSongUnlockItems.Clear();
             ApItemsRecieved.Clear();
             ReceivedInstruments.Clear();
             CheckedLocations.Clear();
@@ -173,14 +173,14 @@ namespace YargArchipelagoPlugin
                     if (item == StaticItems.Victory) Session.SetGoalAchieved();
                     continue;
                 }
-                if (InstrumentItemsById.TryGetValue(i.ItemId, out var instrument))
+                else if (InstrumentItemsById.TryGetValue(i.ItemId, out var instrument))
                 {
                     ReceivedInstruments[instrument] = new BaseYargAPItem(i.ItemId, i.Player.Slot, i.LocationId, i.LocationGame);
                     continue;
                 }
-                if (SlotData.ItemIDtoAPData.TryGetValue(i.ItemId, out var songItem))
+                else if (SlotData.ItemIDtoAPData.ContainsKey(i.ItemId) || i.ItemName.ToLower().StartsWith("song pack"))
                 {
-                    ReceivedSongs[i.ItemId] = new BaseYargAPItem(i.ItemId, i.Player.Slot, i.LocationId, i.LocationGame);
+                    ReceivedSongUnlockItems[i.ItemId] = new BaseYargAPItem(i.ItemId, i.Player.Slot, i.LocationId, i.LocationGame);
                     continue;
                 }
                 throw new Exception($"Error, received unknown item {i.ItemName} [{i.ItemId}]");

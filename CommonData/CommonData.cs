@@ -293,7 +293,7 @@ namespace YargArchipelagoCommon
             {
                 var pool = GetPool(connectionContainer.SlotData);
                 return connectionContainer.ReceivedInstruments.ContainsKey(pool.Instrument) &&
-                    connectionContainer.ReceivedSongs.ContainsKey(UnlockItemID);
+                    connectionContainer.ReceivedSongUnlockItems.ContainsKey(UnlockItemID);
             }
             public bool HasAvailableLocations(APConnectionContainer connectionContainer)
             {
