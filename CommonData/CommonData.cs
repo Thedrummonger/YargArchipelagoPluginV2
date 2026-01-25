@@ -6,6 +6,15 @@ using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using UnityEngine.Profiling;
+using YARG.Core;
+using YARG.Core.Game;
+using YARG.Core.Song;
+using YARG.Gameplay;
+using YARG.Menu.Persistent;
+using YARG.Scores;
+using YARG.Song;
+using YargArchipelagoPlugin;
 //----------------------------------------------------
 
 namespace YargArchipelagoCommon
@@ -74,7 +83,7 @@ namespace YargArchipelagoCommon
         public static readonly Dictionary<string, StaticItems> StaticItemsByName =
         Enum.GetValues(typeof(StaticItems))
             .Cast<StaticItems>()
-            .ToDictionary(item => item.GetType().GetField(item.ToString()).GetCustomAttribute<DescriptionAttribute>().Description, item => item);
+            .ToDictionary(item => item.GetDescription(), item => item);
 
         public static readonly Dictionary<long, StaticItems> StaticItemsById =
         Enum.GetValues(typeof(StaticItems))
@@ -82,16 +91,22 @@ namespace YargArchipelagoCommon
             .Select((item, index) => new { item, index })
             .ToDictionary(x => (long)x.index, x => x.item);
 
+        public static readonly Dictionary<StaticItems, long> StaticItemIDbyValue =
+            StaticItemsById.ToDictionary(x => x.Value, x => x.Key);
+
         public static readonly Dictionary<string, SupportedInstrument> InstrumentItemsByName =
             Enum.GetValues(typeof(SupportedInstrument))
                 .Cast<SupportedInstrument>()
-                .ToDictionary(item => item.GetType().GetField(item.ToString()).GetCustomAttribute<DescriptionAttribute>().Description, item => item);
+                .ToDictionary(item => item.GetDescription(), item => item);
 
         public static readonly Dictionary<long, SupportedInstrument> InstrumentItemsById =
             Enum.GetValues(typeof(SupportedInstrument))
                 .Cast<SupportedInstrument>()
                 .Select((item, index) => new { item, index = index + StaticItemsById.Count })
                 .ToDictionary(x => (long)x.index, x => x.item);
+
+        public static readonly Dictionary<SupportedInstrument, long> InstrumentIDbyValue =
+            InstrumentItemsById.ToDictionary(x => x.Value, x => x.Key);
 
         public enum CompletionReq
         {
@@ -156,41 +171,6 @@ namespace YargArchipelagoCommon
             }
 
             public static bool operator !=(StaticYargAPItem left, StaticYargAPItem right) => !(left == right);
-        }
-
-        public class SongData
-        {
-            public string Name;
-            public string Artist;
-            public string Charter;
-            public string SongChecksum;
-            public Dictionary<SupportedInstrument, int> Difficulties = new Dictionary<SupportedInstrument, int>();
-            public bool TryGetDifficulty(SupportedInstrument instrument, out int Difficulty) => Difficulties.TryGetValue(instrument, out Difficulty);
-        }
-
-        public class SongCompletedData
-        {
-            public SongCompletedData(SongData Song, bool Passed, SongParticipantInfo[] participants, long bandScore) { 
-                SongData = Song; 
-                SongPassed = Passed;
-                Participants = participants;
-                BandScore = bandScore;
-            }
-            public long BandScore;
-            public SongData SongData;
-            public bool SongPassed;
-            public SongParticipantInfo[] Participants;
-        }
-
-        public class SongParticipantInfo
-        {
-            public SupportedInstrument? instrument;
-            public SupportedDifficulty Difficulty;
-            public int Stars;
-            public bool WasGoldStar;
-            public bool FC;
-            public int Score;
-            public float Percentage;
         }
 
         public enum ItemLog
@@ -274,6 +254,7 @@ namespace YargArchipelagoCommon
         public class SongAPData
         {
             public string Hash { get; set; }
+            public string ProxyHash { get; set; }
             public string PoolName { get; set; }
             public long MainLocationID { get; set; }
             public long ExtraLocationID { get; set; }
@@ -287,12 +268,42 @@ namespace YargArchipelagoCommon
                 return new SongAPData
                 {
                     Hash = hash,
+                    ProxyHash = null,
                     PoolName = pool,
                     MainLocationID = tuple[0].ToObject<long>(),
                     ExtraLocationID = tuple[1].ToObject<long>(),
                     CompletionLocationID = tuple[2].ToObject<long>(),
                     UnlockItemID = tuple[3].ToObject<long>()
                 };
+            }
+            public SongEntry GetYargSongEntry()
+            {
+                var hash = ProxyHash ?? Hash;
+                var songObj = SongContainer.Songs.FirstOrDefault(x => Convert.ToBase64String(x.Hash.HashBytes) == hash);
+                if (songObj == null)
+                    ToastManager.ToastError($"Song Hash {hash} was not a valid song in yarg!");
+                return songObj;
+            }
+            public bool WasActiveSongInGame(GameManager gameManager)
+            {
+                var SongHash = Convert.ToBase64String(gameManager.Song.Hash.HashBytes);
+                return SongHash == Hash || SongHash == ProxyHash;
+            }
+            public bool IsSongUnlocked(APConnectionContainer connectionContainer)
+            {
+                var pool = GetPool(connectionContainer.SlotData);
+                return connectionContainer.ReceivedInstruments.ContainsKey(pool.Instrument) &&
+                    connectionContainer.ReceivedSongs.ContainsKey(UnlockItemID);
+            }
+            public bool HasAvailableLocations(APConnectionContainer connectionContainer)
+            {
+                if (!connectionContainer.GetSession().Locations.AllLocationsChecked.Contains(MainLocationID))
+                    return true;
+                if (ExtraLocationID > 0 && !connectionContainer.GetSession().Locations.AllLocationsChecked.Contains(ExtraLocationID))
+                    return true;
+                if (CompletionLocationID > 0 && !connectionContainer.GetSession().Locations.AllLocationsChecked.Contains(CompletionLocationID))
+                    return true;
+                return false;
             }
         }
 
@@ -320,8 +331,8 @@ namespace YargArchipelagoCommon
             public int FamePointsForGoal { get; set; }
             public int SetlistNeededForGoal { get; set; }
             public GoalData GoalData { get; set; }
-            public bool DeathLink { get; set; }
-            public bool EnergyLink { get; set; }
+            public int DeathLink { get; set; }
+            public int EnergyLink { get; set; }
             // Dictionary of pool_name -> SongPool configuration
             public Dictionary<string, SongPool> Pools { get; set; }
             // dict[song_hash, dict[pool_name, SongPoolData]]
@@ -333,6 +344,9 @@ namespace YargArchipelagoCommon
             public Dictionary<long, SongAPData> LocationIDtoAPData { get; set; }
             public Dictionary<long, SongAPData> ItemIDtoAPData { get; set; }
 
+            public HashSet<string> AllInUseSongSubstitutions =>
+                LocationIDtoAPData.Values.Where(x => x.ProxyHash != null).Select(x => x.ProxyHash).ToHashSet();
+
             public static YargSlotData Parse(Dictionary<string, object> slotData)
             {
                 var result = new YargSlotData
@@ -340,8 +354,8 @@ namespace YargArchipelagoCommon
                     FamePointsForGoal = Convert.ToInt32(slotData["fame_points_for_goal"]),
                     SetlistNeededForGoal = Convert.ToInt32(slotData["setlist_needed_for_goal"]),
                     GoalData = GoalData.FromTuple(slotData["goal_data"] as JArray),
-                    DeathLink = Convert.ToBoolean(slotData["death_link"]),
-                    EnergyLink = Convert.ToBoolean(slotData["energy_link"]),
+                    DeathLink = Convert.ToInt32(slotData["death_link"]),
+                    EnergyLink = Convert.ToInt32(slotData["energy_link"]),
                     Pools = new Dictionary<string, SongPool>(),
                     SongHashToAPData = new Dictionary<string, Dictionary<string, SongAPData>>(),
                     SongPoolToAPData = new Dictionary<string, Dictionary<string, SongAPData>>(),

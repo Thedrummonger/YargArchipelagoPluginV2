@@ -22,38 +22,31 @@ namespace YargArchipelagoPlugin
     [HarmonyPatch]
     public static class APPatches
     {
-        public static ArchipelagoEventManager EventManager;
-
+        public static event Action<MusicLibraryMenu, List<ViewType>> OnCreateNormalView;
+        public static event Action<GameManager> OnSongStarted;
+        public static event Action OnSongEnded;
+        public static event Action<GameManager> OnRecordScore;
+        public static event Action<GameManager> OnSongFail;
+        public static bool HasAvailableAPSongUpdate = false;
 
         [HarmonyPatch(typeof(GameManager), "Awake")]
         [HarmonyPostfix]
-        public static void GameManager_Awake(GameManager __instance)
-        {
-
-        }
+        public static void GameManager_Awake(GameManager __instance) => OnSongStarted?.Invoke(__instance);
 
         [HarmonyPatch(typeof(GameManager), "OnDestroy")]
         [HarmonyPrefix]
-        public static void GameManager_OnDestroy()
-        {
-
-        }
+        public static void GameManager_OnDestroy() => OnSongEnded?.Invoke();
 
 
         [HarmonyPatch(typeof(GameManager), "RecordScores")]
         [HarmonyPostfix]
-        public static void GameManager_RecordScores_Postfix(GameManager __instance, ReplayInfo replayInfo)
-        {
-
-        }
+        public static void GameManager_RecordScores_Postfix(GameManager __instance, ReplayInfo replayInfo) => 
+            OnRecordScore?.Invoke(__instance);
 
 #if NIGHTLY 
         [HarmonyPatch(typeof(GameManager), "OnSongFailed")]
         [HarmonyPrefix]
-        public static void GameManager_OnSongFailed(GameManager __instance)
-        {
-
-        }
+        public static void GameManager_OnSongFailed(GameManager __instance) => OnSongFail?.Invoke(__instance);
 #endif
 
         [HarmonyPatch(typeof(SongContainer), "FillContainers")]
@@ -65,17 +58,15 @@ namespace YargArchipelagoPlugin
         [HarmonyPostfix]
         public static void MusicLibraryMenu_OnEnable(MusicLibraryMenu __instance)
         {
-
+            if (HasAvailableAPSongUpdate)
+                HasAvailableAPSongUpdate = !YargEngineActions.UpdateRecommendedSongsMenu();
         }
 
         [HarmonyPatch(typeof(MusicLibraryMenu), "CreateNormalViewList")]
         [HarmonyPostfix]
         public static void MusicLibraryMenu_CreateNormalViewList_Postfix(MusicLibraryMenu __instance, List<ViewType> __result)
         {
-            var SongEntries = new (SongEntry, string)[0];
-            YargEngineActions.InsertAPListViewSongs(__instance, __result, SongEntries);
-            var calc = AccessTools.Method(typeof(MusicLibraryMenu), "CalculateCategoryHeaderIndices");
-            calc.Invoke(__instance, new object[] { __result });
+            OnCreateNormalView?.Invoke(__instance, __result);
         }
 
     }

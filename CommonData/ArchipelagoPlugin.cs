@@ -13,13 +13,20 @@ namespace YargArchipelagoPlugin
 #else
         public const string pluginName = "YARG Archipelago Plugin";
 #endif
-
+        public static APConnectionContainer APcontainer;
         public void Awake()
         {
-            var patcher = new Harmony(ArchipelagoPlugin.pluginGuid);
+            var patcher = new Harmony(pluginGuid);
             patcher.PatchAll();
 
             Logger.LogInfo("Starting AP");
+            APcontainer = new APConnectionContainer(Logger);
+
+        }
+
+        private void Update()
+        {
+
         }
     }
 }

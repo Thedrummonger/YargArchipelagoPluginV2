@@ -1,12 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
+using System.Linq;
+using YARG.Core;
+using YARG.Core.Game;
 using YARG.Core.Song;
 using YARG.Core.Utility;
-using YARG.Core;
-using YargArchipelagoCommon;
-using YARG.Core.Game;
 using YARG.Gameplay;
 using YARG.Scores;
+using YargArchipelagoCommon;
+using static YargArchipelagoCommon.CommonData;
 
 namespace YargArchipelagoPlugin
 {
@@ -31,39 +34,6 @@ namespace YargArchipelagoPlugin
                 return CommonData.SupportedDifficulty.Easy;
             return (CommonData.SupportedDifficulty)(int)source;
         }
-        public static CommonData.SongData ToSongData(this SongEntry song)
-        {
-            return new CommonData.SongData()
-            {
-                Name = RichTextUtils.StripRichTextTags(song.Name),
-                Artist = RichTextUtils.StripRichTextTags(song.Artist),
-                SongChecksum = Convert.ToBase64String(song.Hash.HashBytes),
-                Difficulties = new Dictionary<CommonData.SupportedInstrument, int>()
-            };
-        }
-
-        public static CommonData.SongParticipantInfo[] CreatePlayerScores(GameManager __instance)
-        {
-            List<CommonData.SongParticipantInfo> participants = new List<CommonData.SongParticipantInfo>();
-            foreach (var player in __instance.Players)
-            {
-                var Profile = player.Player.Profile;
-                if (!IsSupportedInstrument(Profile.CurrentInstrument, out var SupportedInstrument)) continue;
-                if (!ScoreContainer.IsSoloScoreValid(__instance.SongSpeed, player.Player)) continue;
-                var Participant = new CommonData.SongParticipantInfo()
-                {
-                    Difficulty = GetSupportedDifficulty(Profile.CurrentDifficulty),
-                    instrument = SupportedInstrument,
-                    FC = player.IsFc,
-                    Percentage = player.BaseStats.Percent,
-                    Score = player.Score,
-                    Stars = (int)player.Stars,
-                    WasGoldStar = StarAmountHelper.GetStarsFromInt((int)player.Stars) == StarAmount.StarGold,
-                };
-                participants.Add(Participant);
-            }
-            return participants.ToArray();
-        }
         public static (string Ip, int Port) ParseIpAddress(string input)
         {
             if (string.IsNullOrWhiteSpace(input)) return (null, 0);
@@ -72,6 +42,36 @@ namespace YargArchipelagoPlugin
             int port = parts.Length > 1 && int.TryParse(parts[1], out var parsedPort) ? parsedPort : 38281;
             return (ip, port);
         }
+        public static string GetDescription(this Enum value) =>
+        value.GetType().GetField(value.ToString())?.GetCustomAttributes(typeof(DescriptionAttribute), false)
+             .OfType<DescriptionAttribute>()
+             .FirstOrDefault()?.Description ?? value.ToString();
 
+        public static bool MetStandard(this SongPool pool, GameManager passInfo, out bool DeathLink) =>
+            pool.MetReq(passInfo, out DeathLink, pool.CompletionRequirements.Reward1Req, pool.CompletionRequirements.Reward1Diff);
+        public static bool MetExtra(this SongPool pool, GameManager passInfo, out bool DeathLink) =>
+            pool.MetReq(passInfo, out DeathLink, pool.CompletionRequirements.Reward2Req, pool.CompletionRequirements.Reward2Diff);
+
+        private static bool MetReq(this SongPool pool, GameManager passInfo, out bool DeathLink, CompletionReq req, SupportedDifficulty diff)
+        {
+            // Only send a deathlink if we had a player playing the correct instrument
+            // at the correct difficulty and they failed to meet the score requirement.
+            var HadValidPlayer = false;
+            foreach (var player in passInfo.Players)
+            {
+                if (!IsSupportedInstrument(player.Player.Profile.CurrentInstrument, out SupportedInstrument? inst)) continue;
+                if (inst != pool.Instrument) continue;
+                if (GetSupportedDifficulty(player.Player.Profile.CurrentDifficulty) < diff) continue;
+                HadValidPlayer = true;
+                if (req == CompletionReq.FullCombo && !player.IsFc) continue;
+                bool WasGold = StarAmountHelper.GetStarsFromInt((int)player.Stars) == StarAmount.StarGold;
+                if (req == CompletionReq.GoldStar && !WasGold) continue;
+                if (player.Stars < (int)req) continue;
+                DeathLink = false;
+                return true;
+            }
+            DeathLink = HadValidPlayer;
+            return false;
+        }
     }
 }

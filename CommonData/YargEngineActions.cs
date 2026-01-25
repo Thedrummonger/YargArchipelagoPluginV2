@@ -12,6 +12,7 @@ using YARG.Core.Audio;
 using YARG.Core.Engine;
 using YARG.Core.Song;
 using YARG.Core.Song.Cache;
+using YARG.Core.Utility;
 using YARG.Gameplay;
 using YARG.Gameplay.HUD;
 //----------------------------------------------------
@@ -20,6 +21,7 @@ using YARG.Localization;
 using YARG.Menu.MusicLibrary;
 using YARG.Menu.Persistent;
 using YargArchipelagoCommon;
+using static YargArchipelagoCommon.CommonData;
 
 namespace YargArchipelagoPlugin
 {
@@ -27,27 +29,35 @@ namespace YargArchipelagoPlugin
     {
         public static void DumpAvailableSongs(SongCache SongCache)
         {
-            Dictionary<string, CommonData.SongData> SongData = new Dictionary<string, CommonData.SongData>();
+            Dictionary<string, SongExportData> SongData = new Dictionary<string, SongExportData>();
 
             foreach (var instrument in SongCache.Instruments)
             {
-                if (!YargAPUtils.IsSupportedInstrument(instrument.Key, out var supportedInstrument))
-                    continue;
+                if (!YargAPUtils.IsSupportedInstrument(instrument.Key, out var supportedInstrument)) continue;
                 foreach (var Difficulty in instrument.Value)
                 {
-                    if (Difficulty.Key < 0)
-                        continue;
+                    if (Difficulty.Key < 0) continue;
                     foreach (var song in Difficulty.Value)
                     {
-                        var data = YargAPUtils.ToSongData(song);
-                        if (!SongData.ContainsKey(data.SongChecksum))
-                            SongData[data.SongChecksum] = data;
-                        SongData[data.SongChecksum].Difficulties[supportedInstrument.Value] = Difficulty.Key;
+                        var Hash = Convert.ToBase64String(song.Hash.HashBytes);
+                        if (!SongData.ContainsKey(Hash))
+                            SongData[Hash] = SongExportData.FromSongEntry(song);
+                        SongData[Hash].Difficulties[supportedInstrument.Value] = Difficulty.Key;
                     }
                 }
             }
             if (!Directory.Exists(CommonData.DataFolder)) Directory.CreateDirectory(CommonData.DataFolder);
             File.WriteAllText(CommonData.SongExportFile, JsonConvert.SerializeObject(SongData.Values.ToArray(), Formatting.Indented));
+        }
+
+        public static bool UpdateRecommendedSongsMenu()
+        {
+            var Menu = UnityEngine.Object.FindObjectOfType<MusicLibraryMenu>();
+            if (Menu == null || !Menu.gameObject.activeInHierarchy)
+                return false;
+
+            Menu.RefreshAndReselect();
+            return true;
         }
 
         public static int GetListViewIndex(List<ViewType> listView, string Key)
@@ -80,6 +90,25 @@ namespace YargArchipelagoPlugin
 
                 foreach (var song in songs)
                     listView.Insert(insertIndex++, new SongViewType(menu, song));
+            }
+        }
+
+        public class SongExportData
+        {
+            public string Name;
+            public string Artist;
+            public string SongChecksum;
+            public Dictionary<SupportedInstrument, int> Difficulties = new Dictionary<SupportedInstrument, int>();
+            public bool TryGetDifficulty(SupportedInstrument instrument, out int Difficulty) => Difficulties.TryGetValue(instrument, out Difficulty);
+            public static SongExportData FromSongEntry(SongEntry song)
+            {
+                return new SongExportData()
+                {
+                    Artist = RichTextUtils.StripRichTextTags(song.Artist),
+                    Name = RichTextUtils.StripRichTextTags(song.Name),
+                    SongChecksum = Convert.ToBase64String(song.Hash.HashBytes),
+                    Difficulties = new Dictionary<CommonData.SupportedInstrument, int>()
+                };
             }
         }
     }
