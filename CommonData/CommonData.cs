@@ -324,6 +324,22 @@ namespace YargArchipelagoCommon
                     UnlockItemID = tuple[3].ToObject<long>()
                 };
             }
+            public SongPool GetPool(YargSlotData slotData) => slotData.Pools[SongPool];
+
+            public bool WasActiveSongInGame(GameManager gameManager)
+            {
+                return SongHash == Convert.ToBase64String(gameManager.Song.Hash.HashBytes);
+            }
+
+            public bool IsSongUnlocked(APConnectionContainer connectionContainer)
+            {
+                var HasUnlockItem = UnlockItemID < 0 || connectionContainer.ReceivedSongUnlockItems.ContainsKey(UnlockItemID);
+                var CurrentSongCompletions = connectionContainer.ApItemsRecieved.Count(x => x.Type == StaticItems.SongCompletion);
+                var HasEnoughCompletions = CurrentSongCompletions >= connectionContainer.SlotData.SetlistNeededForGoal;
+                var CurrentFamePoints = connectionContainer.ApItemsRecieved.Count(x => x.Type == StaticItems.FamePoint);
+                var HasEnoughFame = CurrentFamePoints >= connectionContainer.SlotData.FamePointsForGoal;
+                return HasUnlockItem && HasEnoughFame && HasEnoughCompletions;
+            }
         }
 
         public class YargSlotData

@@ -110,6 +110,27 @@ namespace YargArchipelagoPlugin
                     new DeathLink(parent.LastUsedConnectionInfo?.SlotName,
                     $"Failed to meet the requirements playing {gameManager.Song.Name} by {gameManager.Song.Artist}"));
         }
+        internal void TryCheckSongGoalSong(GameManager manager)
+        {
+            if (!parent.IsSessionConnected)
+                return;
+            if (!parent.SlotData.GoalData.WasActiveSongInGame(manager))
+                return;
+            if (!parent.SlotData.GoalData.IsSongUnlocked(parent))
+                return;
+
+            var pool = parent.SlotData.GoalData.GetPool(parent.SlotData);
+            var MetStandard = pool.MetStandard(manager, out var deathLinkStandard);
+            var MetExtra = pool.MetExtra(manager, out var deathLinkExtra);
+
+            if (MetStandard && MetExtra)
+                parent.GetSession().Locations.CompleteLocationChecks(parent.SlotData.GoalData.GoalLocationID);
+
+            if ((deathLinkExtra || deathLinkStandard) && (parent.seedConfig?.DeathLinkMode ?? DeathLinkType.None) > DeathLinkType.None)
+                parent.DeathLinkService?.SendDeathLink(
+                    new DeathLink(parent.LastUsedConnectionInfo?.SlotName,
+                    $"Failed to meet the requirements playing {manager.Song.Name} by {manager.Song.Artist}"));
+        }
 
         public void RelayChatToYARG(LogMessage message)
         {
@@ -144,6 +165,7 @@ namespace YargArchipelagoPlugin
             if (parent.IsInSong() || !YargEngineActions.UpdateRecommendedSongsMenu())
                 APPatches.HasAvailableAPSongUpdate = true;
         }
+
     }
 
     public class SyncTimer

@@ -128,6 +128,7 @@ namespace YargArchipelagoPlugin
             APPatches.OnSongStarted += eventManager.SetSong;
             APPatches.OnSongEnded += eventManager.SetSong;
             APPatches.OnRecordScore += eventManager.TryCheckSongLocations;
+            APPatches.OnRecordScore += eventManager.TryCheckSongGoalSong;
             APPatches.OnSongFail += eventManager.FailedSong;
             _Listening = true;
         }
@@ -147,6 +148,7 @@ namespace YargArchipelagoPlugin
             APPatches.OnSongStarted -= eventManager.SetSong;
             APPatches.OnSongEnded -= eventManager.SetSong;
             APPatches.OnRecordScore -= eventManager.TryCheckSongLocations;
+            APPatches.OnRecordScore -= eventManager.TryCheckSongGoalSong;
             APPatches.OnSongFail -= eventManager.FailedSong;
             _Listening = false;
         }
