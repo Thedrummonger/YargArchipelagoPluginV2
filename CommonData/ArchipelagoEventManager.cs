@@ -192,7 +192,7 @@ namespace YargArchipelagoPlugin
                     break;
             }
             parent.seedConfig.ApItemsUsed.Add(Item);
-            parent.seedConfig.Save(parent);
+            parent.seedConfig.Save();
         }
 
         internal void OnDeathLinkReceived(DeathLink deathLink)
@@ -253,7 +253,7 @@ namespace YargArchipelagoPlugin
                 return false;
             var CurCount = container.seedConfig.ApItemsPurchased.Where(x => x.Type == Type).Count();
             container.seedConfig.ApItemsPurchased.Add(new StaticYargAPItem(Type, StaticItemIDbyValue[Type], -99, CurCount, "YAYARG"));
-            container.seedConfig.Save(container);
+            container.seedConfig.Save();
             return true;
         }
 

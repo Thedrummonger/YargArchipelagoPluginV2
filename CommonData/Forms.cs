@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -139,42 +140,164 @@ namespace YargArchipelagoPlugin
             public void Dispose() => GUI.enabled = _prev;
         }
     }
-    public class SwapSongMenu : MonoBehaviour
+
+    public static class FormHelpers
+    {
+        public static (int CurrentPage, int TotalPages) DisplayItemList<T>(IEnumerable<T> Objects, int DisplayCount, int Page, int Spacing, Func<T, string> GetDisplay, Action<T> OnClick)
+        {
+            int totalPages = Mathf.Max(1, Mathf.CeilToInt(Objects.Count() / (float)DisplayCount));
+            var currentPage = Mathf.Clamp(Page, 0, totalPages - 1);
+            var Pages = Objects.Skip(currentPage * DisplayCount).Take(DisplayCount);
+            foreach (var song in Pages)
+                if (GUILayout.Button(GetDisplay(song), GUILayout.Height(Spacing)))
+                    OnClick(song);
+
+
+            GUILayout.Space(10);
+
+            GUILayout.BeginHorizontal();
+
+            if (GUILayout.Button("Previous", GUILayout.Height(Spacing)))
+            {
+                if (currentPage > 0) currentPage--;
+            }
+
+            GUILayout.Label($"Page {currentPage + 1} / {totalPages}", GUILayout.ExpandWidth(true));
+
+            if (GUILayout.Button("Next", GUILayout.Height(Spacing)))
+            {
+                if (currentPage < totalPages - 1) currentPage++;
+            }
+
+            GUILayout.EndHorizontal();
+            return (currentPage, totalPages);
+        }
+
+
+        private static readonly Dictionary<(Type, string), object> _filterCache = new Dictionary<(Type, string), object>();
+        public static T[] FilterItems<T>(IEnumerable<T> Objects, string filterText, Func<T, string> GetDisplay)
+        {
+            var cacheKey = (typeof(T), filterText);
+            if (_filterCache.TryGetValue(cacheKey, out var cachedResult))
+                return (T[])cachedResult;
+
+            var result = Objects
+                .Where(s => GetDisplay(s).IndexOf(filterText, StringComparison.OrdinalIgnoreCase) >= 0)
+                .OrderBy(s => GetDisplay(s), StringComparer.OrdinalIgnoreCase)
+                .ToArray();
+
+            _filterCache[cacheKey] = result;
+
+            return result;
+        }
+
+        public static SongAPData[] GetAvailableSongs(APConnectionContainer container, Func<SongAPData, string> GetDisplay, string filterText = "")
+        {
+            var Valid = container.SlotData.LocationIDtoAPData.Values.Where(x =>
+                x.HasAvailableLocations(container) &&
+                x.IsSongUnlocked(container)
+            ).ToHashSet();
+            return FilterItems(Valid, filterText, GetDisplay);
+        }
+    }
+
+    public abstract class BlockerMenu<T> : MonoBehaviour where T : BlockerMenu<T>
     {
         public MessageDialog BlockerDialog;
-        public static SwapSongMenu CurrentInstance = null;
-        private APConnectionContainer container;
-        private StaticYargAPItem item;
+        protected APConnectionContainer container;
+        public static T CurrentInstance { get; protected set; }
+        protected virtual string WindowTitle => typeof(T).Name; // Default to class name
+        protected virtual int WindowId => typeof(T).Name.GetHashCode(); // Unique ID per type
 
+        public Rect windowRect = new Rect(0, 0, 0, 0);
+
+        public bool Show { get; set; }
+        private void OnGUI()
+        {
+            if (!Show) return;
+            windowRect = GUI.Window(WindowId, windowRect, DrawWindow, WindowTitle, GUIStyles.OpaqueWindow());
+        }
+
+        protected abstract void DrawWindow(int id);
+
+        protected virtual void Initialize(APConnectionContainer container, Rect size, bool Center = true)
+        {
+            BlockerDialog = YargEngineActions.ShowBlockerDialog();
+            this.container = container;
+            CurrentInstance = (T)this;
+            windowRect = size;
+            if (Center)
+                windowRect = new Rect((Screen.width - windowRect.width) / 2, (Screen.height - windowRect.height) / 2, windowRect.width, windowRect.height);
+        }
+
+        protected static T CreateMenu()
+        {
+            var menuObject = new GameObject(typeof(T).Name);
+            var menu = menuObject.AddComponent<T>();
+            UnityEngine.Object.DontDestroyOnLoad(menuObject);
+            return menu;
+        }
+
+        protected void RemoveBlockerDialog()
+        {
+            if (BlockerDialog != null && DialogManager.Instance.IsDialogShowing)
+            {
+                BlockerDialog = null;
+                DialogManager.Instance.ClearDialog();
+            }
+        }
+
+        protected virtual void OnDestroy()
+        {
+            RemoveBlockerDialog();
+            if (CurrentInstance == this)
+                CurrentInstance = null;
+        }
+
+        public void CloseMenu()
+        {
+            RemoveBlockerDialog();
+            Show = false;
+            Destroy(gameObject);
+        }
+    }
+
+    public class LowerDifficultyMenu : BlockerMenu<LowerDifficultyMenu>
+    {
+        private StaticYargAPItem _item;
         private SongAPData selectedSongToReplace;
 
         private string filterText = "";
         private int currentPage = 0;
-        private const int SONGS_PER_PAGE = 5;
-
-        private Rect windowRect = new Rect(50, 50, 500, 400);
-
-        public bool Show { get; set; }
-
-        public void Initialize(APConnectionContainer container, StaticYargAPItem item)
+        protected override string WindowTitle => "Lower Difficulty";
+        protected override void DrawWindow(int id)
         {
-            BlockerDialog = YargEngineActions.ShowBlockerDialog();
-            this.container = container;
-            this.item = item;
-            selectedSongToReplace = null;
-            filterText = "";
-            currentPage = 0;
-            CurrentInstance = this;
-            windowRect = new Rect((Screen.width - 500) / 2, (Screen.height - 400) / 2, 500, 400);
+
+        }
+    }
+
+    public class SwapSongMenu : BlockerMenu<SwapSongMenu>
+    {
+        private StaticYargAPItem _item;
+        private SongAPData selectedSongToReplace;
+
+        private string filterText = "";
+        private int currentPage = 0;
+
+        protected override string WindowTitle => "Swap Song";
+
+        public static void ShowMenu(APConnectionContainer container, StaticYargAPItem item)
+        {
+            if (CurrentInstance != null)
+                return;
+
+            var menu = CreateMenu();
+            menu.Initialize(container, new Rect(50, 50, 500, 400));
+            menu._item = item;
+            menu.Show = true;
         }
 
-        private void OnGUI()
-        {
-            if (!Show) return;
-            windowRect = GUI.Window(0xA1C5, windowRect, DrawWindow, "Swap Song", GUIStyles.OpaqueWindow());
-        }
-
-        private void DrawWindow(int id)
+        protected override void DrawWindow(int id)
         {
             GUILayout.BeginVertical();
 
@@ -195,93 +318,37 @@ namespace YargArchipelagoPlugin
 
             GUILayout.Space(10);
 
-            var displayList = GetFilteredList();
-            int totalPages = Mathf.Max(1, Mathf.CeilToInt(displayList.Count / (float)SONGS_PER_PAGE));
-            currentPage = Mathf.Clamp(currentPage, 0, totalPages - 1);
-
-            var pageSongs = displayList.Skip(currentPage * SONGS_PER_PAGE).Take(SONGS_PER_PAGE);
-
-            if (selectedSongToReplace != null)
-            {
-                foreach (var song in pageSongs)
-                    if (GUILayout.Button(GetDisplay(song), GUILayout.Height(40)))
-                        OnReplacementSelected(song);
-            }
+            int TotalPages;
+            if (selectedSongToReplace is null)
+                (currentPage, TotalPages) = FormHelpers.DisplayItemList(FormHelpers.GetAvailableSongs(container, GetDisplay, filterText), 5, currentPage, 40, GetDisplay, OnSongToReplaceSelected);
             else
-            {
-                foreach (var song in pageSongs)
-                    if (GUILayout.Button(GetDisplay(song), GUILayout.Height(40)))
-                        OnSongToReplaceSelected(song);
-            }
-
-            GUILayout.Space(10);
-
-            GUILayout.BeginHorizontal();
-
-            if (GUILayout.Button("Previous", GUILayout.Height(30)))
-            {
-                if (currentPage > 0) currentPage--;
-            }
-
-            GUILayout.Label($"Page {currentPage + 1} / {totalPages}", GUILayout.ExpandWidth(true));
-
-            if (GUILayout.Button("Next", GUILayout.Height(30)))
-            {
-                if (currentPage < totalPages - 1) currentPage++;
-            }
-
-            GUILayout.EndHorizontal();
+                (currentPage, TotalPages) = FormHelpers.DisplayItemList(GetValidReplacements(selectedSongToReplace), 5, currentPage, 40, GetDisplay, OnReplacementSelected);
 
             GUILayout.Space(10);
 
             if (GUILayout.Button("Close", GUILayout.Height(30)))
             {
-                Show = false;
-                Destroy(gameObject);
+                CloseMenu();
             }
 
             GUILayout.EndVertical();
             GUI.DragWindow(new Rect(0, 0, 10000, 20));
         }
 
-        private List<object> GetFilteredList()
+        private void OnSongToReplaceSelected(SongAPData song)
         {
-            if (selectedSongToReplace != null)
-            {
-                var replacements = GetValidReplacements(selectedSongToReplace);
-                return replacements
-                    .Where(s => GetDisplay(s).IndexOf(filterText, StringComparison.OrdinalIgnoreCase) >= 0)
-                    .OrderBy(s => GetDisplay(s), StringComparer.OrdinalIgnoreCase)
-                    .Cast<object>()
-                    .ToList();
-            }
-            else
-            {
-                var songsToReplace = GetSongsToReplace();
-                return songsToReplace
-                    .Where(s => GetDisplay(s).IndexOf(filterText, StringComparison.OrdinalIgnoreCase) >= 0)
-                    .OrderBy(s => GetDisplay(s), StringComparer.OrdinalIgnoreCase)
-                    .Cast<object>()
-                    .ToList();
-            }
-        }
+            var validReplacements = GetValidReplacements(song);
 
-        private void OnSongToReplaceSelected(object song)
-        {
-            selectedSongToReplace = (SongAPData)song;
-
-            var validReplacements = GetValidReplacements(selectedSongToReplace);
-
-            if (validReplacements.Count == 0)
+            if (validReplacements.Length == 0)
             {
                 ToastManager.ToastError("There are no valid replacement songs available for this selection.");
-                selectedSongToReplace = null;
                 return;
             }
+            selectedSongToReplace = song;
 
-            if (item.Type == StaticItems.SwapRandom)
+            if (_item.Type == StaticItems.SwapRandom)
             {
-                var randomReplacement = validReplacements[UnityEngine.Random.Range(0, validReplacements.Count)];
+                var randomReplacement = validReplacements[UnityEngine.Random.Range(0, validReplacements.Length)];
                 OnReplacementSelected(randomReplacement);
                 return;
             }
@@ -290,29 +357,13 @@ namespace YargArchipelagoPlugin
             currentPage = 0;
         }
 
-        private void OnReplacementSelected(object song)
+        private void OnReplacementSelected(SongEntry replacement)
         {
-            var replacement = (SongEntry)song;
             PerformSwap(selectedSongToReplace, replacement);
-            ExitMenu();
+            CloseMenu();
         }
 
-        public void ExitMenu()
-        {
-            Show = false;
-            Destroy(gameObject);
-        }
-
-        private List<SongAPData> GetSongsToReplace()
-        {
-            var Valid = container.SlotData.LocationIDtoAPData.Values.Where(x =>
-                x.HasAvailableLocations(container) &&
-                x.IsSongUnlocked(container)
-            ).ToHashSet();
-            return Valid.ToList();
-        }
-
-        private List<SongEntry> GetValidReplacements(SongAPData song)
+        private SongEntry[] GetValidReplacements(SongAPData song)
         {
             var Pool = song.GetPool(container.SlotData);
             var UsedSongs = new HashSet<string>();
@@ -324,21 +375,17 @@ namespace YargArchipelagoPlugin
 
             }
             var ValidReplcements = SongContainer.Songs.Where(x => !UsedSongs.Contains(Convert.ToBase64String(x.Hash.HashBytes)));
-            return ValidReplcements.ToList();
+            return FormHelpers.FilterItems(ValidReplcements, filterText, GetDisplay);
         }
 
-        private string GetDisplay(object song)
+        private string GetDisplay(SongEntry songEntry) => $"{songEntry.Name} by {songEntry.Artist}";
+
+        private static string GetDisplay(SongAPData songAPData)
         {
-            if (song is SongAPData songAPData)
-            {
-                SongEntry YArgEntry = SongContainer.Songs.FirstOrDefault(x => Convert.ToBase64String(x.Hash.HashBytes) == songAPData.Hash);
-                if (YArgEntry is null)
-                    return $"[{songAPData.PoolName}] {songAPData.Hash}";
-                return $"[{songAPData.PoolName}] {YArgEntry.Name} by {YArgEntry.Artist}";
-            }
-            if (song is SongEntry songEntry)
-                return $"{songEntry.Name} by {songEntry.Artist}";
-            throw new NotImplementedException($"Cannot Get name for object of type {song.GetType()}");
+            SongEntry YArgEntry = SongContainer.Songs.FirstOrDefault(x => Convert.ToBase64String(x.Hash.HashBytes) == songAPData.Hash);
+            if (YArgEntry is null)
+                return $"[{songAPData.PoolName}] {songAPData.Hash}";
+            return $"[{songAPData.PoolName}] {YArgEntry.Name} by {YArgEntry.Artist}";
         }
 
         private void PerformSwap(SongAPData toReplace, SongEntry replacement)
@@ -347,25 +394,11 @@ namespace YargArchipelagoPlugin
             string ToReplace = YArgEntry is null ? $"{toReplace.Hash}" : $"{YArgEntry.Name} by {YArgEntry.Artist}";
             string Replacement = $"{replacement.Name} by {replacement.Artist}";
             toReplace.ProxyHash = Convert.ToBase64String(replacement.Hash.HashBytes);
-            container.seedConfig.ApItemsUsed.Add(item);
-            container.seedConfig.Save(container);
+            container.seedConfig.ApItemsUsed.Add(_item);
+            container.seedConfig.Save();
             RemoveBlockerDialog();
             YargEngineActions.UpdateRecommendedSongsMenu();
             DialogManager.Instance.ShowMessage($"Song Replaced", $"Replaced\n{ToReplace}\n\nwith\n{Replacement}\n\nIn Pool\n{toReplace.PoolName}");
-        }
-
-        public void RemoveBlockerDialog()
-        {
-            if (BlockerDialog != null && DialogManager.Instance.IsDialogShowing)
-            {
-                BlockerDialog = null;
-                DialogManager.Instance.ClearDialog();
-            }
-        }
-
-        private void OnDestroy()
-        {
-            RemoveBlockerDialog();
         }
     }
 }

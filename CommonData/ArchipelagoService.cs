@@ -7,6 +7,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Runtime.InteropServices.ComTypes;
 using System.Security.Cryptography;
 using System.Text;
 using YARG.Core.Song;
@@ -93,23 +94,17 @@ namespace YargArchipelagoPlugin
             }
             Session = tempSession;
             LastUsedConnectionInfo = connectionDetails;
-            ToastManager.ToastInformation($"Connected Archipelago!\n{connectionDetails.SlotName}@{connectionDetails.Address}");
+            SlotData = YargSlotData.Parse(Session.DataStorage.GetSlotData());
+            seedConfig = PersistantData.Load(this);
             DeathLinkService = Session.CreateDeathLinkService();
             SeededRNG = new Random(GetAPSeed());
-            SlotData = YargSlotData.Parse(Session.DataStorage.GetSlotData());
-            File.WriteAllText(Path.Combine(CommonData.DataFolder, "Debug.json"), JsonConvert.SerializeObject(SlotData, Formatting.Indented));
-            seedConfig = PersistantData.Load(this);
-            if (seedConfig is null)
-            {
-                seedConfig = new PersistantData
-                {
-                    DeathLinkMode = (DeathLinkType)SlotData.DeathLink,
-                    EnergyLinkMode = (EnergyLinkType)SlotData.EnergyLink
-                };
-            }
+
             AddListeners();
             eventManager.UpdateAPData();
             UpdateDeathLinkTags();
+
+            ToastManager.ToastInformation($"Connected Archipelago!\n{connectionDetails.SlotName}@{connectionDetails.Address}");
+            File.WriteAllText(Path.Combine(CommonData.DataFolder, "Debug.json"), JsonConvert.SerializeObject(SlotData, Formatting.Indented));
             return true;
         }
 
@@ -222,8 +217,11 @@ namespace YargArchipelagoPlugin
 
     public class PersistantData
     {
+        private APConnectionContainer parent;
         public HashSet<StaticYargAPItem> ApItemsUsed { get; } = new HashSet<StaticYargAPItem>();
         public HashSet<StaticYargAPItem> ApItemsPurchased { get; } = new HashSet<StaticYargAPItem>();
+
+        public List<(string pool, string hash, string proxyHash)> ProxyData { get; } = new List<(string, string, string)>();
 
         public bool InGameAPChat = true;
 
@@ -249,22 +247,55 @@ namespace YargArchipelagoPlugin
             var ConfigFile = Directory.GetFiles(SeedConfigPath)
                 .FirstOrDefault(file => Path.GetFileName(file) == getSaveFileName(container));
             if (ConfigFile is null)
-                return null;
-            try { 
+                return CreateNew();
+            try 
+            { 
                 var configData = JsonConvert.DeserializeObject<PersistantData>(File.ReadAllText(ConfigFile));
+                configData.parent = container;
+                configData.LoadProxyCache();
+                container.logger.LogInfo($"Loaded Persistance Data\n{JsonConvert.SerializeObject(configData, Formatting.Indented)}");
                 return configData;
             }
-            catch { return null; }
+            catch 
+            {
+                return CreateNew();
+            }
+
+            PersistantData CreateNew() => new PersistantData
+            {
+                DeathLinkMode = (DeathLinkType)container.SlotData.DeathLink,
+                EnergyLinkMode = (EnergyLinkType)container.SlotData.EnergyLink,
+                parent = container
+            };
         }
-        public void Save(APConnectionContainer container)
+        public void Save()
         {
-            if (!container.IsSessionConnected) return;
+            if (!parent.IsSessionConnected) return;
             Directory.CreateDirectory(SeedConfigPath);
-            var path = Path.Combine(SeedConfigPath, getSaveFileName(container));
+            var path = Path.Combine(SeedConfigPath, getSaveFileName(parent));
+            UpdateProxyCache();
             File.WriteAllText(path, JsonConvert.SerializeObject(this, Formatting.Indented));
         }
         private static string getSaveFileName(APConnectionContainer container) =>
             $"{container.GetSession()?.RoomState?.Seed}_{container.GetSession()?.Players?.ActivePlayer?.Slot}_" +
             $"{container.GetSession()?.Players?.ActivePlayer?.Slot}_{container.GetSession()?.Players?.ActivePlayer?.GetHashCode()}";
+
+        private void UpdateProxyCache()
+        {
+            ProxyData.Clear();
+            foreach(var pool in parent.SlotData.SongPoolToAPData)
+            {
+                foreach (var Hash in pool.Value)
+                {
+                    if (Hash.Value.ProxyHash is null) continue;
+                    ProxyData.Add((pool.Key, Hash.Key, Hash.Value.ProxyHash));
+                }
+            }
+        }
+        private void LoadProxyCache()
+        {
+            foreach (var (pool, hash, proxyHash) in ProxyData)
+                parent.SlotData.SongPoolToAPData[pool][hash].ProxyHash = proxyHash;
+        }
     }
 }

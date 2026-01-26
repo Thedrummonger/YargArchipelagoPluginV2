@@ -85,11 +85,11 @@ namespace YargArchipelagoPlugin
 
             var SwapSongs = container.ApItemsRecieved.Where(x => x.Type == StaticItems.SwapPick && !container.seedConfig.ApItemsUsed.Contains(x));
             if (SwapSongs.Any())
-                listView.Insert(insertIndex++, new CategoryViewType($"SWAP SONG (Pick)", SwapSongs.Count(), new SongEntry[0], () => CreateSwapMenu(container, SwapSongs.First())));
+                listView.Insert(insertIndex++, new CategoryViewType($"SWAP SONG (Pick)", SwapSongs.Count(), new SongEntry[0], () => SwapSongMenu.ShowMenu(container, SwapSongs.First())));
 
             var SwapSongRand = container.ApItemsRecieved.Where(x => x.Type == StaticItems.SwapRandom && !container.seedConfig.ApItemsUsed.Contains(x));
             if (SwapSongRand.Any())
-                listView.Insert(insertIndex++, new CategoryViewType($"SWAP SONG (Random)", SwapSongRand.Count(), new SongEntry[0], () => CreateSwapMenu(container, SwapSongRand.First())));
+                listView.Insert(insertIndex++, new CategoryViewType($"SWAP SONG (Random)", SwapSongRand.Count(), new SongEntry[0], () => SwapSongMenu.ShowMenu(container, SwapSongRand.First())));
 
             var allSongs = entries.Select(e => e.song).ToArray();
             listView.Insert(insertIndex++, new CategoryViewType("ARCHIPELAGO SONGS", allSongs.Length, allSongs, menu.RefreshAndReselect));
@@ -107,17 +107,6 @@ namespace YargArchipelagoPlugin
             }
         }
 
-
-        public static void CreateSwapMenu(APConnectionContainer container, StaticYargAPItem item)
-        {
-            if (SwapSongMenu.CurrentInstance != null)
-                return;
-            var menuObject = new GameObject("SwapSongMenu");
-            var menu = menuObject.AddComponent<SwapSongMenu>();
-            UnityEngine.Object.DontDestroyOnLoad(menuObject);
-            menu.Initialize(container, item);
-            menu.Show = true;
-        }
         /// <summary>
         /// A special MessageDialog with no gui elements. Used to block the ui while custom Bepin menus are being displayed. Must be closed manually. 
         /// </summary>
