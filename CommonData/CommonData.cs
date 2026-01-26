@@ -210,6 +210,14 @@ namespace YargArchipelagoCommon
             AnySong = 3,
         }
 
+
+        public class ConnectionDetails
+        {
+            public string Address { get; set; } = "localhost";//"Archipleago.gg:38281";
+            public string SlotName { get; set; } = "TDMYarg";//string.Empty;
+            public string Password { get; set; } = string.Empty;
+        }
+
         public class SongExportData
         {
             public string Name;

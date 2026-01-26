@@ -19,6 +19,7 @@ using YARG.Gameplay.HUD;
 //----------------------------------------------------
 using YARG.Gameplay.Player;
 using YARG.Localization;
+using YARG.Menu.Dialogs;
 using YARG.Menu.MusicLibrary;
 using YARG.Menu.Persistent;
 using YargArchipelagoCommon;
@@ -82,6 +83,14 @@ namespace YargArchipelagoPlugin
             int insertIndex = GetListViewIndex(listView, "Menu.MusicLibrary.AllSongs");
             if (insertIndex < 0) return;
 
+            var SwapSongs = container.ApItemsRecieved.Where(x => x.Type == StaticItems.SwapPick && !container.seedConfig.ApItemsUsed.Contains(x));
+            if (SwapSongs.Any())
+                listView.Insert(insertIndex++, new CategoryViewType($"SWAP SONG (Pick)", SwapSongs.Count(), new SongEntry[0], () => CreateSwapMenu(container, SwapSongs.First())));
+
+            var SwapSongRand = container.ApItemsRecieved.Where(x => x.Type == StaticItems.SwapRandom && !container.seedConfig.ApItemsUsed.Contains(x));
+            if (SwapSongRand.Any())
+                listView.Insert(insertIndex++, new CategoryViewType($"SWAP SONG (Random)", SwapSongRand.Count(), new SongEntry[0], () => CreateSwapMenu(container, SwapSongRand.First())));
+
             var allSongs = entries.Select(e => e.song).ToArray();
             listView.Insert(insertIndex++, new CategoryViewType("ARCHIPELAGO SONGS", allSongs.Length, allSongs, menu.RefreshAndReselect));
 
@@ -96,6 +105,38 @@ namespace YargArchipelagoPlugin
                 foreach (var song in poolSongs)
                     listView.Insert(insertIndex++, new SongViewType(menu, song));
             }
+        }
+
+
+        public static void CreateSwapMenu(APConnectionContainer container, StaticYargAPItem item)
+        {
+            if (SwapSongMenu.CurrentInstance != null)
+                return;
+            var menuObject = new GameObject("SwapSongMenu");
+            var menu = menuObject.AddComponent<SwapSongMenu>();
+            UnityEngine.Object.DontDestroyOnLoad(menuObject);
+            menu.Initialize(container, item);
+            menu.Show = true;
+        }
+        /// <summary>
+        /// A special MessageDialog with no gui elements. Used to block the ui while custom Bepin menus are being displayed. Must be closed manually. 
+        /// </summary>
+        /// <returns></returns>
+        public static MessageDialog ShowBlockerDialog()
+        {
+            var dialog = DialogManager.Instance.ShowMessage("", "");
+            dialog.ClearButtons();
+
+            foreach (var graphic in dialog.GetComponentsInChildren<Component>())
+            {   // Keep the "Tint" image, thats what actually blocks the UI 
+                if (graphic.GetType().Name == "Image" && graphic.gameObject.name != "Tint")
+                {
+                    var enabled = graphic.GetType().GetProperty("enabled");
+                    enabled?.SetValue(graphic, false);
+                }
+            }
+
+            return dialog;
         }
 
         public static void ShowPoolData(APConnectionContainer container, string poolName)

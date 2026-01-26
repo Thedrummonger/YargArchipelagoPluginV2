@@ -267,11 +267,4 @@ namespace YargArchipelagoPlugin
             $"{container.GetSession()?.RoomState?.Seed}_{container.GetSession()?.Players?.ActivePlayer?.Slot}_" +
             $"{container.GetSession()?.Players?.ActivePlayer?.Slot}_{container.GetSession()?.Players?.ActivePlayer?.GetHashCode()}";
     }
-
-    public class ConnectionDetails
-    {
-        public string Address { get; set; } = "localhost";//"Archipleago.gg:38281";
-        public string SlotName { get; set; } = "TDMYarg";//string.Empty;
-        public string Password { get; set; } = string.Empty;
-    }
 }
