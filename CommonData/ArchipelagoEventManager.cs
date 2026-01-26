@@ -32,16 +32,16 @@ namespace YargArchipelagoPlugin
             if (!parent.IsSessionConnected)
                 return;
             List<(SongEntry, SongAPData)> SongEntries = new List<(SongEntry, SongAPData)>();
-            foreach (var i in parent.SlotData.InstrumentToAPData)
+            foreach (var i in parent.SlotData.SongsByInstrument)
             {
                 if (!parent.ReceivedInstruments.ContainsKey(i.Key)) continue;
                 foreach (var song in i.Value)
                 {
-                    if (!parent.ReceivedSongUnlockItems.ContainsKey(song.Value.UnlockItemID)) continue;
-                    if (!song.Value.HasAvailableLocations(parent)) continue;
-                    var songObj = song.Value.GetYargSongEntry();
+                    if (!parent.ReceivedSongUnlockItems.ContainsKey(song.UnlockItemID)) continue;
+                    if (!song.HasAvailableLocations(parent)) continue;
+                    var songObj = song.GetYargSongEntry(parent);
                     if (songObj != null)
-                        SongEntries.Add((songObj, song.Value));
+                        SongEntries.Add((songObj, song));
                 }
             }
             YargEngineActions.InsertAPListViewSongs(parent, __instance, __result, SongEntries);
@@ -69,7 +69,7 @@ namespace YargArchipelagoPlugin
             APPatches.IgnoreScoreForNextSong = false;
             if (!parent.IsSessionConnected)
                 return;
-            var LocationsPlayed = parent.SlotData.LocationIDtoAPData.Values.Where(x => x.WasActiveSongInGame(gameManager));
+            var LocationsPlayed = parent.SlotData.Songs.Where(x => x.WasActiveSongInGame(parent, gameManager));
             var DoDeathlink = false;
             List<long> LocationsToComplete = new List<long>();
             foreach (var i in LocationsPlayed)

@@ -192,9 +192,7 @@ namespace YargArchipelagoPlugin
                 }
                 else if (InstrumentItemsById.TryGetValue(i.ItemId, out var instrument))
                     ReceivedInstruments[instrument] = new BaseYargAPItem(i.ItemId, i.Player.Slot, i.LocationId, i.LocationGame);
-                else if (SlotData.ItemIDtoAPData.ContainsKey(i.ItemId))
-                    ReceivedSongUnlockItems[i.ItemId] = new BaseYargAPItem(i.ItemId, i.Player.Slot, i.LocationId, i.LocationGame);
-                else if (i.ItemId == SlotData.GoalData.UnlockItemID)
+                else if (SlotData.SongUnlockIds.Contains(i.ItemId))
                     ReceivedSongUnlockItems[i.ItemId] = new BaseYargAPItem(i.ItemId, i.Player.Slot, i.LocationId, i.LocationGame);
                 else if (i.ItemName.ToLower().StartsWith("song pack"))
                     ReceivedSongUnlockItems[i.ItemId] = new BaseYargAPItem(i.ItemId, i.Player.Slot, i.LocationId, i.LocationGame);
@@ -221,7 +219,8 @@ namespace YargArchipelagoPlugin
         public HashSet<StaticYargAPItem> ApItemsUsed { get; } = new HashSet<StaticYargAPItem>();
         public HashSet<StaticYargAPItem> ApItemsPurchased { get; } = new HashSet<StaticYargAPItem>();
 
-        public List<(string pool, string hash, string proxyHash)> ProxyData { get; } = new List<(string, string, string)>();
+        public Dictionary<string, string> SongProxies { get; } = new Dictionary<string, string>();
+        public Dictionary<string, CompletionRequirements> AdjustedDifficulties { get; } = new Dictionary<string, CompletionRequirements>();
 
         public bool InGameAPChat = true;
 
@@ -252,7 +251,6 @@ namespace YargArchipelagoPlugin
             { 
                 var configData = JsonConvert.DeserializeObject<PersistantData>(File.ReadAllText(ConfigFile));
                 configData.parent = container;
-                configData.LoadProxyCache();
                 container.logger.LogInfo($"Loaded Persistance Data\n{JsonConvert.SerializeObject(configData, Formatting.Indented)}");
                 return configData;
             }
@@ -273,29 +271,11 @@ namespace YargArchipelagoPlugin
             if (!parent.IsSessionConnected) return;
             Directory.CreateDirectory(SeedConfigPath);
             var path = Path.Combine(SeedConfigPath, getSaveFileName(parent));
-            UpdateProxyCache();
             File.WriteAllText(path, JsonConvert.SerializeObject(this, Formatting.Indented));
         }
         private static string getSaveFileName(APConnectionContainer container) =>
             $"{container.GetSession()?.RoomState?.Seed}_{container.GetSession()?.Players?.ActivePlayer?.Slot}_" +
             $"{container.GetSession()?.Players?.ActivePlayer?.Slot}_{container.GetSession()?.Players?.ActivePlayer?.GetHashCode()}";
 
-        private void UpdateProxyCache()
-        {
-            ProxyData.Clear();
-            foreach(var pool in parent.SlotData.SongPoolToAPData)
-            {
-                foreach (var Hash in pool.Value)
-                {
-                    if (Hash.Value.ProxyHash is null) continue;
-                    ProxyData.Add((pool.Key, Hash.Key, Hash.Value.ProxyHash));
-                }
-            }
-        }
-        private void LoadProxyCache()
-        {
-            foreach (var (pool, hash, proxyHash) in ProxyData)
-                parent.SlotData.SongPoolToAPData[pool][hash].ProxyHash = proxyHash;
-        }
     }
 }

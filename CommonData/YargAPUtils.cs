@@ -17,13 +17,12 @@ namespace YargArchipelagoPlugin
     {
         public static bool IsSupportedInstrument(Instrument source, out CommonData.SupportedInstrument? target)
         {
-            int value = (int)source;
-            if (Enum.IsDefined(typeof(CommonData.SupportedInstrument), value))
+            if (Enum.TryParse<CommonData.SupportedInstrument>(source.ToString(), out var result))
             {
-                target = (CommonData.SupportedInstrument)value;
+                target = result;
                 return true;
             }
-            target = default;
+            target = null;
             return false;
         }
         public static CommonData.SupportedDifficulty GetSupportedDifficulty(Difficulty source)

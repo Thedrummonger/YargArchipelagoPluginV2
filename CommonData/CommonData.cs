@@ -224,6 +224,8 @@ namespace YargArchipelagoCommon
             public string Artist;
             public string SongChecksum;
             public Dictionary<SupportedInstrument, int> Difficulties = new Dictionary<SupportedInstrument, int>();
+            [Newtonsoft.Json.JsonIgnore]
+            public SongEntry YargSongEntry;
             public bool TryGetDifficulty(SupportedInstrument instrument, out int Difficulty) => Difficulties.TryGetValue(instrument, out Difficulty);
             public static SongExportData FromSongEntry(SongEntry song)
             {
@@ -280,21 +282,36 @@ namespace YargArchipelagoCommon
         public class SongAPData
         {
             public string Hash { get; set; }
-            public string ProxyHash { get; set; }
             public string PoolName { get; set; }
             public long MainLocationID { get; set; }
             public long ExtraLocationID { get; set; }
             public long CompletionLocationID { get; set; }
             public long UnlockItemID { get; set; }
 
+            public string UniqueKey => $"{PoolName}[{Hash}]";
+
+            public string GetActiveHash(APConnectionContainer container)
+            {
+                if (HasProxy(container, out var ProxyHash)) 
+                    return ProxyHash;
+                return Hash;
+            }
+
+            public bool HasProxy(APConnectionContainer container, out string proxyHash) => 
+                container.seedConfig.SongProxies.TryGetValue(UniqueKey, out proxyHash);
+
             public SongPool GetPool(YargSlotData slotData) => slotData.Pools[PoolName];
+
+            public CompletionRequirements GetCurrentCompletionRequirements(APConnectionContainer container)
+            {
+                return GetPool(container.SlotData).CompletionRequirements;
+            }
 
             public static SongAPData FromTuple(JArray tuple, string hash, string pool)
             {
                 return new SongAPData
                 {
                     Hash = hash,
-                    ProxyHash = null,
                     PoolName = pool,
                     MainLocationID = tuple[0].ToObject<long>(),
                     ExtraLocationID = tuple[1].ToObject<long>(),
@@ -302,18 +319,18 @@ namespace YargArchipelagoCommon
                     UnlockItemID = tuple[3].ToObject<long>()
                 };
             }
-            public SongEntry GetYargSongEntry()
+            public SongEntry GetYargSongEntry(APConnectionContainer container)
             {
-                var hash = ProxyHash ?? Hash;
+                var hash = HasProxy(container, out var ProxyHash) ? ProxyHash : Hash;
                 var songObj = SongContainer.Songs.FirstOrDefault(x => Convert.ToBase64String(x.Hash.HashBytes) == hash);
                 if (songObj == null)
                     ToastManager.ToastError($"Song Hash {hash} was not a valid song in yarg!");
                 return songObj;
             }
-            public bool WasActiveSongInGame(GameManager gameManager)
+            public bool WasActiveSongInGame(APConnectionContainer container, GameManager gameManager)
             {
                 var SongHash = Convert.ToBase64String(gameManager.Song.Hash.HashBytes);
-                return SongHash == Hash || SongHash == ProxyHash;
+                return SongHash == GetActiveHash(container);
             }
             public bool IsSongUnlocked(APConnectionContainer connectionContainer)
             {
@@ -375,19 +392,11 @@ namespace YargArchipelagoCommon
             public GoalData GoalData { get; set; }
             public int DeathLink { get; set; }
             public int EnergyLink { get; set; }
-            // Dictionary of pool_name -> SongPool configuration
-            public Dictionary<string, SongPool> Pools { get; set; }
-            // dict[song_hash, dict[pool_name, SongPoolData]]
-            public Dictionary<string, Dictionary<string, SongAPData>> SongHashToAPData { get; set; }
-            // dict[pool_name, dict[song_hash, SongPoolData]]
-            public Dictionary<string, Dictionary<string, SongAPData>> SongPoolToAPData { get; set; }
-            // dict[instrument, dict[song_hash, SongPoolData]]
-            public Dictionary<SupportedInstrument, Dictionary<string, SongAPData>> InstrumentToAPData { get; set; }
-            public Dictionary<long, SongAPData> LocationIDtoAPData { get; set; }
-            public Dictionary<long, SongAPData> ItemIDtoAPData { get; set; }
+            public Dictionary<string, SongPool> Pools { get; set; } = new Dictionary<string, SongPool>();
 
-            public HashSet<string> AllInUseSongSubstitutions =>
-                LocationIDtoAPData.Values.Where(x => x.ProxyHash != null).Select(x => x.ProxyHash).ToHashSet();
+            public HashSet<SongAPData> Songs { get; set; } = new HashSet<SongAPData>();
+            public Dictionary<SupportedInstrument, SongAPData[]> SongsByInstrument { get; set; } = new Dictionary<SupportedInstrument, SongAPData[]>();
+            public HashSet<long> SongUnlockIds { get; set; } = new HashSet<long>();
 
             public static YargSlotData Parse(Dictionary<string, object> slotData)
             {
@@ -397,13 +406,7 @@ namespace YargArchipelagoCommon
                     SetlistNeededForGoal = Convert.ToInt32(slotData["setlist_needed_for_goal"]),
                     GoalData = GoalData.FromTuple(slotData["goal_data"] as JArray),
                     DeathLink = Convert.ToInt32(slotData["death_link"]),
-                    EnergyLink = Convert.ToInt32(slotData["energy_link"]),
-                    Pools = new Dictionary<string, SongPool>(),
-                    SongHashToAPData = new Dictionary<string, Dictionary<string, SongAPData>>(),
-                    SongPoolToAPData = new Dictionary<string, Dictionary<string, SongAPData>>(),
-                    InstrumentToAPData = new Dictionary<SupportedInstrument, Dictionary<string, SongAPData>>(),
-                    LocationIDtoAPData = new Dictionary<long, SongAPData>(),
-                    ItemIDtoAPData = new Dictionary<long, SongAPData>(),
+                    EnergyLink = Convert.ToInt32(slotData["energy_link"])
                 };
 
                 var poolsJson = slotData["pools"] as JObject;
@@ -413,31 +416,14 @@ namespace YargArchipelagoCommon
                 var songDataJson = slotData["song_data"] as JObject;
                 foreach (var songHash in songDataJson)
                 {
-                    result.SongHashToAPData[songHash.Key] = new Dictionary<string, SongAPData>();
-
                     var poolsDataJson = songHash.Value as JObject;
-                    foreach (var poolData in poolsDataJson)
-                    {
-                        var PoolData = SongAPData.FromTuple(poolData.Value as JArray, songHash.Key, poolData.Key);
-
-                        if (!result.SongPoolToAPData.ContainsKey(poolData.Key))
-                            result.SongPoolToAPData[poolData.Key] = new Dictionary<string, SongAPData>();
-                        result.SongPoolToAPData[poolData.Key][songHash.Key] = PoolData;
-
-                        var Pool = PoolData.GetPool(result);
-                        if (!result.InstrumentToAPData.ContainsKey(Pool.Instrument))
-                            result.InstrumentToAPData[Pool.Instrument] = new Dictionary<string, SongAPData>();
-                        result.InstrumentToAPData[Pool.Instrument][songHash.Key] = PoolData;
-
-                        result.SongHashToAPData[songHash.Key][poolData.Key] = PoolData;
-                        result.LocationIDtoAPData[PoolData.MainLocationID] = PoolData;
-                        if (PoolData.ExtraLocationID >= 0)
-                            result.LocationIDtoAPData[PoolData.ExtraLocationID] = PoolData;
-                        if (PoolData.CompletionLocationID >= 0)
-                            result.LocationIDtoAPData[PoolData.CompletionLocationID] = PoolData;
-                        result.ItemIDtoAPData[PoolData.UnlockItemID] = PoolData;
-                    }
+                    foreach (var APData in poolsDataJson)
+                        result.Songs.Add(SongAPData.FromTuple(APData.Value as JArray, songHash.Key, APData.Key));
                 }
+
+                result.SongsByInstrument = result.Songs.GroupBy(x => x.GetPool(result).Instrument).ToDictionary(x => x.Key, x => x.ToArray());
+                result.SongUnlockIds = result.Songs.Select(x => x.UnlockItemID).ToHashSet();
+                result.SongUnlockIds.Add(result.GoalData.UnlockItemID);
 
                 return result;
             }

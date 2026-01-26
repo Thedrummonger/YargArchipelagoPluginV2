@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using UnityEngine;
+using YARG.Core;
 using YARG.Core.Song;
 using YARG.Menu.Dialogs;
 using YARG.Menu.Persistent;
@@ -143,34 +144,53 @@ namespace YargArchipelagoPlugin
 
     public static class FormHelpers
     {
-        public static (int CurrentPage, int TotalPages) DisplayItemList<T>(IEnumerable<T> Objects, int DisplayCount, int Page, int Spacing, Func<T, string> GetDisplay, Action<T> OnClick)
+        public static (int CurrentPage, string CurrentFilter) DisplayItemList<T>(IEnumerable<T> Objects, int DisplayCount, int Page, string Title, string LastFilter, Func<T, string> GetDisplay, Action<T> OnClick)
         {
-            int totalPages = Mathf.Max(1, Mathf.CeilToInt(Objects.Count() / (float)DisplayCount));
-            var currentPage = Mathf.Clamp(Page, 0, totalPages - 1);
-            var Pages = Objects.Skip(currentPage * DisplayCount).Take(DisplayCount);
-            foreach (var song in Pages)
-                if (GUILayout.Button(GetDisplay(song), GUILayout.Height(Spacing)))
-                    OnClick(song);
+            GUILayout.Label(Title, GUI.skin.label);
 
+            GUILayout.Space(10);
+
+            var CurrentFilter = LastFilter;
+            var SelectedPage = Page;
+
+            GUILayout.BeginHorizontal();
+            GUILayout.Label("Filter:", GUILayout.Width(50));
+            string newFilter = GUILayout.TextField(CurrentFilter);
+            if (newFilter != CurrentFilter)
+            {
+                CurrentFilter = newFilter;
+                SelectedPage = 0;
+            }
+            GUILayout.EndHorizontal();
+
+            var FilteredObjects = FilterItems(Objects, CurrentFilter, GetDisplay);
+            int totalPages = Mathf.Max(1, Mathf.CeilToInt(FilteredObjects.Count() / (float)DisplayCount));
+            var currentPage = Mathf.Clamp(SelectedPage, 0, totalPages - 1);
+            var Pages = FilteredObjects.Skip(currentPage * DisplayCount).Take(DisplayCount);
+
+            GUILayout.Space(10);
+            foreach (var song in Pages)
+                if (GUILayout.Button(GetDisplay(song), GUILayout.Height(40)))
+                    OnClick(song);
 
             GUILayout.Space(10);
 
             GUILayout.BeginHorizontal();
 
-            if (GUILayout.Button("Previous", GUILayout.Height(Spacing)))
+            if (GUILayout.Button("Previous", GUILayout.Height(30)))
             {
                 if (currentPage > 0) currentPage--;
             }
 
             GUILayout.Label($"Page {currentPage + 1} / {totalPages}", GUILayout.ExpandWidth(true));
 
-            if (GUILayout.Button("Next", GUILayout.Height(Spacing)))
+            if (GUILayout.Button("Next", GUILayout.Height(30)))
             {
                 if (currentPage < totalPages - 1) currentPage++;
             }
 
             GUILayout.EndHorizontal();
-            return (currentPage, totalPages);
+            return (currentPage, CurrentFilter);
         }
 
 
@@ -191,13 +211,13 @@ namespace YargArchipelagoPlugin
             return result;
         }
 
-        public static SongAPData[] GetAvailableSongs(APConnectionContainer container, Func<SongAPData, string> GetDisplay, string filterText = "")
+        public static SongAPData[] GetAvailableSongs(APConnectionContainer container)
         {
-            var Valid = container.SlotData.LocationIDtoAPData.Values.Where(x =>
+            var Valid = container.SlotData.Songs.Where(x =>
                 x.HasAvailableLocations(container) &&
                 x.IsSongUnlocked(container)
             ).ToHashSet();
-            return FilterItems(Valid, filterText, GetDisplay);
+            return Valid.ToArray();
         }
     }
 
@@ -265,14 +285,45 @@ namespace YargArchipelagoPlugin
     public class LowerDifficultyMenu : BlockerMenu<LowerDifficultyMenu>
     {
         private StaticYargAPItem _item;
-        private SongAPData selectedSongToReplace;
+        private SongAPData SelectedSong;
 
-        private string filterText = "";
+        private string CurrentFilter = "";
         private int currentPage = 0;
         protected override string WindowTitle => "Lower Difficulty";
         protected override void DrawWindow(int id)
         {
+            GUILayout.BeginVertical();
 
+            if (SelectedSong is null)
+                (currentPage, CurrentFilter) = FormHelpers.DisplayItemList(FormHelpers.GetAvailableSongs(container), 5, currentPage, "SELECT SONG TO REPLACE", CurrentFilter, GetDisplay, OnSongSelect);
+            else
+            {
+
+            }
+
+            GUILayout.Space(10);
+
+            if (GUILayout.Button("Close", GUILayout.Height(30)))
+            {
+                CloseMenu();
+            }
+
+            GUILayout.EndVertical();
+            GUI.DragWindow(new Rect(0, 0, 10000, 20));
+
+        }
+
+        private void OnSongSelect(SongAPData data)
+        {
+            throw new NotImplementedException();
+        }
+
+        private static string GetDisplay(SongAPData songAPData)
+        {
+            SongEntry YArgEntry = SongContainer.Songs.FirstOrDefault(x => Convert.ToBase64String(x.Hash.HashBytes) == songAPData.Hash);
+            if (YArgEntry is null)
+                return $"[{songAPData.PoolName}] {songAPData.Hash}";
+            return $"[{songAPData.PoolName}] {YArgEntry.Name} by {YArgEntry.Artist}";
         }
     }
 
@@ -281,8 +332,11 @@ namespace YargArchipelagoPlugin
         private StaticYargAPItem _item;
         private SongAPData selectedSongToReplace;
 
-        private string filterText = "";
+        private string CurrentFilter = "";
         private int currentPage = 0;
+
+        // I think this calculates every frame while the window is up so we should cache it.
+        Dictionary<SongAPData, SongEntry[]> ValidEntryCache = new Dictionary<SongAPData, SongEntry[]>();
 
         protected override string WindowTitle => "Swap Song";
 
@@ -294,6 +348,7 @@ namespace YargArchipelagoPlugin
             var menu = CreateMenu();
             menu.Initialize(container, new Rect(50, 50, 500, 400));
             menu._item = item;
+            menu.ValidEntryCache = new Dictionary<SongAPData, SongEntry[]>();
             menu.Show = true;
         }
 
@@ -301,28 +356,10 @@ namespace YargArchipelagoPlugin
         {
             GUILayout.BeginVertical();
 
-            GUILayout.Label(selectedSongToReplace != null ? "SELECT REPLACEMENT" : "SELECT SONG TO REPLACE",
-                GUI.skin.label);
-
-            GUILayout.Space(10);
-
-            GUILayout.BeginHorizontal();
-            GUILayout.Label("Filter:", GUILayout.Width(50));
-            string newFilter = GUILayout.TextField(filterText);
-            if (newFilter != filterText)
-            {
-                filterText = newFilter;
-                currentPage = 0;
-            }
-            GUILayout.EndHorizontal();
-
-            GUILayout.Space(10);
-
-            int TotalPages;
             if (selectedSongToReplace is null)
-                (currentPage, TotalPages) = FormHelpers.DisplayItemList(FormHelpers.GetAvailableSongs(container, GetDisplay, filterText), 5, currentPage, 40, GetDisplay, OnSongToReplaceSelected);
+                (currentPage, CurrentFilter) = FormHelpers.DisplayItemList(FormHelpers.GetAvailableSongs(container), 5, currentPage, "SELECT SONG TO REPLACE", CurrentFilter, GetDisplay, OnSongToReplaceSelected);
             else
-                (currentPage, TotalPages) = FormHelpers.DisplayItemList(GetValidReplacements(selectedSongToReplace), 5, currentPage, 40, GetDisplay, OnReplacementSelected);
+                (currentPage, CurrentFilter) = FormHelpers.DisplayItemList(GetValidReplacements(selectedSongToReplace), 5, currentPage, "SELECT REPLACEMENT", CurrentFilter, GetDisplay, OnReplacementSelected);
 
             GUILayout.Space(10);
 
@@ -353,7 +390,7 @@ namespace YargArchipelagoPlugin
                 return;
             }
 
-            filterText = "";
+            CurrentFilter = "";
             currentPage = 0;
         }
 
@@ -365,24 +402,37 @@ namespace YargArchipelagoPlugin
 
         private SongEntry[] GetValidReplacements(SongAPData song)
         {
+            if (ValidEntryCache.ContainsKey(song))
+                return ValidEntryCache[song];
+
             var Pool = song.GetPool(container.SlotData);
             var UsedSongs = new HashSet<string>();
-            foreach (var item in container.SlotData.SongPoolToAPData[song.PoolName])
+            foreach (var item in container.SlotData.SongsByInstrument[Pool.Instrument])
             {
-                UsedSongs.Add(item.Key);
-                if (item.Value.ProxyHash != null)
-                    UsedSongs.Add(item.Value.ProxyHash);
+                UsedSongs.Add(item.Hash);
+                if (item.HasProxy(container, out var proxyHash))
+                    UsedSongs.Add(proxyHash);
 
             }
-            var ValidReplcements = SongContainer.Songs.Where(x => !UsedSongs.Contains(Convert.ToBase64String(x.Hash.HashBytes)));
-            return FormHelpers.FilterItems(ValidReplcements, filterText, GetDisplay);
+            var AllYargSongs =  YargEngineActions.GetYargSongExportData(SongContainer.Instruments);
+            var ValidReplcements = AllYargSongs.Where(x => x.Value.TryGetDifficulty(Pool.Instrument, out var difficulty) && DifficultyInRange(difficulty) && !UsedSongs.Contains(x.Key));
+            ValidEntryCache[song] = ValidReplcements.Select(x => x.Value.YargSongEntry).ToArray();
+            return ValidReplcements.Select(x => x.Value.YargSongEntry).ToArray();
+
+            bool DifficultyInRange(int difficulty)
+            {
+                // Let the user manually pick a song outside of their diffuclty range if they want
+                if (_item.Type == StaticItems.SwapPick) 
+                    return true;
+                return difficulty <= Pool.MaxDifficulty && difficulty >= Pool.MinDifficulty;
+            }
         }
 
         private string GetDisplay(SongEntry songEntry) => $"{songEntry.Name} by {songEntry.Artist}";
 
-        private static string GetDisplay(SongAPData songAPData)
+        private string GetDisplay(SongAPData songAPData)
         {
-            SongEntry YArgEntry = SongContainer.Songs.FirstOrDefault(x => Convert.ToBase64String(x.Hash.HashBytes) == songAPData.Hash);
+            SongEntry YArgEntry = SongContainer.Songs.FirstOrDefault(x => Convert.ToBase64String(x.Hash.HashBytes) == songAPData.GetActiveHash(container));
             if (YArgEntry is null)
                 return $"[{songAPData.PoolName}] {songAPData.Hash}";
             return $"[{songAPData.PoolName}] {YArgEntry.Name} by {YArgEntry.Artist}";
@@ -393,7 +443,7 @@ namespace YargArchipelagoPlugin
             SongEntry YArgEntry = SongContainer.Songs.FirstOrDefault(x => Convert.ToBase64String(x.Hash.HashBytes) == toReplace.Hash);
             string ToReplace = YArgEntry is null ? $"{toReplace.Hash}" : $"{YArgEntry.Name} by {YArgEntry.Artist}";
             string Replacement = $"{replacement.Name} by {replacement.Artist}";
-            toReplace.ProxyHash = Convert.ToBase64String(replacement.Hash.HashBytes);
+            container.seedConfig.SongProxies[toReplace.UniqueKey] = Convert.ToBase64String(replacement.Hash.HashBytes);
             container.seedConfig.ApItemsUsed.Add(_item);
             container.seedConfig.Save();
             RemoveBlockerDialog();

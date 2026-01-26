@@ -8,6 +8,7 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using UnityEngine;
+using YARG.Core;
 using YARG.Core.Audio;
 //Don't Let visual studios lie to me these are needed
 using YARG.Core.Engine;
@@ -31,9 +32,16 @@ namespace YargArchipelagoPlugin
     {
         public static void DumpAvailableSongs(SongCache SongCache)
         {
+            var SongData = GetYargSongExportData(SongCache.Instruments);
+            if (!Directory.Exists(CommonData.DataFolder)) Directory.CreateDirectory(CommonData.DataFolder);
+            File.WriteAllText(CommonData.SongExportFile, JsonConvert.SerializeObject(SongData.Values.ToArray(), Formatting.Indented));
+        }
+
+        public static Dictionary<string, SongExportData> GetYargSongExportData(IReadOnlyDictionary<Instrument, SortedDictionary<int, List<SongEntry>>> SongsByInstrument)
+        {
             Dictionary<string, SongExportData> SongData = new Dictionary<string, SongExportData>();
 
-            foreach (var instrument in SongCache.Instruments)
+            foreach (var instrument in SongsByInstrument)
             {
                 if (!YargAPUtils.IsSupportedInstrument(instrument.Key, out var supportedInstrument)) continue;
                 foreach (var Difficulty in instrument.Value)
@@ -45,11 +53,11 @@ namespace YargArchipelagoPlugin
                         if (!SongData.ContainsKey(Hash))
                             SongData[Hash] = SongExportData.FromSongEntry(song);
                         SongData[Hash].Difficulties[supportedInstrument.Value] = Difficulty.Key;
+                        SongData[Hash].YargSongEntry = song;
                     }
                 }
             }
-            if (!Directory.Exists(CommonData.DataFolder)) Directory.CreateDirectory(CommonData.DataFolder);
-            File.WriteAllText(CommonData.SongExportFile, JsonConvert.SerializeObject(SongData.Values.ToArray(), Formatting.Indented));
+            return SongData;
         }
 
         public static bool UpdateRecommendedSongsMenu()
