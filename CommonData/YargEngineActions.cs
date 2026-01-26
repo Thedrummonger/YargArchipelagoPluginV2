@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Text;
 using UnityEngine;
 using YARG.Core;
 using YARG.Core.Audio;
@@ -140,7 +141,19 @@ namespace YargArchipelagoPlugin
         {
             if (!container.SlotData.Pools.TryGetValue(poolName, out var SongPool))
                 return;
-            DialogManager.Instance.ShowMessage($"Data for pool: {poolName}", JsonConvert.SerializeObject(SongPool, Formatting.Indented));
+
+            StringBuilder Result = new StringBuilder()
+                .AppendLine($"REQUIRED INSTRUMENT:")
+                .AppendLine($"{SongPool.Instrument.GetDescription()}")
+                .AppendLine()
+                .AppendLine($"REWARD 1 REQUIREMENTS:")
+                .AppendLine($"Minimum Difficulty: {SongPool.CompletionRequirements.Reward1Diff.GetDescription()}")
+                .AppendLine($"Minimum Score: {SongPool.CompletionRequirements.Reward1Req.GetDescription()}")
+                .AppendLine()
+                .AppendLine($"\nREWARD 2 REQUIREMENTS:")
+                .AppendLine($"Minimum Difficulty: {SongPool.CompletionRequirements.Reward2Diff.GetDescription()}")
+                .AppendLine($"Minimum Score: {SongPool.CompletionRequirements.Reward2Req.GetDescription()}");
+            DialogManager.Instance.ShowMessage(poolName, Result.ToString());
         }
 
         public static void ApplyStarPowerItem(APConnectionContainer handler)

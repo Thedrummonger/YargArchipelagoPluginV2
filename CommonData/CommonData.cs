@@ -304,6 +304,8 @@ namespace YargArchipelagoCommon
 
             public CompletionRequirements GetCurrentCompletionRequirements(APConnectionContainer container)
             {
+                if (container.seedConfig.AdjustedDifficulties.TryGetValue(UniqueKey, out var reqs))
+                    return reqs;
                 return GetPool(container.SlotData).CompletionRequirements;
             }
 
