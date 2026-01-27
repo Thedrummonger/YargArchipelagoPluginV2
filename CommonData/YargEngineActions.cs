@@ -100,6 +100,10 @@ namespace YargArchipelagoPlugin
             if (SwapSongRand.Any())
                 listView.Insert(insertIndex++, new CategoryViewType($"SWAP SONG (Random)", SwapSongRand.Count(), new SongEntry[0], () => SwapSongMenu.ShowMenu(container, SwapSongRand.First())));
 
+            var LowerDifficulty = container.ApItemsRecieved.Where(x => x.Type == StaticItems.LowerDifficulty && !container.seedConfig.ApItemsUsed.Contains(x));
+            if (LowerDifficulty.Any())
+                listView.Insert(insertIndex++, new CategoryViewType($"LOWER DIFFICULTY", LowerDifficulty.Count(), new SongEntry[0], () => LowerDifficultyMenu.ShowMenu(container, LowerDifficulty.First())));
+
             var allSongs = entries.Select(e => e.song).ToArray();
             listView.Insert(insertIndex++, new CategoryViewType("ARCHIPELAGO SONGS", allSongs.Length, allSongs, menu.RefreshAndReselect));
 
@@ -141,6 +145,10 @@ namespace YargArchipelagoPlugin
         {
             if (!container.SlotData.Pools.TryGetValue(poolName, out var SongPool))
                 return;
+            ShowPoolData(container, poolName, SongPool);
+        }
+        public static void ShowPoolData(APConnectionContainer container, string Title, SongPool SongPool)
+        {
 
             StringBuilder Result = new StringBuilder()
                 .AppendLine($"REQUIRED INSTRUMENT:")
@@ -153,7 +161,7 @@ namespace YargArchipelagoPlugin
                 .AppendLine($"\nREWARD 2 REQUIREMENTS:")
                 .AppendLine($"Minimum Difficulty: {SongPool.CompletionRequirements.Reward2Diff.GetDescription()}")
                 .AppendLine($"Minimum Score: {SongPool.CompletionRequirements.Reward2Req.GetDescription()}");
-            DialogManager.Instance.ShowMessage(poolName, Result.ToString());
+            DialogManager.Instance.ShowMessage(Title, Result.ToString());
         }
 
         public static void ApplyStarPowerItem(APConnectionContainer handler)

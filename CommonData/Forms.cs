@@ -290,15 +290,37 @@ namespace YargArchipelagoPlugin
         private string CurrentFilter = "";
         private int currentPage = 0;
         protected override string WindowTitle => "Lower Difficulty";
+        public static void ShowMenu(APConnectionContainer container, StaticYargAPItem item)
+        {
+            if (CurrentInstance != null)
+                return;
+
+            var menu = CreateMenu();
+            menu.Initialize(container, new Rect(50, 50, 500, 400));
+            menu._item = item;
+            menu.Show = true;
+        }
         protected override void DrawWindow(int id)
         {
             GUILayout.BeginVertical();
 
             if (SelectedSong is null)
-                (currentPage, CurrentFilter) = FormHelpers.DisplayItemList(FormHelpers.GetAvailableSongs(container), 5, currentPage, "SELECT SONG TO REPLACE", CurrentFilter, GetDisplay, OnSongSelect);
+                (currentPage, CurrentFilter) = FormHelpers.DisplayItemList(FormHelpers.GetAvailableSongs(container), 5, currentPage, "SELECT SONG TO LOWER DIFFICULTY", CurrentFilter, GetDisplay, OnSongSelect);
             else
             {
-
+                var CurrentReqs = SelectedSong.GetCurrentCompletionRequirements(container);
+                if (CurrentReqs.Reward1Diff > SupportedDifficulty.Easy)
+                    if (GUILayout.Button($"Lower Reward 1 Difficulty: {CurrentReqs.Reward1Diff.GetDescription()} -> {(CurrentReqs.Reward1Diff - 1).GetDescription()}", GUILayout.Height(40)))
+                        SetRequirementOverride(CurrentReqs.Reward1Diff - 1, CurrentReqs.Reward1Req, CurrentReqs.Reward2Diff, CurrentReqs.Reward2Req);
+                if (CurrentReqs.Reward1Req > CompletionReq.Clear)
+                    if (GUILayout.Button($"Lower Reward 1 Score Requirement: {CurrentReqs.Reward1Req.GetDescription()} -> {(CurrentReqs.Reward1Req - 1).GetDescription()}", GUILayout.Height(40)))
+                        SetRequirementOverride(CurrentReqs.Reward1Diff, CurrentReqs.Reward1Req - 1, CurrentReqs.Reward2Diff, CurrentReqs.Reward2Req);
+                if (CurrentReqs.Reward2Diff > SupportedDifficulty.Easy)
+                    if (GUILayout.Button($"Lower Reward 2 Difficulty: {CurrentReqs.Reward2Diff.GetDescription()} -> {(CurrentReqs.Reward2Diff - 1).GetDescription()}", GUILayout.Height(40)))
+                        SetRequirementOverride(CurrentReqs.Reward1Diff, CurrentReqs.Reward1Req, CurrentReqs.Reward2Diff - 1, CurrentReqs.Reward2Req);
+                if (CurrentReqs.Reward2Req > CompletionReq.Clear)
+                    if (GUILayout.Button($"Lower Reward 2 Score Requirement: {CurrentReqs.Reward2Req.GetDescription()} -> {(CurrentReqs.Reward2Req - 1).GetDescription()}", GUILayout.Height(40)))
+                        SetRequirementOverride(CurrentReqs.Reward1Diff, CurrentReqs.Reward1Req, CurrentReqs.Reward2Diff, CurrentReqs.Reward2Req - 1);
             }
 
             GUILayout.Space(10);
@@ -313,14 +335,43 @@ namespace YargArchipelagoPlugin
 
         }
 
-        private void OnSongSelect(SongAPData data)
+        private void SetRequirementOverride(SupportedDifficulty reward1Diff, CompletionReq reward1Req, SupportedDifficulty reward2Diff, CompletionReq reward2Req)
         {
-            throw new NotImplementedException();
+            var NewReqs = new CompletionRequirements
+            {
+                Reward1Diff = reward1Diff,
+                Reward2Diff = reward2Diff,
+                Reward1Req = reward1Req,
+                Reward2Req = reward2Req
+            };
+            container.seedConfig.AdjustedDifficulties[SelectedSong.UniqueKey] = NewReqs;
+            container.seedConfig.ApItemsUsed.Add(_item);
+            container.seedConfig.Save();
+            RemoveBlockerDialog();
+            var SongData = SelectedSong.GetYargSongEntry(container);
+            var Display = SongData is null ? SelectedSong.Hash : $"{SongData.Name} by {SongData.Artist}";
+            YargEngineActions.ShowPoolData(container, $"New Requirements for {Display}", new SongPool { Instrument = SelectedSong.GetPool(container.SlotData).Instrument, CompletionRequirements = NewReqs });
+            CloseMenu();
         }
 
-        private static string GetDisplay(SongAPData songAPData)
+        private void OnSongSelect(SongAPData data)
         {
-            SongEntry YArgEntry = SongContainer.Songs.FirstOrDefault(x => Convert.ToBase64String(x.Hash.HashBytes) == songAPData.Hash);
+            var CurrentReqs = data.GetCurrentCompletionRequirements(container);
+            var CanLower1Diff = CurrentReqs.Reward1Diff > SupportedDifficulty.Easy;
+            var CanLower2Diff = CurrentReqs.Reward2Diff > SupportedDifficulty.Easy;
+            var CanLower1Req = CurrentReqs.Reward1Req > CompletionReq.Clear;
+            var CanLower2Req = CurrentReqs.Reward2Req > CompletionReq.Clear;
+            if (!CanLower1Diff && !CanLower2Diff && !CanLower1Req && !CanLower2Req)
+            {
+                ToastManager.ToastError($"Unable to lower the requirements of this song any further!");
+                return;
+            }
+            SelectedSong = data;
+        }
+
+        private string GetDisplay(SongAPData songAPData)
+        {
+            SongEntry YArgEntry = SongContainer.Songs.FirstOrDefault(x => Convert.ToBase64String(x.Hash.HashBytes) == songAPData.GetActiveHash(container));
             if (YArgEntry is null)
                 return $"[{songAPData.PoolName}] {songAPData.Hash}";
             return $"[{songAPData.PoolName}] {YArgEntry.Name} by {YArgEntry.Artist}";

@@ -80,14 +80,14 @@ namespace YargArchipelagoPlugin
                     continue;
                 var pool = i.GetPool(parent.SlotData);
 
-                var MetStandard = pool.MetStandard(gameManager, out var deathLinkStandard) || ShouldCheat;
+                var MetStandard = pool.MetStandard(gameManager, out var deathLinkStandard, i.GetCurrentCompletionRequirements(parent)) || ShouldCheat;
                 if (!MetStandard && deathLinkStandard) DoDeathlink = true;
                 if (MetStandard) LocationsToComplete.Add(i.MainLocationID);
 
                 var MetExtra = true;
                 if (i.ExtraLocationID >= 0)
                 {
-                    MetExtra = pool.MetExtra(gameManager, out var deathLinkExtra) || ShouldCheat;
+                    MetExtra = pool.MetExtra(gameManager, out var deathLinkExtra, i.GetCurrentCompletionRequirements(parent)) || ShouldCheat;
                     if (!MetExtra && deathLinkExtra) DoDeathlink = true;
                     if (MetExtra) LocationsToComplete.Add(i.ExtraLocationID);
                 }

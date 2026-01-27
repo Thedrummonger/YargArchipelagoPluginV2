@@ -46,10 +46,10 @@ namespace YargArchipelagoPlugin
              .OfType<DescriptionAttribute>()
              .FirstOrDefault()?.Description ?? value.ToString();
 
-        public static bool MetStandard(this SongPool pool, GameManager passInfo, out bool DeathLink) =>
-            pool.MetReq(passInfo, out DeathLink, pool.CompletionRequirements.Reward1Req, pool.CompletionRequirements.Reward1Diff);
-        public static bool MetExtra(this SongPool pool, GameManager passInfo, out bool DeathLink) =>
-            pool.MetReq(passInfo, out DeathLink, pool.CompletionRequirements.Reward2Req, pool.CompletionRequirements.Reward2Diff);
+        public static bool MetStandard(this SongPool pool, GameManager passInfo, out bool DeathLink, CompletionRequirements CustomReqs = null) =>
+            pool.MetReq(passInfo, out DeathLink, (CustomReqs ?? pool.CompletionRequirements).Reward1Req, (CustomReqs ?? pool.CompletionRequirements).Reward1Diff);
+        public static bool MetExtra(this SongPool pool, GameManager passInfo, out bool DeathLink, CompletionRequirements CustomReqs = null) =>
+            pool.MetReq(passInfo, out DeathLink, (CustomReqs ?? pool.CompletionRequirements).Reward2Req, (CustomReqs ?? pool.CompletionRequirements).Reward2Diff);
 
         private static bool MetReq(this SongPool pool, GameManager passInfo, out bool DeathLink, CompletionReq req, SupportedDifficulty diff)
         {
