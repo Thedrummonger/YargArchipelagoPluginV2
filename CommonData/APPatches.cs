@@ -14,7 +14,9 @@ using YARG.Core.Song.Cache;
 using YARG.Gameplay;
 using YARG.Gameplay.Player;
 using YARG.Localization;
+using YARG.Menu.Main;
 using YARG.Menu.MusicLibrary;
+using YARG.Menu.Persistent;
 using YARG.Playback;
 using YARG.Scores;
 using YARG.Settings;
@@ -33,6 +35,17 @@ namespace YargArchipelagoPlugin
         public static event Action<GameManager> OnSongFail;
         public static bool HasAvailableAPSongUpdate = false;
         public static bool IgnoreScoreForNextSong = false;
+        private static bool FirstAwake = true;
+
+        [HarmonyPatch(typeof(MainMenu), "Start")]
+        [HarmonyPostfix]
+        public static void MainMenu_Start(MainMenu __instance)
+        {
+            if (!FirstAwake)
+                return;
+            ArchipelagoPlugin.ToggleArchipelagoDialog();
+            FirstAwake = false;
+        }
 
         [HarmonyPatch(typeof(GameManager), "Awake")]
         [HarmonyPostfix]
@@ -87,6 +100,24 @@ namespace YargArchipelagoPlugin
                 IgnoreScoreForNextSong = true;
                 endSongMethod?.Invoke(__instance, new object[] { });
             }
+        }
+        [HarmonyPatch(typeof(DevWatermark), "Start")]
+        [HarmonyPostfix]
+        public static void DevWatermark_Start_Postfix(DevWatermark __instance)
+        {
+            // Get the _watermarkText field via reflection
+            var field = typeof(DevWatermark).GetField("_watermarkText", BindingFlags.NonPublic | BindingFlags.Instance);
+
+            if (field == null) return;
+            var watermarkText = field.GetValue(__instance);
+            if (watermarkText == null) return;
+            var textProperty = watermarkText.GetType().GetProperty("text");
+            if (textProperty == null) return;
+
+            string currentText = textProperty.GetValue(watermarkText) as string;
+
+            if (!string.IsNullOrEmpty(currentText))
+                textProperty.SetValue(watermarkText, $"{currentText}\nYarg Archipelago plugin V{ArchipelagoPlugin.pluginVersion}. Press F10 to connect!");
         }
     }
 }

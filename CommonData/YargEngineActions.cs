@@ -90,25 +90,29 @@ namespace YargArchipelagoPlugin
         public static void InsertAPListViewSongs(APConnectionContainer container, MusicLibraryMenu menu, List<ViewType> listView, IEnumerable<(SongEntry song, SongAPData APData)> entries)
         {
             int insertIndex = GetListViewIndex(listView, "Menu.MusicLibrary.AllSongs");
-            if (insertIndex < 0) return;
+            if (insertIndex < 0) 
+                return;
 
             var allSongs = entries.Select(e => e.song).ToArray();
             listView.Insert(insertIndex++, new CategoryViewType("ARCHIPELAGO", allSongs.Length, allSongs, menu.RefreshAndReselect));
 
-            var SwapSongs = container.ApItemsRecieved.Where(x => x.Type == StaticItems.SwapPick && !container.seedConfig.ApItemsUsed.Contains(x));
-            if (SwapSongs.Any())
-                listView.Insert(insertIndex++, new CategoryViewType($"USE SWAP SONG (Pick)", SwapSongs.Count(), new SongEntry[0], () => SwapSongMenu.ShowMenu(container, SwapSongs.First())));
+            var AllActionItems = container.GetAllAquiredActionItems();
+            //var AllActionItems = container.ApItemsRecieved;
+            var SwapSongs = AllActionItems.Where(x => x.Type == StaticItems.SwapPick && !container.seedConfig.ApItemsUsed.Contains(x));
+            var SwapSongRand = AllActionItems.Where(x => x.Type == StaticItems.SwapRandom && !container.seedConfig.ApItemsUsed.Contains(x));
+            var LowerDifficulty = AllActionItems.Where(x => x.Type == StaticItems.LowerDifficulty && !container.seedConfig.ApItemsUsed.Contains(x));
 
-            var SwapSongRand = container.ApItemsRecieved.Where(x => x.Type == StaticItems.SwapRandom && !container.seedConfig.ApItemsUsed.Contains(x));
-            if (SwapSongRand.Any())
-                listView.Insert(insertIndex++, new CategoryViewType($"USE SWAP SONG (Random)", SwapSongRand.Count(), new SongEntry[0], () => SwapSongMenu.ShowMenu(container, SwapSongRand.First())));
+            if (SwapSongs.Any() && allSongs.Any())
+                listView.Insert(insertIndex++, new CategoryViewType($"- USE SWAP SONG (Pick)", SwapSongs.Count(), new SongEntry[0], () => SwapSongMenu.ShowMenu(container, SwapSongs.First())));
 
-            var LowerDifficulty = container.ApItemsRecieved.Where(x => x.Type == StaticItems.LowerDifficulty && !container.seedConfig.ApItemsUsed.Contains(x));
-            if (LowerDifficulty.Any())
-                listView.Insert(insertIndex++, new CategoryViewType($"USE LOWER DIFFICULTY", LowerDifficulty.Count(), new SongEntry[0], () => LowerDifficultyMenu.ShowMenu(container, LowerDifficulty.First())));
+            if (SwapSongRand.Any() && allSongs.Any())
+                listView.Insert(insertIndex++, new CategoryViewType($"- USE SWAP SONG (Random)", SwapSongRand.Count(), new SongEntry[0], () => SwapSongMenu.ShowMenu(container, SwapSongRand.First())));
+
+            if (LowerDifficulty.Any() && allSongs.Any())
+                listView.Insert(insertIndex++, new CategoryViewType($"- USE LOWER DIFFICULTY", LowerDifficulty.Count(), new SongEntry[0], () => LowerDifficultyMenu.ShowMenu(container, LowerDifficulty.First())));
 
             if (container.seedConfig.EnergyLinkMode > EnergyLinkType.None || true)
-                listView.Insert(insertIndex++, new CategoryViewType($"OPEN ENERGY LINK SHOP", (int)container.seedConfig.EnergyLinkMode, new SongEntry[0], () => EnergyLinkShop.ShowMenu(container)));
+                listView.Insert(insertIndex++, new CategoryViewType($"- OPEN ENERGY LINK SHOP", (int)container.seedConfig.EnergyLinkMode, new SongEntry[0], () => EnergyLinkShop.ShowMenu(container)));
 
             foreach (var pool in entries
                 .OrderBy(e => e.APData.GetPool(container.SlotData).Instrument.GetDescription(), StringComparer.OrdinalIgnoreCase)

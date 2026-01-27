@@ -38,7 +38,7 @@ namespace YargArchipelagoPlugin
                 ToggleArchipelagoDialog();
             }
         }
-        private void ToggleArchipelagoDialog()
+        public static void ToggleArchipelagoDialog()
         {
             var dialog = GetOrCreateApDialog();
             dialog.Show = !dialog.Show;

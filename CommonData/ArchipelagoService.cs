@@ -29,6 +29,12 @@ namespace YargArchipelagoPlugin
         public Dictionary<long, BaseYargAPItem> ReceivedSongUnlockItems { get; } = new Dictionary<long, BaseYargAPItem>();
         public Dictionary<SupportedInstrument, BaseYargAPItem> ReceivedInstruments { get; } = new Dictionary<SupportedInstrument, BaseYargAPItem>();
         public HashSet<StaticYargAPItem> ApItemsRecieved { get; } = new HashSet<StaticYargAPItem>();
+        public HashSet<StaticYargAPItem> GetAllAquiredActionItems()
+        {
+            HashSet<StaticYargAPItem> Recieved = ApItemsRecieved;
+            HashSet<StaticYargAPItem> Purchased = seedConfig is null ? new HashSet<StaticYargAPItem>() : seedConfig.ApItemsPurchased;
+            return new HashSet<StaticYargAPItem>(Recieved.Union(Purchased));
+        }
         public HashSet<long> CheckedLocations { get; } = new HashSet<long>();
         public DeathLinkService DeathLinkService { get; private set; } = null;
 
@@ -225,8 +231,6 @@ namespace YargArchipelagoPlugin
         public bool InGameAPChat = true;
 
         public ItemLog InGameItemLog = ItemLog.ToMe;
-
-        public bool CheatMode = false;
 
         /// <summary>
         /// This value tracks the current death link mode. It can be changed in game independently of the yaml.

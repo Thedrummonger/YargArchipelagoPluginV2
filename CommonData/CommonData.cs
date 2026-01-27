@@ -400,8 +400,8 @@ namespace YargArchipelagoCommon
             public int FamePointsForGoal { get; set; }
             public int SetlistNeededForGoal { get; set; }
             public GoalData GoalData { get; set; }
-            public int DeathLink { get; set; }
-            public int EnergyLink { get; set; }
+            public DeathLinkType DeathLink { get; set; }
+            public EnergyLinkType EnergyLink { get; set; }
             public Dictionary<string, SongPool> Pools { get; set; } = new Dictionary<string, SongPool>();
 
             public HashSet<SongAPData> Songs { get; set; } = new HashSet<SongAPData>();
@@ -415,8 +415,8 @@ namespace YargArchipelagoCommon
                     FamePointsForGoal = Convert.ToInt32(slotData["fame_points_for_goal"]),
                     SetlistNeededForGoal = Convert.ToInt32(slotData["setlist_needed_for_goal"]),
                     GoalData = GoalData.FromTuple(slotData["goal_data"] as JArray),
-                    DeathLink = Convert.ToInt32(slotData["death_link"]),
-                    EnergyLink = Convert.ToInt32(slotData["energy_link"])
+                    DeathLink = (DeathLinkType)Convert.ToInt32(slotData["death_link"]),
+                    EnergyLink = (EnergyLinkType)Convert.ToInt32(slotData["energy_link"])
                 };
 
                 var poolsJson = slotData["pools"] as JObject;

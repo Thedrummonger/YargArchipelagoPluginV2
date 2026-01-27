@@ -15,6 +15,13 @@ namespace YargArchipelagoPlugin
 {
     public static class YargAPUtils
     {
+        public static T CycleEnum<T>(T currentValue) where T : System.Enum
+        {
+            var values = (T[])Enum.GetValues(typeof(T));
+            int currentIndex = Array.IndexOf(values, currentValue);
+            int nextIndex = (currentIndex + 1) % values.Length;
+            return values[nextIndex];
+        }
         public static bool IsSupportedInstrument(Instrument source, out CommonData.SupportedInstrument? target)
         {
             if (Enum.TryParse<CommonData.SupportedInstrument>(source.ToString(), out var result))

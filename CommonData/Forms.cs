@@ -47,14 +47,13 @@ namespace YargArchipelagoPlugin
         public bool Show = false;
 
         [Header("Defaults")]
-
-        private bool showDeathlinkDropdown = false;
         APConnectionContainer connectionContainer;
 
         ConnectionDetails connectionDetails;
 
+        private bool _hasPositioned = false;
 
-        private Rect _windowRect = new Rect(20, 20, 400, 180);
+        private Rect _windowRect = new Rect(20, 20, 400, 320);
 
         public void Initialize(APConnectionContainer container)
         {
@@ -78,32 +77,33 @@ namespace YargArchipelagoPlugin
         private void OnGUI()
         {
             if (!Show) return;
+            if (!_hasPositioned && Show)
+            {
+                _windowRect.x = (Screen.width - _windowRect.width) / 2;
+                _windowRect.y = (Screen.height - _windowRect.height) / 2;
+                _hasPositioned = true;
+            }
             _windowRect = GUI.Window(0xA1C4, _windowRect, DrawWindow, "Archipelago Connection", GUIStyles.OpaqueWindow());
         }
         private void DrawWindow(int id)
         {
             GUILayout.BeginVertical();
-
             GUILayout.BeginHorizontal();
             GUILayout.Label("Address", GUILayout.Width(80));
             using (new GUIEnabledScope(!connectionContainer.IsSessionConnected))
                 connectionDetails.Address = GUILayout.TextField(connectionDetails.Address, GUILayout.Width(280));
             GUILayout.EndHorizontal();
-
             GUILayout.BeginHorizontal();
             GUILayout.Label("Slot Name", GUILayout.Width(80));
             using (new GUIEnabledScope(!connectionContainer.IsSessionConnected))
                 connectionDetails.SlotName = GUILayout.TextField(connectionDetails.SlotName, GUILayout.Width(280));
             GUILayout.EndHorizontal();
-
             GUILayout.BeginHorizontal();
             GUILayout.Label("Password", GUILayout.Width(80));
             using (new GUIEnabledScope(!connectionContainer.IsSessionConnected))
                 connectionDetails.Password = GUILayout.PasswordField(connectionDetails.Password, '*', GUILayout.Width(280));
             GUILayout.EndHorizontal();
-
             GUILayout.Space(10);
-
             string buttonText = connectionContainer.IsSessionConnected ? "Disconnect" : "Connect";
             if (GUILayout.Button(buttonText, GUILayout.Height(28)))
             {
@@ -123,11 +123,81 @@ namespace YargArchipelagoPlugin
 
             GUILayout.Space(6);
 
+            bool isConnected = connectionContainer.IsSessionConnected &&
+                               connectionContainer.SlotData != null &&
+                               connectionContainer.seedConfig != null;
+
+            using (new GUIEnabledScope(isConnected))
+            {
+                GUILayout.BeginHorizontal();
+
+                GUILayout.BeginVertical(GUILayout.Width(190));
+                string deathLinkYaml = isConnected ? connectionContainer.SlotData.DeathLink.GetDescription() : "N/A";
+                GUILayout.Label($"Death Link:");
+                GUILayout.Label($"YAML: {deathLinkYaml}");
+                string deathLinkText = isConnected ? connectionContainer.seedConfig.DeathLinkMode.GetDescription() : "N/A";
+                if (GUILayout.Button(deathLinkText, GUILayout.Height(20)))
+                    if (isConnected)
+                    {
+                        connectionContainer.seedConfig.DeathLinkMode = CycleEnum(connectionContainer.seedConfig.DeathLinkMode);
+                        connectionContainer.seedConfig.Save();
+                    }
+                GUILayout.EndVertical();
+
+                GUILayout.BeginVertical(GUILayout.Width(190));
+                string energyLinkYaml = isConnected ? connectionContainer.SlotData.EnergyLink.GetDescription() : "N/A";
+                GUILayout.Label($"Energy Link:");
+                GUILayout.Label($"YAML: {energyLinkYaml}");
+                string energyLinkText = isConnected ? connectionContainer.seedConfig.EnergyLinkMode.GetDescription() : "N/A";
+                if (GUILayout.Button(energyLinkText, GUILayout.Height(20)))
+                    if (isConnected)
+                    {
+                        connectionContainer.seedConfig.EnergyLinkMode = CycleEnum(connectionContainer.seedConfig.EnergyLinkMode);
+                        connectionContainer.seedConfig.Save();
+                    }
+                GUILayout.EndVertical();
+
+                GUILayout.EndHorizontal();
+
+                GUILayout.BeginHorizontal();
+
+                GUILayout.BeginVertical(GUILayout.Width(190));
+                GUILayout.Label("Item Log:");
+                string itemLogText = isConnected ? connectionContainer.seedConfig.InGameItemLog.GetDescription() : "N/A";
+                if (GUILayout.Button(itemLogText, GUILayout.Height(20)))
+                    if (isConnected)
+                    {
+                        connectionContainer.seedConfig.InGameItemLog = CycleEnum(connectionContainer.seedConfig.InGameItemLog);
+                        connectionContainer.seedConfig.Save();
+                    }
+                GUILayout.EndVertical();
+
+                GUILayout.BeginVertical(GUILayout.Width(190));
+                GUILayout.Label("AP Chat:");
+                string apChatText = isConnected ? (connectionContainer.seedConfig.InGameAPChat ? "On" : "Off") : "N/A";
+                if (GUILayout.Button(apChatText, GUILayout.Height(20)))
+                    if (isConnected)
+                    {
+                        connectionContainer.seedConfig.InGameAPChat = !connectionContainer.seedConfig.InGameAPChat;
+                        connectionContainer.seedConfig.Save();
+                    }
+                GUILayout.EndVertical();
+
+                GUILayout.EndHorizontal();
+            }
+
             if (GUILayout.Button("Close", GUILayout.Height(28)))
                 Show = false;
-
             GUILayout.EndVertical();
             GUI.DragWindow(new Rect(0, 0, 10000, 20));
+        }
+
+        private T CycleEnum<T>(T currentValue) where T : System.Enum
+        {
+            var values = (T[])System.Enum.GetValues(typeof(T));
+            int currentIndex = System.Array.IndexOf(values, currentValue);
+            int nextIndex = (currentIndex + 1) % values.Length;
+            return values[nextIndex];
         }
 
         private readonly struct GUIEnabledScope : System.IDisposable
@@ -292,6 +362,11 @@ namespace YargArchipelagoPlugin
         protected override string WindowTitle => "Lower Difficulty";
         public static void ShowMenu(APConnectionContainer container, StaticYargAPItem item)
         {
+            if (FormHelpers.GetAvailableSongs(container).Length == 0)
+            {
+                ToastManager.ToastError("No Available Songs!");
+                return;
+            }
             if (CurrentInstance != null)
                 return;
 
@@ -352,6 +427,7 @@ namespace YargArchipelagoPlugin
             container.seedConfig.ApItemsUsed.Add(_item);
             container.seedConfig.Save();
             RemoveBlockerDialog();
+            YargEngineActions.UpdateRecommendedSongsMenu();
             var SongData = SelectedSong.GetYargSongEntry(container);
             var Display = SongData is null ? SelectedSong.GetActiveHash(container) : $"{SongData.Name} by {SongData.Artist}";
             YargEngineActions.ShowPoolData(container, $"New Requirements for {Display}", new SongPool { Instrument = SelectedSong.GetPool(container.SlotData).Instrument, CompletionRequirements = NewReqs });
@@ -391,6 +467,11 @@ namespace YargArchipelagoPlugin
 
         public static void ShowMenu(APConnectionContainer container, StaticYargAPItem item)
         {
+            if (FormHelpers.GetAvailableSongs(container).Length == 0)
+            {
+                ToastManager.ToastError("No Available Songs!");
+                return;
+            }
             if (CurrentInstance != null)
                 return;
 
@@ -545,6 +626,7 @@ namespace YargArchipelagoPlugin
                 return;
             }
             ToastManager.ToastSuccess($"Purchased one {Item.GetDescription()}");
+            YargEngineActions.UpdateRecommendedSongsMenu();
         }
     }
 }
