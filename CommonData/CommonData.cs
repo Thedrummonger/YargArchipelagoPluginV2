@@ -309,6 +309,15 @@ namespace YargArchipelagoCommon
                 return GetPool(container.SlotData).CompletionRequirements;
             }
 
+            public string GetDisplayName(APConnectionContainer container, bool IncludePool)
+            {
+                SongEntry YArgEntry = GetYargSongEntry(container);
+                var SongName = YArgEntry is null ? $"{GetActiveHash(container)}" : $"{YArgEntry.Name} by {YArgEntry.Artist}";
+                if (IncludePool)
+                    SongName = $"[{PoolName}] {SongName}";
+                return SongName;
+            }
+
             public static SongAPData FromTuple(JArray tuple, string hash, string pool)
             {
                 return new SongAPData
@@ -323,10 +332,9 @@ namespace YargArchipelagoCommon
             }
             public SongEntry GetYargSongEntry(APConnectionContainer container)
             {
-                var hash = HasProxy(container, out var ProxyHash) ? ProxyHash : Hash;
-                var songObj = SongContainer.Songs.FirstOrDefault(x => Convert.ToBase64String(x.Hash.HashBytes) == hash);
+                var songObj = SongContainer.Songs.FirstOrDefault(x => Convert.ToBase64String(x.Hash.HashBytes) == GetActiveHash(container));
                 if (songObj == null)
-                    ToastManager.ToastError($"Song Hash {hash} was not a valid song in yarg!");
+                    ToastManager.ToastError($"Song Hash {GetActiveHash(container)} was not a valid song in yarg!");
                 return songObj;
             }
             public bool WasActiveSongInGame(APConnectionContainer container, GameManager gameManager)

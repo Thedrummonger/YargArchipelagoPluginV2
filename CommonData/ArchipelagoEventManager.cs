@@ -240,15 +240,19 @@ namespace YargArchipelagoPlugin
     {
         public const long minEnergyLinkScale = 20000;
         public const long maxEnergyLinkScale = 1000000;
+        public static Dictionary<StaticItems, long> PriceDict = new Dictionary<StaticItems, long>
+        {
+            { StaticItems.SwapRandom, 17_000_000_000 },
+            { StaticItems.SwapPick, 20_000_000_000 },
+            { StaticItems.LowerDifficulty, 15_000_000_000 }
+        };
 
-        public const long SwapSongRandomPrice = 17_000_000_000;
-        public const long SwapSongPickPrice = 20_000_000_000;
-        public const long LowerDifficultyPrice = 15_000_000_000;
-
-        public static string EnergyLinkKey(ArchipelagoSession session) => $"EnergyLink{session.Players.ActivePlayer.Team}";
-        public static bool TryPurchaseItem(APConnectionContainer container, StaticItems Type, long Price)
+    public static string EnergyLinkKey(ArchipelagoSession session) => $"EnergyLink{session.Players.ActivePlayer.Team}";
+        public static bool TryPurchaseItem(APConnectionContainer container, StaticItems Type)
         {
             var CurrentEnergy = GetEnergy(container);
+            if (!PriceDict.TryGetValue(Type, out var Price))
+                return false;
             if (!TryUseEnergy(container, Price))
                 return false;
             var CurCount = container.seedConfig.ApItemsPurchased.Where(x => x.Type == Type).Count();

@@ -308,6 +308,10 @@ namespace YargArchipelagoPlugin
                 (currentPage, CurrentFilter) = FormHelpers.DisplayItemList(FormHelpers.GetAvailableSongs(container), 5, currentPage, "SELECT SONG TO LOWER DIFFICULTY", CurrentFilter, GetDisplay, OnSongSelect);
             else
             {
+                GUILayout.Label("SELECT A DIFFICULTY VALUE TO LOWER", GUI.skin.label);
+                GUILayout.Space(10);
+                GUILayout.Label(GetDisplay(SelectedSong), GUI.skin.label);
+                GUILayout.Space(10);
                 var CurrentReqs = SelectedSong.GetCurrentCompletionRequirements(container);
                 if (CurrentReqs.Reward1Diff > SupportedDifficulty.Easy)
                     if (GUILayout.Button($"Lower Reward 1 Difficulty: {CurrentReqs.Reward1Diff.GetDescription()} -> {(CurrentReqs.Reward1Diff - 1).GetDescription()}", GUILayout.Height(40)))
@@ -349,7 +353,7 @@ namespace YargArchipelagoPlugin
             container.seedConfig.Save();
             RemoveBlockerDialog();
             var SongData = SelectedSong.GetYargSongEntry(container);
-            var Display = SongData is null ? SelectedSong.Hash : $"{SongData.Name} by {SongData.Artist}";
+            var Display = SongData is null ? SelectedSong.GetActiveHash(container) : $"{SongData.Name} by {SongData.Artist}";
             YargEngineActions.ShowPoolData(container, $"New Requirements for {Display}", new SongPool { Instrument = SelectedSong.GetPool(container.SlotData).Instrument, CompletionRequirements = NewReqs });
             CloseMenu();
         }
@@ -369,13 +373,7 @@ namespace YargArchipelagoPlugin
             SelectedSong = data;
         }
 
-        private string GetDisplay(SongAPData songAPData)
-        {
-            SongEntry YArgEntry = SongContainer.Songs.FirstOrDefault(x => Convert.ToBase64String(x.Hash.HashBytes) == songAPData.GetActiveHash(container));
-            if (YArgEntry is null)
-                return $"[{songAPData.PoolName}] {songAPData.Hash}";
-            return $"[{songAPData.PoolName}] {YArgEntry.Name} by {YArgEntry.Artist}";
-        }
+        private string GetDisplay(SongAPData songAPData) => songAPData.GetDisplayName(container, true);
     }
 
     public class SwapSongMenu : BlockerMenu<SwapSongMenu>
@@ -460,6 +458,8 @@ namespace YargArchipelagoPlugin
             var UsedSongs = new HashSet<string>();
             foreach (var item in container.SlotData.SongsByInstrument[Pool.Instrument])
             {
+                //Add both the original hash and proxy hash if it exists. Even if it's proxied, we probably
+                //shouldn't place a core song onto another song as a proxy. This might change in the future.
                 UsedSongs.Add(item.Hash);
                 if (item.HasProxy(container, out var proxyHash))
                     UsedSongs.Add(proxyHash);
@@ -481,18 +481,11 @@ namespace YargArchipelagoPlugin
 
         private string GetDisplay(SongEntry songEntry) => $"{songEntry.Name} by {songEntry.Artist}";
 
-        private string GetDisplay(SongAPData songAPData)
-        {
-            SongEntry YArgEntry = SongContainer.Songs.FirstOrDefault(x => Convert.ToBase64String(x.Hash.HashBytes) == songAPData.GetActiveHash(container));
-            if (YArgEntry is null)
-                return $"[{songAPData.PoolName}] {songAPData.Hash}";
-            return $"[{songAPData.PoolName}] {YArgEntry.Name} by {YArgEntry.Artist}";
-        }
+        private string GetDisplay(SongAPData songAPData) => songAPData.GetDisplayName(container, true);
 
         private void PerformSwap(SongAPData toReplace, SongEntry replacement)
         {
-            SongEntry YArgEntry = SongContainer.Songs.FirstOrDefault(x => Convert.ToBase64String(x.Hash.HashBytes) == toReplace.Hash);
-            string ToReplace = YArgEntry is null ? $"{toReplace.Hash}" : $"{YArgEntry.Name} by {YArgEntry.Artist}";
+            string ToReplace = toReplace.GetDisplayName(container, false);
             string Replacement = $"{replacement.Name} by {replacement.Artist}";
             container.seedConfig.SongProxies[toReplace.UniqueKey] = Convert.ToBase64String(replacement.Hash.HashBytes);
             container.seedConfig.ApItemsUsed.Add(_item);
@@ -500,6 +493,58 @@ namespace YargArchipelagoPlugin
             RemoveBlockerDialog();
             YargEngineActions.UpdateRecommendedSongsMenu();
             DialogManager.Instance.ShowMessage($"Song Replaced", $"Replaced\n{ToReplace}\n\nwith\n{Replacement}\n\nIn Pool\n{toReplace.PoolName}");
+        }
+    }
+
+    public class EnergyLinkShop : BlockerMenu<EnergyLinkShop>
+    {
+        protected override string WindowTitle => "ENERGY SHOP";
+
+        public static void ShowMenu(APConnectionContainer container)
+        {
+            if (CurrentInstance != null)
+                return;
+
+            var menu = CreateMenu();
+            menu.Initialize(container, new Rect(50, 50, 500, 280));
+            menu.Show = true;
+        }
+        protected override void DrawWindow(int id)
+        {
+            GUILayout.BeginVertical();
+
+            GUILayout.Label("SELECT AN ITEM TO PRUCHASE", GUI.skin.label);
+            GUILayout.Space(10);
+            GUILayout.Label($"CURRENT ENERGY: {ExtraAPFunctionalityHelper.FormatLargeNumber(ExtraAPFunctionalityHelper.GetEnergy(container))}", GUI.skin.label);
+            GUILayout.Space(10);
+
+            if (GUILayout.Button($"Swap Song (Random) {ExtraAPFunctionalityHelper.FormatLargeNumber(ExtraAPFunctionalityHelper.PriceDict[StaticItems.SwapRandom])}", GUILayout.Height(40)))
+                PerformPurchase(StaticItems.SwapRandom);
+            if (GUILayout.Button($"Swap Song (Pick) {ExtraAPFunctionalityHelper.FormatLargeNumber(ExtraAPFunctionalityHelper.PriceDict[StaticItems.SwapPick])}", GUILayout.Height(40)))
+                PerformPurchase(StaticItems.SwapPick);
+            if (GUILayout.Button($"Swap Song (Random) {ExtraAPFunctionalityHelper.FormatLargeNumber(ExtraAPFunctionalityHelper.PriceDict[StaticItems.LowerDifficulty])}", GUILayout.Height(40)))
+                PerformPurchase(StaticItems.LowerDifficulty);
+
+            GUILayout.Space(10);
+
+            if (GUILayout.Button("Close", GUILayout.Height(30)))
+            {
+                CloseMenu();
+            }
+
+            GUILayout.EndVertical();
+            GUI.DragWindow(new Rect(0, 0, 10000, 20));
+        }
+
+        private void PerformPurchase(StaticItems Item)
+        {
+            var Success = ExtraAPFunctionalityHelper.TryPurchaseItem(container, Item);
+            if (!Success)
+            {
+                ToastManager.ToastError($"Not enough energy to purchase a {Item.GetDescription()}!");
+                return;
+            }
+            ToastManager.ToastSuccess($"Purchased one {Item.GetDescription()}");
         }
     }
 }
