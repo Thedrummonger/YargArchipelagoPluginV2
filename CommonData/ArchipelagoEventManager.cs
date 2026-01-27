@@ -96,8 +96,14 @@ namespace YargArchipelagoPlugin
                     LocationsToComplete.Add(i.CompletionLocationID);
             }
 
-            if (LocationsToComplete.Count > 0)
+            // Filter out locations that are already check, specifically for energy link option checking
+            LocationsToComplete = LocationsToComplete.Where(x => !parent.GetSession().Locations.AllLocationsChecked.Contains(x)).ToList();
+            var HasLocationsTocheck = LocationsToComplete.Count > 0;
+
+            if (HasLocationsTocheck)
                 parent.GetSession().Locations.CompleteLocationChecks(LocationsToComplete.ToArray());
+
+            ExtraAPFunctionalityHelper.SendScoreAsEnergy(parent, gameManager.BandScore, HasLocationsTocheck);
 
             if (DoDeathlink && (parent.seedConfig?.DeathLinkMode ?? DeathLinkType.None) > DeathLinkType.None)
                 parent.DeathLinkService?.SendDeathLink(
