@@ -16,15 +16,46 @@ namespace Yaml_Creator
     public partial class Form1 : Form
     {
         public static SongExportExtendedData[] ExportFile;
-        public static YAMLCore YAML = new YAMLCore();
+        public static YAMLCore YAML;
         public static string OutputFolder = Path.Combine(Application.StartupPath, "Output");
         public static SongPoolContainer SelectedSongPool = null;
         public bool IsLoadingNewSongPool = false;
+        private const string cache = "cache";
         public Form1()
         {
             InitializeComponent();
+
+            if (File.Exists(cache))
+            {
+                try { YAML = JsonConvert.DeserializeObject<YAMLCore>(File.ReadAllText(cache)); }
+                catch { YAML = null; }
+            }
+            if (YAML is null)
+                YAML = new YAMLCore();
+
+            LoadYamlToControls();
             CreateListeners();
             Directory.CreateDirectory(OutputFolder);
+            txtPoolExclude.ReadOnly = true;
+            txtPoolInclude.ReadOnly = true;
+        }
+
+        private void Form1_Load(object sender, EventArgs e)
+        {
+            var datas = CrossPlatformFileLoader.LoadSongDataCrossPlatform();
+            if (datas == null)
+            {
+                this.Close();
+                return;
+            }
+            ExportFile = datas.Select(x => new SongExportExtendedData(x)).ToArray();
+            YAML.YAYARG.songList = SongDataConverter.ConvertSongDataToBase64(ExportFile);
+            PrintActiveSongs(sender, e);
+            SongPoolListUpdated();
+            RegenerateGoalPoolList();
+            RegenerateGoalSongList();
+            cmbGoalPoolPlando.Enabled = chkGoalPoolPlando.Checked;
+            cmbGoalSongPlando.Enabled = chkGoalSongPlando.Checked;
         }
 
         private void LoadSongPool()
@@ -83,24 +114,6 @@ namespace Yaml_Creator
                 Debug.WriteLine(ex.Message);
                 return null;
             }
-        }
-
-        private void Form1_Load(object sender, EventArgs e)
-        {
-            var datas = CrossPlatformFileLoader.LoadSongDataCrossPlatform();
-            if (datas == null)
-            {
-                this.Close();
-                return;
-            }
-            ExportFile = datas.Select(x => new SongExportExtendedData(x)).ToArray();
-            YAML.YAYARG.songList = SongDataConverter.ConvertSongDataToBase64(ExportFile);
-            PrintActiveSongs(sender, e);
-            SongPoolListUpdated();
-            RegenerateGoalPoolList();
-            RegenerateGoalSongList();
-            cmbGoalPoolPlando.Enabled = chkGoalPoolPlando.Checked;
-            cmbGoalSongPlando.Enabled = chkGoalSongPlando.Checked;
         }
 
         public void PrintActiveSongs(object sender, EventArgs e)
@@ -289,6 +302,76 @@ namespace Yaml_Creator
             SongPoolListUpdated();
             RegenerateGoalPoolList();
             RegenerateGoalSongList();
+        }
+
+        private void lbActiveSongs_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            SongExportExtendedData ExtendedData = lbActiveSongs.SelectedItem is SongExportExtendedData ed ? ed : null;
+            btnCopyHash.Enabled = ExtendedData != null;
+            txtPoolInclude.Text = ExtendedData != null ? string.Join(", ", ExtendedData.IncludedPools) : "";
+            txtPoolExclude.Text = ExtendedData != null ? string.Join(", ", ExtendedData.ExcludedPools) : "";
+        }
+
+        public void PopulatePoolSongMappings()
+        {
+            var inclusionLists = new Dictionary<string, List<string>>();
+            var exclusionLists = new Dictionary<string, List<string>>();
+
+            foreach (var song in ExportFile)
+            {
+                foreach (var pool in song.IncludedPools)
+                {
+                    if (!inclusionLists.ContainsKey(pool))
+                        inclusionLists[pool] = new List<string>();
+
+                    inclusionLists[pool].Add(song.core.SongChecksum);
+                }
+
+                foreach (var pool in song.ExcludedPools)
+                {
+                    if (!exclusionLists.ContainsKey(pool))
+                        exclusionLists[pool] = new List<string>();
+
+                    exclusionLists[pool].Add(song.core.SongChecksum);
+                }
+            }
+            YAML.YAYARG.song_pool_inclusions = inclusionLists.ToDictionary(x => x.Key, x => x.Value.ToArray());
+            YAML.YAYARG.song_pool_exclusions = exclusionLists.ToDictionary(x => x.Key, x => x.Value.ToArray());
+        }
+
+        private void Form1_FormClosing(object sender, FormClosingEventArgs e)
+        {
+            YAML.YAYARG.songList = string.Empty;
+            File.WriteAllText(cache, JsonConvert.SerializeObject(YAML));
+        }
+        private void LoadYamlToControls()
+        {
+            txtSlotName.Text = YAML.name??"";
+
+            // Song Check Settings
+            nudSongExtra.Value = YAML.YAYARG.song_check_extra;
+            nudSongPack.Value = YAML.YAYARG.song_pack_size;
+            nudStartingSongs.Value = YAML.YAYARG.starting_songs;
+            chkReuseSongs.Checked = YAML.YAYARG.reuse_songs;
+            chkInstrumentShuffle.Checked = YAML.YAYARG.instrument_shuffle;
+
+            // Goal Song Settings
+            nudGoalFame.Value = YAML.YAYARG.fame_point_needed;
+            nudGoalSetlist.Value = YAML.YAYARG.setlist_needed;
+            nudFameAmount.Value = YAML.YAYARG.fame_point_amount;
+            chkGoalItemNeeded.Checked = YAML.YAYARG.goal_song_item_needed;
+
+            // Goal Plando
+            chkGoalPoolPlando.Checked = !string.IsNullOrEmpty(YAML.YAYARG.goal_pool_plando);
+            chkGoalSongPlando.Checked = !string.IsNullOrEmpty(YAML.YAYARG.goal_song_plando);
+
+            // Filler Items
+            nudStarPower.Value = YAML.YAYARG.star_power;
+            nudSwapPick.Value = YAML.YAYARG.swap_song_choice;
+            nudSwapRandom.Value = YAML.YAYARG.swap_song_random;
+            nudLowerDiff.Value = YAML.YAYARG.lower_difficulty;
+            nudRestartTrap.Value = YAML.YAYARG.restart_trap;
+            nudRockTrap.Value = YAML.YAYARG.rock_meter_trap;
         }
     }
 }

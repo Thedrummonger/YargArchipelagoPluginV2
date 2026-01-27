@@ -31,12 +31,12 @@ namespace Yaml_Creator
         public int setlist_needed = 80;
         public int fame_point_needed = 80;
         public int fame_point_amount = 30;
-        public int star_power = 30;
-        public int swap_song_random = 30;
-        public int swap_song_choice = 30;
-        public int lower_difficulty = 30;
-        public int restart_trap = 30;
-        public int rock_meter_trap = 30;
+        public int star_power = 5;
+        public int swap_song_random = 3;
+        public int swap_song_choice = 1;
+        public int lower_difficulty = 1;
+        public int restart_trap = 0;
+        public int rock_meter_trap = 2;
         public DeathLinkType death_link = DeathLinkType.disabled;
         public EnergyLinkType energy_link = EnergyLinkType.any_song;
     }

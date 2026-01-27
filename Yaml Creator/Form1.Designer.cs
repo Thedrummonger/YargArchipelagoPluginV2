@@ -984,6 +984,7 @@
             this.lbActiveSongs.Name = "lbActiveSongs";
             this.lbActiveSongs.Size = new System.Drawing.Size(360, 196);
             this.lbActiveSongs.TabIndex = 0;
+            this.lbActiveSongs.SelectedIndexChanged += new System.EventHandler(this.lbActiveSongs_SelectedIndexChanged);
             // 
             // menuStrip1
             // 
@@ -1074,6 +1075,7 @@
             this.MainMenuStrip = this.menuStrip1;
             this.Name = "Form1";
             this.Text = "YARG YAML Maker";
+            this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.Form1_FormClosing);
             this.Load += new System.EventHandler(this.Form1_Load);
             this.TabControlMain.ResumeLayout(false);
             this.SettingsTab.ResumeLayout(false);
