@@ -57,7 +57,7 @@ namespace YargArchipelagoPlugin
 #if NIGHTLY
             if (SettingsManager.Settings.NoFailMode.Value && gameManager.IsPractice && gameManager.PlayerHasFailed) return;
 #endif
-            if ((parent.seedConfig?.DeathLinkMode ?? DeathLinkType.None) > DeathLinkType.None)
+            if ((parent.seedConfig?.DeathLinkMode ?? DeathLinkType.disabled) > DeathLinkType.disabled)
                 parent.DeathLinkService?.SendDeathLink(
                     new DeathLink(parent.LastUsedConnectionInfo?.SlotName,
                     $"Failed Song {gameManager.Song.Name} by {gameManager.Song.Artist}"));
@@ -105,7 +105,7 @@ namespace YargArchipelagoPlugin
 
             ExtraAPFunctionalityHelper.SendScoreAsEnergy(parent, gameManager.BandScore, HasLocationsTocheck);
 
-            if (DoDeathlink && (parent.seedConfig?.DeathLinkMode ?? DeathLinkType.None) > DeathLinkType.None)
+            if (DoDeathlink && (parent.seedConfig?.DeathLinkMode ?? DeathLinkType.disabled) > DeathLinkType.disabled)
                 parent.DeathLinkService?.SendDeathLink(
                     new DeathLink(parent.LastUsedConnectionInfo?.SlotName,
                     $"Failed to meet the requirements playing {gameManager.Song.Name} by {gameManager.Song.Artist}"));
@@ -126,7 +126,7 @@ namespace YargArchipelagoPlugin
             if (MetStandard && MetExtra)
                 parent.GetSession().Locations.CompleteLocationChecks(parent.SlotData.GoalData.GoalLocationID);
 
-            if ((deathLinkExtra || deathLinkStandard) && (parent.seedConfig?.DeathLinkMode ?? DeathLinkType.None) > DeathLinkType.None)
+            if ((deathLinkExtra || deathLinkStandard) && (parent.seedConfig?.DeathLinkMode ?? DeathLinkType.disabled) > DeathLinkType.disabled)
                 parent.DeathLinkService?.SendDeathLink(
                     new DeathLink(parent.LastUsedConnectionInfo?.SlotName,
                     $"Failed to meet the requirements playing {manager.Song.Name} by {manager.Song.Artist}"));
@@ -204,7 +204,7 @@ namespace YargArchipelagoPlugin
         internal void OnDeathLinkReceived(DeathLink deathLink)
         {
             if (!parent.HasActiveSession) return;
-            if (parent.seedConfig.DeathLinkMode <= DeathLinkType.None) return;
+            if (parent.seedConfig.DeathLinkMode <= DeathLinkType.disabled) return;
             YargEngineActions.ApplyDeathLink(parent, deathLink);
         }
     }
@@ -282,9 +282,9 @@ namespace YargArchipelagoPlugin
         }
         public static void SendScoreAsEnergy(APConnectionContainer container, long BaseScore, bool WasLocationChecked)
         {
-            if (container.seedConfig.EnergyLinkMode <= CommonData.EnergyLinkType.None) return;
-            if (container.seedConfig.EnergyLinkMode == CommonData.EnergyLinkType.CheckSong && !WasLocationChecked) return;
-            if (container.seedConfig.EnergyLinkMode == CommonData.EnergyLinkType.OtherSong && WasLocationChecked) return;
+            if (container.seedConfig.EnergyLinkMode <= CommonData.EnergyLinkType.disabled) return;
+            if (container.seedConfig.EnergyLinkMode == CommonData.EnergyLinkType.check_song && !WasLocationChecked) return;
+            if (container.seedConfig.EnergyLinkMode == CommonData.EnergyLinkType.other_song && WasLocationChecked) return;
 
             var Session = container.GetSession();
             Session.DataStorage[EnergyLinkKey(Session)].Initialize(0);
@@ -303,7 +303,7 @@ namespace YargArchipelagoPlugin
 
         public static long GetEnergy(APConnectionContainer container)
         {
-            if (container.seedConfig.EnergyLinkMode <= CommonData.EnergyLinkType.None) return 0;
+            if (container.seedConfig.EnergyLinkMode <= CommonData.EnergyLinkType.disabled) return 0;
             var Session = container.GetSession();
             Session.DataStorage[EnergyLinkKey(Session)].Initialize(0);
             return Session.DataStorage[EnergyLinkKey(Session)];
@@ -311,7 +311,7 @@ namespace YargArchipelagoPlugin
 
         public static bool TryUseEnergy(APConnectionContainer container, long Amount)
         {
-            if (container.seedConfig.EnergyLinkMode <= CommonData.EnergyLinkType.None) return false;
+            if (container.seedConfig.EnergyLinkMode <= CommonData.EnergyLinkType.disabled) return false;
             var Session = container.GetSession();
             Session.DataStorage[EnergyLinkKey(Session)].Initialize(0);
             if (Session.DataStorage[EnergyLinkKey(Session)] >= Amount)

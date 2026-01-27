@@ -111,11 +111,11 @@ namespace YargArchipelagoPlugin
             if (LowerDifficulty.Any() && allSongs.Any())
                 listView.Insert(insertIndex++, new CategoryViewType($"- USE LOWER DIFFICULTY", LowerDifficulty.Count(), new SongEntry[0], () => LowerDifficultyMenu.ShowMenu(container, LowerDifficulty.First())));
 
-            if (container.seedConfig.EnergyLinkMode > EnergyLinkType.None || true)
+            if (container.seedConfig.EnergyLinkMode > EnergyLinkType.disabled || true)
                 listView.Insert(insertIndex++, new CategoryViewType($"- OPEN ENERGY LINK SHOP", (int)container.seedConfig.EnergyLinkMode, new SongEntry[0], () => EnergyLinkShop.ShowMenu(container)));
 
             foreach (var pool in entries
-                .OrderBy(e => e.APData.GetPool(container.SlotData).Instrument.GetDescription(), StringComparer.OrdinalIgnoreCase)
+                .OrderBy(e => e.APData.GetPool(container.SlotData).instrument.GetDescription(), StringComparer.OrdinalIgnoreCase)
                 .ThenBy(e => e.APData.PoolName, StringComparer.OrdinalIgnoreCase)
                 .GroupBy(e => e.APData.PoolName))
             {
@@ -159,15 +159,15 @@ namespace YargArchipelagoPlugin
 
             StringBuilder Result = new StringBuilder()
                 .AppendLine($"REQUIRED INSTRUMENT:")
-                .AppendLine($"{SongPool.Instrument.GetDescription()}")
+                .AppendLine($"{SongPool.instrument.GetDescription()}")
                 .AppendLine()
                 .AppendLine($"REWARD 1 REQUIREMENTS:")
-                .AppendLine($"Minimum Difficulty: {SongPool.CompletionRequirements.Reward1Diff.GetDescription()}")
-                .AppendLine($"Minimum Score: {SongPool.CompletionRequirements.Reward1Req.GetDescription()}")
+                .AppendLine($"Minimum Difficulty: {SongPool.completion_requirements.reward1_diff.GetDescription()}")
+                .AppendLine($"Minimum Score: {SongPool.completion_requirements.reward1_req.GetDescription()}")
                 .AppendLine()
                 .AppendLine($"\nREWARD 2 REQUIREMENTS:")
-                .AppendLine($"Minimum Difficulty: {SongPool.CompletionRequirements.Reward2Diff.GetDescription()}")
-                .AppendLine($"Minimum Score: {SongPool.CompletionRequirements.Reward2Req.GetDescription()}");
+                .AppendLine($"Minimum Difficulty: {SongPool.completion_requirements.reward2_diff.GetDescription()}")
+                .AppendLine($"Minimum Score: {SongPool.completion_requirements.reward2_req.GetDescription()}");
             DialogManager.Instance.ShowMessage(Title, Result.ToString());
         }
 
@@ -207,10 +207,10 @@ namespace YargArchipelagoPlugin
 #else
                 switch (handler.seedConfig.DeathLinkMode)
                 {
-                    case CommonData.DeathLinkType.RockMeter:
+                    case CommonData.DeathLinkType.rock_meter:
                         SetBandHappiness(handler, 0.02f);
                         break;
-                    case CommonData.DeathLinkType.Fail:
+                    case CommonData.DeathLinkType.instant_fail:
                         ForceFailSong(handler);
                         break;
                     default:

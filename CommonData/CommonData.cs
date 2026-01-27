@@ -192,22 +192,22 @@ namespace YargArchipelagoCommon
         public enum DeathLinkType
         {
             [Description("Disabled")]
-            None = 0,
+            disabled = 0,
             [Description("Rock Meter")]
-            RockMeter = 1,
+            rock_meter = 1,
             [Description("Instant Fail")]
-            Fail = 2,
+            instant_fail = 2,
         }
         public enum EnergyLinkType
         {
             [Description("Disabled")]
-            None = 0,
+            disabled = 0,
             [Description("Check Song")]
-            CheckSong = 1,
+            check_song = 1,
             [Description("Other Song")]
-            OtherSong = 2,
+            other_song = 2,
             [Description("Any Song")]
-            AnySong = 3,
+            any_song = 3,
         }
 
 
@@ -241,40 +241,40 @@ namespace YargArchipelagoCommon
 
         public class CompletionRequirements
         {
-            public CompletionReq Reward1Req { get; set; }
-            public SupportedDifficulty Reward1Diff { get; set; }
-            public CompletionReq Reward2Req { get; set; }
-            public SupportedDifficulty Reward2Diff { get; set; }
+            public CompletionReq reward1_req { get; set; }
+            public SupportedDifficulty reward1_diff { get; set; }
+            public CompletionReq reward2_req { get; set; }
+            public SupportedDifficulty reward2_diff { get; set; }
 
             public static CompletionRequirements FromJson(JObject json)
             {
                 return new CompletionRequirements
                 {
-                    Reward1Req = ParseEnum<CompletionReq>(json["reward1_req"].ToObject<string>()),
-                    Reward1Diff = ParseEnum<SupportedDifficulty>(json["reward1_diff"].ToObject<string>()),
-                    Reward2Req = ParseEnum<CompletionReq>(json["reward2_req"].ToObject<string>()),
-                    Reward2Diff = ParseEnum<SupportedDifficulty>(json["reward2_diff"].ToObject<string>())
+                    reward1_req = ParseEnum<CompletionReq>(json["reward1_req"].ToObject<string>()),
+                    reward1_diff = ParseEnum<SupportedDifficulty>(json["reward1_diff"].ToObject<string>()),
+                    reward2_req = ParseEnum<CompletionReq>(json["reward2_req"].ToObject<string>()),
+                    reward2_diff = ParseEnum<SupportedDifficulty>(json["reward2_diff"].ToObject<string>())
                 };
             }
         }
 
         public class SongPool
         {
-            public SupportedInstrument Instrument { get; set; }
-            public long AmountInPool { get; set; }
-            public long MinDifficulty { get; set; }
-            public long MaxDifficulty { get; set; }
-            public CompletionRequirements CompletionRequirements { get; set; }
+            public SupportedInstrument instrument { get; set; }
+            public long amount_in_pool { get; set; }
+            public long min_difficulty { get; set; }
+            public long max_difficulty { get; set; }
+            public CompletionRequirements completion_requirements { get; set; }
 
             public static SongPool FromJson(JObject json)
             {
                 return new SongPool
                 {
-                    Instrument = ParseEnum<SupportedInstrument>(json["instrument"].ToObject<string>()),
-                    AmountInPool = json["amount_in_pool"].ToObject<int>(),
-                    MinDifficulty = json["min_difficulty"].ToObject<int>(),
-                    MaxDifficulty = json["max_difficulty"].ToObject<int>(),
-                    CompletionRequirements = CompletionRequirements.FromJson(json["completion_requirements"] as JObject)
+                    instrument = ParseEnum<SupportedInstrument>(json["instrument"].ToObject<string>()),
+                    amount_in_pool = json["amount_in_pool"].ToObject<int>(),
+                    min_difficulty = json["min_difficulty"].ToObject<int>(),
+                    max_difficulty = json["max_difficulty"].ToObject<int>(),
+                    completion_requirements = CompletionRequirements.FromJson(json["completion_requirements"] as JObject)
                 };
             }
         }
@@ -306,7 +306,7 @@ namespace YargArchipelagoCommon
             {
                 if (container.seedConfig.AdjustedDifficulties.TryGetValue(UniqueKey, out var reqs))
                     return reqs;
-                return GetPool(container.SlotData).CompletionRequirements;
+                return GetPool(container.SlotData).completion_requirements;
             }
 
             public string GetDisplayName(APConnectionContainer container, bool IncludePool)
@@ -345,7 +345,7 @@ namespace YargArchipelagoCommon
             public bool IsSongUnlocked(APConnectionContainer connectionContainer)
             {
                 var pool = GetPool(connectionContainer.SlotData);
-                return connectionContainer.ReceivedInstruments.ContainsKey(pool.Instrument) &&
+                return connectionContainer.ReceivedInstruments.ContainsKey(pool.instrument) &&
                     connectionContainer.ReceivedSongUnlockItems.ContainsKey(UnlockItemID);
             }
             public bool HasAvailableLocations(APConnectionContainer connectionContainer)
@@ -431,7 +431,7 @@ namespace YargArchipelagoCommon
                         result.Songs.Add(SongAPData.FromTuple(APData.Value as JArray, songHash.Key, APData.Key));
                 }
 
-                result.SongsByInstrument = result.Songs.GroupBy(x => x.GetPool(result).Instrument).ToDictionary(x => x.Key, x => x.ToArray());
+                result.SongsByInstrument = result.Songs.GroupBy(x => x.GetPool(result).instrument).ToDictionary(x => x.Key, x => x.ToArray());
                 result.SongUnlockIds = result.Songs.Select(x => x.UnlockItemID).ToHashSet();
                 result.SongUnlockIds.Add(result.GoalData.UnlockItemID);
 

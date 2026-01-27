@@ -54,9 +54,9 @@ namespace YargArchipelagoPlugin
              .FirstOrDefault()?.Description ?? value.ToString();
 
         public static bool MetStandard(this SongPool pool, GameManager passInfo, out bool DeathLink, CompletionRequirements CustomReqs = null) =>
-            pool.MetReq(passInfo, out DeathLink, (CustomReqs ?? pool.CompletionRequirements).Reward1Req, (CustomReqs ?? pool.CompletionRequirements).Reward1Diff);
+            pool.MetReq(passInfo, out DeathLink, (CustomReqs ?? pool.completion_requirements).reward1_req, (CustomReqs ?? pool.completion_requirements).reward1_diff);
         public static bool MetExtra(this SongPool pool, GameManager passInfo, out bool DeathLink, CompletionRequirements CustomReqs = null) =>
-            pool.MetReq(passInfo, out DeathLink, (CustomReqs ?? pool.CompletionRequirements).Reward2Req, (CustomReqs ?? pool.CompletionRequirements).Reward2Diff);
+            pool.MetReq(passInfo, out DeathLink, (CustomReqs ?? pool.completion_requirements).reward2_req, (CustomReqs ?? pool.completion_requirements).reward2_diff);
 
         private static bool MetReq(this SongPool pool, GameManager passInfo, out bool DeathLink, CompletionReq req, SupportedDifficulty diff)
         {
@@ -66,7 +66,7 @@ namespace YargArchipelagoPlugin
             foreach (var player in passInfo.Players)
             {
                 if (!IsSupportedInstrument(player.Player.Profile.CurrentInstrument, out SupportedInstrument? inst)) continue;
-                if (inst != pool.Instrument) continue;
+                if (inst != pool.instrument) continue;
                 if (GetSupportedDifficulty(player.Player.Profile.CurrentDifficulty) < diff) continue;
                 HadValidPlayer = true;
                 if (req == CompletionReq.FullCombo && !player.IsFc) continue;

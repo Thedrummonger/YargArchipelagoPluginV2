@@ -211,7 +211,7 @@ namespace YargArchipelagoPlugin
         {
             if (!IsSessionConnected)
                 return;
-            if (seedConfig.DeathLinkMode > DeathLinkType.None)
+            if (seedConfig.DeathLinkMode > DeathLinkType.disabled)
                 DeathLinkService.EnableDeathLink();
             else
                 DeathLinkService.DisableDeathLink();
@@ -235,12 +235,12 @@ namespace YargArchipelagoPlugin
         /// <summary>
         /// This value tracks the current death link mode. It can be changed in game independently of the yaml.
         /// </summary>
-        public DeathLinkType DeathLinkMode = DeathLinkType.None;
+        public DeathLinkType DeathLinkMode = DeathLinkType.disabled;
 
         /// <summary>
         /// This value tracks the current energylink mode. It can be changed in game independently of the yaml.
         /// </summary>
-        public EnergyLinkType EnergyLinkMode = EnergyLinkType.None;
+        public EnergyLinkType EnergyLinkMode = EnergyLinkType.disabled;
 
         public static PersistantData Load(APConnectionContainer container)
         {

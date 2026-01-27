@@ -388,18 +388,18 @@ namespace YargArchipelagoPlugin
                 GUILayout.Label(GetDisplay(SelectedSong), GUI.skin.label);
                 GUILayout.Space(10);
                 var CurrentReqs = SelectedSong.GetCurrentCompletionRequirements(container);
-                if (CurrentReqs.Reward1Diff > SupportedDifficulty.Easy)
-                    if (GUILayout.Button($"Lower Reward 1 Difficulty: {CurrentReqs.Reward1Diff.GetDescription()} -> {(CurrentReqs.Reward1Diff - 1).GetDescription()}", GUILayout.Height(40)))
-                        SetRequirementOverride(CurrentReqs.Reward1Diff - 1, CurrentReqs.Reward1Req, CurrentReqs.Reward2Diff, CurrentReqs.Reward2Req);
-                if (CurrentReqs.Reward1Req > CompletionReq.Clear)
-                    if (GUILayout.Button($"Lower Reward 1 Score Requirement: {CurrentReqs.Reward1Req.GetDescription()} -> {(CurrentReqs.Reward1Req - 1).GetDescription()}", GUILayout.Height(40)))
-                        SetRequirementOverride(CurrentReqs.Reward1Diff, CurrentReqs.Reward1Req - 1, CurrentReqs.Reward2Diff, CurrentReqs.Reward2Req);
-                if (CurrentReqs.Reward2Diff > SupportedDifficulty.Easy)
-                    if (GUILayout.Button($"Lower Reward 2 Difficulty: {CurrentReqs.Reward2Diff.GetDescription()} -> {(CurrentReqs.Reward2Diff - 1).GetDescription()}", GUILayout.Height(40)))
-                        SetRequirementOverride(CurrentReqs.Reward1Diff, CurrentReqs.Reward1Req, CurrentReqs.Reward2Diff - 1, CurrentReqs.Reward2Req);
-                if (CurrentReqs.Reward2Req > CompletionReq.Clear)
-                    if (GUILayout.Button($"Lower Reward 2 Score Requirement: {CurrentReqs.Reward2Req.GetDescription()} -> {(CurrentReqs.Reward2Req - 1).GetDescription()}", GUILayout.Height(40)))
-                        SetRequirementOverride(CurrentReqs.Reward1Diff, CurrentReqs.Reward1Req, CurrentReqs.Reward2Diff, CurrentReqs.Reward2Req - 1);
+                if (CurrentReqs.reward1_diff > SupportedDifficulty.Easy)
+                    if (GUILayout.Button($"Lower Reward 1 Difficulty: {CurrentReqs.reward1_diff.GetDescription()} -> {(CurrentReqs.reward1_diff - 1).GetDescription()}", GUILayout.Height(40)))
+                        SetRequirementOverride(CurrentReqs.reward1_diff - 1, CurrentReqs.reward1_req, CurrentReqs.reward2_diff, CurrentReqs.reward2_req);
+                if (CurrentReqs.reward1_req > CompletionReq.Clear)
+                    if (GUILayout.Button($"Lower Reward 1 Score Requirement: {CurrentReqs.reward1_req.GetDescription()} -> {(CurrentReqs.reward1_req - 1).GetDescription()}", GUILayout.Height(40)))
+                        SetRequirementOverride(CurrentReqs.reward1_diff, CurrentReqs.reward1_req - 1, CurrentReqs.reward2_diff, CurrentReqs.reward2_req);
+                if (CurrentReqs.reward2_diff > SupportedDifficulty.Easy)
+                    if (GUILayout.Button($"Lower Reward 2 Difficulty: {CurrentReqs.reward2_diff.GetDescription()} -> {(CurrentReqs.reward2_diff - 1).GetDescription()}", GUILayout.Height(40)))
+                        SetRequirementOverride(CurrentReqs.reward1_diff, CurrentReqs.reward1_req, CurrentReqs.reward2_diff - 1, CurrentReqs.reward2_req);
+                if (CurrentReqs.reward2_req > CompletionReq.Clear)
+                    if (GUILayout.Button($"Lower Reward 2 Score Requirement: {CurrentReqs.reward2_req.GetDescription()} -> {(CurrentReqs.reward2_req - 1).GetDescription()}", GUILayout.Height(40)))
+                        SetRequirementOverride(CurrentReqs.reward1_diff, CurrentReqs.reward1_req, CurrentReqs.reward2_diff, CurrentReqs.reward2_req - 1);
             }
 
             GUILayout.Space(10);
@@ -418,10 +418,10 @@ namespace YargArchipelagoPlugin
         {
             var NewReqs = new CompletionRequirements
             {
-                Reward1Diff = reward1Diff,
-                Reward2Diff = reward2Diff,
-                Reward1Req = reward1Req,
-                Reward2Req = reward2Req
+                reward1_diff = reward1Diff,
+                reward2_diff = reward2Diff,
+                reward1_req = reward1Req,
+                reward2_req = reward2Req
             };
             container.seedConfig.AdjustedDifficulties[SelectedSong.UniqueKey] = NewReqs;
             container.seedConfig.ApItemsUsed.Add(_item);
@@ -430,17 +430,17 @@ namespace YargArchipelagoPlugin
             YargEngineActions.UpdateRecommendedSongsMenu();
             var SongData = SelectedSong.GetYargSongEntry(container);
             var Display = SongData is null ? SelectedSong.GetActiveHash(container) : $"{SongData.Name} by {SongData.Artist}";
-            YargEngineActions.ShowPoolData(container, $"New Requirements for {Display}", new SongPool { Instrument = SelectedSong.GetPool(container.SlotData).Instrument, CompletionRequirements = NewReqs });
+            YargEngineActions.ShowPoolData(container, $"New Requirements for {Display}", new SongPool { instrument = SelectedSong.GetPool(container.SlotData).instrument, completion_requirements = NewReqs });
             CloseMenu();
         }
 
         private void OnSongSelect(SongAPData data)
         {
             var CurrentReqs = data.GetCurrentCompletionRequirements(container);
-            var CanLower1Diff = CurrentReqs.Reward1Diff > SupportedDifficulty.Easy;
-            var CanLower2Diff = CurrentReqs.Reward2Diff > SupportedDifficulty.Easy;
-            var CanLower1Req = CurrentReqs.Reward1Req > CompletionReq.Clear;
-            var CanLower2Req = CurrentReqs.Reward2Req > CompletionReq.Clear;
+            var CanLower1Diff = CurrentReqs.reward1_diff > SupportedDifficulty.Easy;
+            var CanLower2Diff = CurrentReqs.reward2_diff > SupportedDifficulty.Easy;
+            var CanLower1Req = CurrentReqs.reward1_req > CompletionReq.Clear;
+            var CanLower2Req = CurrentReqs.reward2_req > CompletionReq.Clear;
             if (!CanLower1Diff && !CanLower2Diff && !CanLower1Req && !CanLower2Req)
             {
                 ToastManager.ToastError($"Unable to lower the requirements of this song any further!");
@@ -537,7 +537,7 @@ namespace YargArchipelagoPlugin
 
             var Pool = song.GetPool(container.SlotData);
             var UsedSongs = new HashSet<string>();
-            foreach (var item in container.SlotData.SongsByInstrument[Pool.Instrument])
+            foreach (var item in container.SlotData.SongsByInstrument[Pool.instrument])
             {
                 //Add both the original hash and proxy hash if it exists. Even if it's proxied, we probably
                 //shouldn't place a core song onto another song as a proxy. This might change in the future.
@@ -547,7 +547,7 @@ namespace YargArchipelagoPlugin
 
             }
             var AllYargSongs =  YargEngineActions.GetYargSongExportData(SongContainer.Instruments);
-            var ValidReplcements = AllYargSongs.Where(x => x.Value.TryGetDifficulty(Pool.Instrument, out var difficulty) && DifficultyInRange(difficulty) && !UsedSongs.Contains(x.Key));
+            var ValidReplcements = AllYargSongs.Where(x => x.Value.TryGetDifficulty(Pool.instrument, out var difficulty) && DifficultyInRange(difficulty) && !UsedSongs.Contains(x.Key));
             ValidEntryCache[song] = ValidReplcements.Select(x => x.Value.YargSongEntry).ToArray();
             return ValidReplcements.Select(x => x.Value.YargSongEntry).ToArray();
 
@@ -556,7 +556,7 @@ namespace YargArchipelagoPlugin
                 // Let the user manually pick a song outside of their diffuclty range if they want
                 if (_item.Type == StaticItems.SwapPick) 
                     return true;
-                return difficulty <= Pool.MaxDifficulty && difficulty >= Pool.MinDifficulty;
+                return difficulty <= Pool.max_difficulty && difficulty >= Pool.min_difficulty;
             }
         }
 
