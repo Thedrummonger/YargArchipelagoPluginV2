@@ -114,7 +114,7 @@ namespace YargArchipelagoPlugin
         {
             if (!parent.IsSessionConnected)
                 return;
-            if (!parent.SlotData.GoalData.WasActiveSongInGame(manager))
+            if (!parent.SlotData.GoalData.WasActiveSongInGame(parent, manager))
                 return;
             if (!parent.SlotData.GoalData.IsSongUnlocked(parent))
                 return;
@@ -124,7 +124,7 @@ namespace YargArchipelagoPlugin
             var MetExtra = pool.MetExtra(manager, out var deathLinkExtra);
 
             if (MetStandard && MetExtra)
-                parent.GetSession().Locations.CompleteLocationChecks(parent.SlotData.GoalData.GoalLocationID);
+                parent.GetSession().Locations.CompleteLocationChecks(parent.SlotData.GoalData.MainLocationID);
 
             if ((deathLinkExtra || deathLinkStandard) && (parent.seedConfig?.DeathLinkMode ?? DeathLinkType.disabled) > DeathLinkType.disabled)
                 parent.DeathLinkService?.SendDeathLink(

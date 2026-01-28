@@ -288,36 +288,41 @@ namespace YargArchipelagoCommon
             }
         }
 
-        public class SongAPData
+        public abstract class BaseAPSong
         {
             public string Hash { get; set; }
             public string PoolName { get; set; }
             public long MainLocationID { get; set; }
-            public long ExtraLocationID { get; set; }
-            public long CompletionLocationID { get; set; }
             public long UnlockItemID { get; set; }
 
             public string UniqueKey => $"{PoolName}[{Hash}]";
 
-            public string GetActiveHash(APConnectionContainer container)
-            {
-                if (HasProxy(container, out var ProxyHash)) 
-                    return ProxyHash;
-                return Hash;
-            }
-
-            public bool HasProxy(APConnectionContainer container, out string proxyHash) => 
-                container.seedConfig.SongProxies.TryGetValue(UniqueKey, out proxyHash);
-
             public SongPool GetPool(YargSlotData slotData) => slotData.Pools[PoolName];
-
+            public string GetActiveHash(APConnectionContainer container) => HasProxy(container, out var ProxyHash) ? ProxyHash : Hash;
+            public bool HasProxy(APConnectionContainer container, out string proxyHash) => container.seedConfig.SongProxies.TryGetValue(UniqueKey, out proxyHash);
+            public SongEntry GetYargSongEntry(APConnectionContainer container)
+            {
+                var songObj = SongContainer.Songs.FirstOrDefault(x => Convert.ToBase64String(x.Hash.HashBytes) == GetActiveHash(container));
+                if (songObj == null)
+                    ToastManager.ToastError($"Song Hash {GetActiveHash(container)} was not a valid song in yarg!");
+                return songObj;
+            }
+            public bool HadYargSongEntry(APConnectionContainer container, out SongEntry entry)
+            {
+                entry = GetYargSongEntry(container);
+                return entry is SongEntry;
+            }
+            public bool WasActiveSongInGame(APConnectionContainer container, GameManager gameManager)
+            {
+                var SongHash = Convert.ToBase64String(gameManager.Song.Hash.HashBytes);
+                return SongHash == GetActiveHash(container);
+            }
             public CompletionRequirements GetCurrentCompletionRequirements(APConnectionContainer container)
             {
                 if (container.seedConfig.AdjustedDifficulties.TryGetValue(UniqueKey, out var reqs))
                     return reqs;
                 return GetPool(container.SlotData).completion_requirements;
             }
-
             public string GetDisplayName(APConnectionContainer container, bool IncludePool)
             {
                 SongEntry YArgEntry = GetYargSongEntry(container);
@@ -327,6 +332,30 @@ namespace YargArchipelagoCommon
                 return SongName;
             }
 
+            public abstract bool IsSongUnlocked(APConnectionContainer connectionContainer);
+            public abstract bool HasAvailableLocations(APConnectionContainer connectionContainer);
+        }
+
+        public class SongAPData : BaseAPSong
+        {
+            public long ExtraLocationID { get; set; }
+            public long CompletionLocationID { get; set; }
+            public override bool IsSongUnlocked(APConnectionContainer connectionContainer)
+            {
+                var pool = GetPool(connectionContainer.SlotData);
+                return connectionContainer.ReceivedInstruments.ContainsKey(pool.instrument) &&
+                    connectionContainer.ReceivedSongUnlockItems.ContainsKey(UnlockItemID);
+            }
+            public override bool HasAvailableLocations(APConnectionContainer connectionContainer)
+            {
+                if (!connectionContainer.GetSession().Locations.AllLocationsChecked.Contains(MainLocationID))
+                    return true;
+                if (ExtraLocationID > 0 && !connectionContainer.GetSession().Locations.AllLocationsChecked.Contains(ExtraLocationID))
+                    return true;
+                if (CompletionLocationID > 0 && !connectionContainer.GetSession().Locations.AllLocationsChecked.Contains(CompletionLocationID))
+                    return true;
+                return false;
+            }
             public static SongAPData FromTuple(JArray tuple, string hash, string pool)
             {
                 return new SongAPData
@@ -339,61 +368,25 @@ namespace YargArchipelagoCommon
                     UnlockItemID = tuple[3].ToObject<long>()
                 };
             }
-            public SongEntry GetYargSongEntry(APConnectionContainer container)
-            {
-                var songObj = SongContainer.Songs.FirstOrDefault(x => Convert.ToBase64String(x.Hash.HashBytes) == GetActiveHash(container));
-                if (songObj == null)
-                    ToastManager.ToastError($"Song Hash {GetActiveHash(container)} was not a valid song in yarg!");
-                return songObj;
-            }
-            public bool WasActiveSongInGame(APConnectionContainer container, GameManager gameManager)
-            {
-                var SongHash = Convert.ToBase64String(gameManager.Song.Hash.HashBytes);
-                return SongHash == GetActiveHash(container);
-            }
-            public bool IsSongUnlocked(APConnectionContainer connectionContainer)
-            {
-                var pool = GetPool(connectionContainer.SlotData);
-                return connectionContainer.ReceivedInstruments.ContainsKey(pool.instrument) &&
-                    connectionContainer.ReceivedSongUnlockItems.ContainsKey(UnlockItemID);
-            }
-            public bool HasAvailableLocations(APConnectionContainer connectionContainer)
-            {
-                if (!connectionContainer.GetSession().Locations.AllLocationsChecked.Contains(MainLocationID))
-                    return true;
-                if (ExtraLocationID > 0 && !connectionContainer.GetSession().Locations.AllLocationsChecked.Contains(ExtraLocationID))
-                    return true;
-                if (CompletionLocationID > 0 && !connectionContainer.GetSession().Locations.AllLocationsChecked.Contains(CompletionLocationID))
-                    return true;
-                return false;
-            }
         }
 
-        public class GoalData
+        public class GoalData : BaseAPSong
         {
-            public string SongHash { get; set; }
-            public string SongPool { get; set; }
-            public long GoalLocationID { get; set; }
-            public long UnlockItemID { get; set; }
-
             public static GoalData FromTuple(JArray tuple)
             {
                 return new GoalData
                 {
-                    SongHash = tuple[0].ToObject<string>(),
-                    SongPool = tuple[1].ToObject<string>(),
-                    GoalLocationID = tuple[2].ToObject<long>(),
+                    Hash = tuple[0].ToObject<string>(),
+                    PoolName = tuple[1].ToObject<string>(),
+                    MainLocationID = tuple[2].ToObject<long>(),
                     UnlockItemID = tuple[3].ToObject<long>()
                 };
             }
-            public SongPool GetPool(YargSlotData slotData) => slotData.Pools[SongPool];
 
-            public bool WasActiveSongInGame(GameManager gameManager)
-            {
-                return SongHash == Convert.ToBase64String(gameManager.Song.Hash.HashBytes);
-            }
+            public override bool HasAvailableLocations(APConnectionContainer connectionContainer) => 
+                !connectionContainer.GetSession().Locations.AllLocationsChecked.Contains(MainLocationID);
 
-            public bool IsSongUnlocked(APConnectionContainer connectionContainer)
+            public override bool IsSongUnlocked(APConnectionContainer connectionContainer)
             {
                 var HasUnlockItem = connectionContainer.ReceivedSongUnlockItems.ContainsKey(UnlockItemID);
                 var CurrentSongCompletions = connectionContainer.ApItemsRecieved.Count(x => x.Type == StaticItems.SongCompletion);

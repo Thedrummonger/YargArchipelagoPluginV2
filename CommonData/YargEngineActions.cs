@@ -127,6 +127,13 @@ namespace YargArchipelagoPlugin
             if (container.seedConfig.EnergyLinkMode > EnergyLinkType.disabled || true)
                 listView.Insert(insertIndex++, new CategoryViewType($"- OPEN ENERGY LINK SHOP", (int)container.seedConfig.EnergyLinkMode, new SongEntry[0], () => EnergyLinkShop.ShowMenu(container)));
 
+            if (container.SlotData.GoalData.IsSongUnlocked(container) && container.SlotData.GoalData.HadYargSongEntry(container, out var GoalSong) && container.SlotData.GoalData.HasAvailableLocations(container))
+            {
+                var Pool = container.SlotData.GoalData.PoolName;
+                listView.Insert(insertIndex++, new CategoryViewType($"GOAL SONG: {Pool.ToUpper()}", 1, new SongEntry[] { GoalSong }, () => ShowPoolData(container, Pool)));
+                listView.Insert(insertIndex++, new SongViewType(menu, GoalSong));
+            }
+
             foreach (var pool in entries
                 .OrderBy(e => e.APData.GetPool(container.SlotData).instrument.GetDescription(), StringComparer.OrdinalIgnoreCase)
                 .ThenBy(e => e.APData.PoolName, StringComparer.OrdinalIgnoreCase)
