@@ -87,16 +87,18 @@ namespace YargArchipelagoCommon
             Harmony
         }
 
+        //This must be set to the same value in the data_register file in the APWorld
+        private static int _itemIDOffsetCounter = 100;
+
         public static readonly Dictionary<string, StaticItems> StaticItemsByName =
-        Enum.GetValues(typeof(StaticItems))
-            .Cast<StaticItems>()
-            .ToDictionary(item => item.GetDescription(), item => item);
+            Enum.GetValues(typeof(StaticItems))
+                .Cast<StaticItems>()
+                .ToDictionary(item => item.GetDescription(), item => item);
 
         public static readonly Dictionary<long, StaticItems> StaticItemsById =
-        Enum.GetValues(typeof(StaticItems))
-            .Cast<StaticItems>()
-            .Select((item, index) => new { item, index })
-            .ToDictionary(x => (long)x.index, x => x.item);
+            Enum.GetValues(typeof(StaticItems))
+                .Cast<StaticItems>()
+                .ToDictionary(item => (long)_itemIDOffsetCounter++, item => item);
 
         public static readonly Dictionary<StaticItems, long> StaticItemIDbyValue =
             StaticItemsById.ToDictionary(x => x.Value, x => x.Key);
@@ -109,8 +111,7 @@ namespace YargArchipelagoCommon
         public static readonly Dictionary<long, SupportedInstrument> InstrumentItemsById =
             Enum.GetValues(typeof(SupportedInstrument))
                 .Cast<SupportedInstrument>()
-                .Select((item, index) => new { item, index = index + StaticItemsById.Count })
-                .ToDictionary(x => (long)x.index, x => x.item);
+                .ToDictionary(item => (long)_itemIDOffsetCounter++, item => item);
 
         public static readonly Dictionary<SupportedInstrument, long> InstrumentIDbyValue =
             InstrumentItemsById.ToDictionary(x => x.Value, x => x.Key);

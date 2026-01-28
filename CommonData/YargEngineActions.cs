@@ -157,7 +157,7 @@ namespace YargArchipelagoPlugin
             var Team = container.GetSession().Players.ActivePlayer.Team;
             var Player = container.GetSession().Players.GetPlayerInfo(Team, recieveInfo.SendingPlayerSlot);
             var LocationInfo = container.GetSession().Locations.GetLocationNameFromId(recieveInfo.SendingPlayerLocation, recieveInfo.SendingPlayerGame);
-            var dialog = DialogManager.Instance.ShowMessage("Goal Unlock Item Found!", $"Found by Player\n{Player.Name}\n\nFrom Location\n{LocationInfo}\n\nPlaying game\\{Player.Game}");
+            DialogManager.Instance.ShowMessage("Goal Unlock Item Found!", $"Found by Player:\n{Player.Name}\n\nFrom Location:\n{LocationInfo}\n\nPlaying Game:\n{Player.Game}");
         }
 
         /// <summary>
@@ -198,7 +198,7 @@ namespace YargArchipelagoPlugin
                 .AppendLine($"Minimum Difficulty: {SongPool.completion_requirements.reward1_diff.GetDescription()}")
                 .AppendLine($"Minimum Score: {SongPool.completion_requirements.reward1_req.GetDescription()}")
                 .AppendLine()
-                .AppendLine($"\nREWARD 2 REQUIREMENTS:")
+                .AppendLine($"REWARD 2 REQUIREMENTS:")
                 .AppendLine($"Minimum Difficulty: {SongPool.completion_requirements.reward2_diff.GetDescription()}")
                 .AppendLine($"Minimum Score: {SongPool.completion_requirements.reward2_req.GetDescription()}");
             DialogManager.Instance.ShowMessage(Title, Result.ToString());
