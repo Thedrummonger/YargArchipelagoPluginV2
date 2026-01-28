@@ -202,9 +202,7 @@ namespace YargArchipelagoPlugin
             try
             {
                 handler.logger.LogInfo($"Applying Death Link");
-#if STABLE
-                ForceExitSong(handler);
-#else
+#if NIGHTLY
                 switch (handler.seedConfig.DeathLinkMode)
                 {
                     case CommonData.DeathLinkType.rock_meter:
@@ -216,6 +214,8 @@ namespace YargArchipelagoPlugin
                     default:
                         return;
                 }
+#else
+                ForceExitSong(handler);
 #endif
                 ToastManager.ToastInformation($"DeathLink Received!\n\n{deathLink.Source} {deathLink.Cause}");
             }

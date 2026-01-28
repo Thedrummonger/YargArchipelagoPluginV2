@@ -223,10 +223,15 @@ namespace YargArchipelagoCommon
             public string Name;
             public string Artist;
             public string SongChecksum;
+            public string Source;
+            public string Album;
+            public string Genre;
+            public string Charter;
             public Dictionary<SupportedInstrument, int> Difficulties = new Dictionary<SupportedInstrument, int>();
             [Newtonsoft.Json.JsonIgnore]
             public SongEntry YargSongEntry;
             public bool TryGetDifficulty(SupportedInstrument instrument, out int Difficulty) => Difficulties.TryGetValue(instrument, out Difficulty);
+            public bool ValidForPool(SongPool pool) => TryGetDifficulty(pool.instrument, out var diff) && diff <= pool.max_difficulty && diff >= pool.min_difficulty;
             public static SongExportData FromSongEntry(SongEntry song)
             {
                 return new SongExportData()
@@ -234,7 +239,11 @@ namespace YargArchipelagoCommon
                     Artist = RichTextUtils.StripRichTextTags(song.Artist),
                     Name = RichTextUtils.StripRichTextTags(song.Name),
                     SongChecksum = Convert.ToBase64String(song.Hash.HashBytes),
-                    Difficulties = new Dictionary<CommonData.SupportedInstrument, int>()
+                    Difficulties = new Dictionary<CommonData.SupportedInstrument, int>(),
+                    Source = song.Source.Original,
+                    Album = song.Album,
+                    Genre = song.Genre,
+                    Charter = song.Charter,
                 };
             }
         }

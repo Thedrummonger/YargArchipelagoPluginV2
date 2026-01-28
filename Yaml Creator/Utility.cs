@@ -12,7 +12,7 @@ using static YargArchipelagoCommon.CommonData;
 
 namespace Yaml_Creator
 {
-    internal class Utility
+    public class Utility
     {
         public class DisplayItem<T>
         {

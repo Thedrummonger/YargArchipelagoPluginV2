@@ -12,15 +12,14 @@ namespace Yaml_Creator
         public class SongExportExtendedData
         {
             public SongExportData core;
-            public HashSet<string> ExcludedPools = new HashSet<string>();
-            public HashSet<string> IncludedPools = new HashSet<string>();
+            public string DisplayOverride = null;
             public SongExportExtendedData(SongExportData data)
             {
                 core = data;
             }
             public override string ToString()
             {
-                return $"{core.Name} by {core.Artist}";
+                return DisplayOverride ?? $"{core.Name} by {core.Artist}";
             }
             public SongDataConverter.CompressedSongData Compress()
             {
@@ -30,6 +29,15 @@ namespace Yaml_Creator
                     Difficulties = core.Difficulties.ToDictionary(x => x.Key.ToString(), x => x.Value)
                 };
             }
+        }
+        public class TaggedSongExportExtendedData : SongExportExtendedData
+        {
+            public TaggedSongExportExtendedData(SongExportExtendedData data, Func<SongExportExtendedData, string> Display) : base(data.core)
+            {
+                display = Display(data);
+            }
+            private readonly string display;
+            public override string ToString() => display;
         }
     }
 }

@@ -1,6 +1,6 @@
 ﻿namespace Yaml_Creator
 {
-    partial class Form1
+    partial class MainForm
     {
         /// <summary>
         /// Required designer variable.
@@ -117,6 +117,9 @@
             this.panel1 = new System.Windows.Forms.Panel();
             this.txtSlotName = new System.Windows.Forms.TextBox();
             this.label29 = new System.Windows.Forms.Label();
+            this.lblDisplayPoolExclusions = new System.Windows.Forms.Label();
+            this.lblDisplayPoolInclusions = new System.Windows.Forms.Label();
+            this.btnFilter = new System.Windows.Forms.Button();
             this.TabControlMain.SuspendLayout();
             this.SettingsTab.SuspendLayout();
             this.groupBox6.SuspendLayout();
@@ -643,7 +646,7 @@
             // 
             // btnRemovePool
             // 
-            this.btnRemovePool.Location = new System.Drawing.Point(9, 128);
+            this.btnRemovePool.Location = new System.Drawing.Point(9, 149);
             this.btnRemovePool.Name = "btnRemovePool";
             this.btnRemovePool.Size = new System.Drawing.Size(143, 23);
             this.btnRemovePool.TabIndex = 5;
@@ -657,7 +660,7 @@
             this.lbSongPoolList.ItemHeight = 16;
             this.lbSongPoolList.Location = new System.Drawing.Point(9, 27);
             this.lbSongPoolList.Name = "lbSongPoolList";
-            this.lbSongPoolList.Size = new System.Drawing.Size(143, 100);
+            this.lbSongPoolList.Size = new System.Drawing.Size(143, 116);
             this.lbSongPoolList.TabIndex = 4;
             // 
             // gbSelectedPool
@@ -666,13 +669,15 @@
             this.gbSelectedPool.Controls.Add(this.groupBox3);
             this.gbSelectedPool.Controls.Add(this.nudPoolMaxDifficulty);
             this.gbSelectedPool.Controls.Add(this.label6);
+            this.gbSelectedPool.Controls.Add(this.lblDisplayPoolExclusions);
             this.gbSelectedPool.Controls.Add(this.nudPoolMinDifficulty);
             this.gbSelectedPool.Controls.Add(this.label5);
+            this.gbSelectedPool.Controls.Add(this.lblDisplayPoolInclusions);
             this.gbSelectedPool.Controls.Add(this.nudAmountInPool);
             this.gbSelectedPool.Controls.Add(this.label4);
             this.gbSelectedPool.Location = new System.Drawing.Point(161, 6);
             this.gbSelectedPool.Name = "gbSelectedPool";
-            this.gbSelectedPool.Size = new System.Drawing.Size(196, 300);
+            this.gbSelectedPool.Size = new System.Drawing.Size(196, 316);
             this.gbSelectedPool.TabIndex = 3;
             this.gbSelectedPool.TabStop = false;
             this.gbSelectedPool.Text = "SelectedPool";
@@ -683,9 +688,9 @@
             this.groupBox4.Controls.Add(this.label9);
             this.groupBox4.Controls.Add(this.cmbReward2Diff);
             this.groupBox4.Controls.Add(this.cmbReward2Score);
-            this.groupBox4.Location = new System.Drawing.Point(100, 176);
+            this.groupBox4.Location = new System.Drawing.Point(94, 159);
             this.groupBox4.Name = "groupBox4";
-            this.groupBox4.Size = new System.Drawing.Size(100, 120);
+            this.groupBox4.Size = new System.Drawing.Size(100, 108);
             this.groupBox4.TabIndex = 7;
             this.groupBox4.TabStop = false;
             this.groupBox4.Text = "Reward 2";
@@ -730,9 +735,9 @@
             this.groupBox3.Controls.Add(this.label8);
             this.groupBox3.Controls.Add(this.cmbReward1Diff);
             this.groupBox3.Controls.Add(this.cmbReward1Score);
-            this.groupBox3.Location = new System.Drawing.Point(0, 176);
+            this.groupBox3.Location = new System.Drawing.Point(-3, 159);
             this.groupBox3.Name = "groupBox3";
-            this.groupBox3.Size = new System.Drawing.Size(100, 120);
+            this.groupBox3.Size = new System.Drawing.Size(100, 108);
             this.groupBox3.TabIndex = 6;
             this.groupBox3.TabStop = false;
             this.groupBox3.Text = "Reward 1";
@@ -773,15 +778,15 @@
             // 
             // nudPoolMaxDifficulty
             // 
-            this.nudPoolMaxDifficulty.Location = new System.Drawing.Point(9, 144);
+            this.nudPoolMaxDifficulty.Location = new System.Drawing.Point(6, 128);
             this.nudPoolMaxDifficulty.Name = "nudPoolMaxDifficulty";
-            this.nudPoolMaxDifficulty.Size = new System.Drawing.Size(53, 22);
+            this.nudPoolMaxDifficulty.Size = new System.Drawing.Size(83, 22);
             this.nudPoolMaxDifficulty.TabIndex = 5;
             // 
             // label6
             // 
             this.label6.AutoSize = true;
-            this.label6.Location = new System.Drawing.Point(6, 125);
+            this.label6.Location = new System.Drawing.Point(3, 109);
             this.label6.Name = "label6";
             this.label6.Size = new System.Drawing.Size(118, 16);
             this.label6.TabIndex = 4;
@@ -790,15 +795,15 @@
             // 
             // nudPoolMinDifficulty
             // 
-            this.nudPoolMinDifficulty.Location = new System.Drawing.Point(9, 95);
+            this.nudPoolMinDifficulty.Location = new System.Drawing.Point(6, 82);
             this.nudPoolMinDifficulty.Name = "nudPoolMinDifficulty";
-            this.nudPoolMinDifficulty.Size = new System.Drawing.Size(53, 22);
+            this.nudPoolMinDifficulty.Size = new System.Drawing.Size(83, 22);
             this.nudPoolMinDifficulty.TabIndex = 3;
             // 
             // label5
             // 
             this.label5.AutoSize = true;
-            this.label5.Location = new System.Drawing.Point(6, 76);
+            this.label5.Location = new System.Drawing.Point(3, 63);
             this.label5.Name = "label5";
             this.label5.Size = new System.Drawing.Size(122, 16);
             this.label5.TabIndex = 2;
@@ -807,19 +812,19 @@
             // 
             // nudAmountInPool
             // 
-            this.nudAmountInPool.Location = new System.Drawing.Point(9, 43);
+            this.nudAmountInPool.Location = new System.Drawing.Point(6, 38);
             this.nudAmountInPool.Name = "nudAmountInPool";
-            this.nudAmountInPool.Size = new System.Drawing.Size(53, 22);
+            this.nudAmountInPool.Size = new System.Drawing.Size(83, 22);
             this.nudAmountInPool.TabIndex = 1;
             // 
             // label4
             // 
             this.label4.AutoSize = true;
-            this.label4.Location = new System.Drawing.Point(6, 24);
+            this.label4.Location = new System.Drawing.Point(3, 18);
             this.label4.Name = "label4";
-            this.label4.Size = new System.Drawing.Size(166, 16);
+            this.label4.Size = new System.Drawing.Size(173, 16);
             this.label4.TabIndex = 0;
-            this.label4.Text = "Amount of song in this Pool";
+            this.label4.Text = "Amount of songs in this Pool";
             this.label4.TextAlign = System.Drawing.ContentAlignment.TopCenter;
             // 
             // groupBox1
@@ -829,16 +834,16 @@
             this.groupBox1.Controls.Add(this.label3);
             this.groupBox1.Controls.Add(this.txtNewPoolName);
             this.groupBox1.Controls.Add(this.label2);
-            this.groupBox1.Location = new System.Drawing.Point(9, 157);
+            this.groupBox1.Location = new System.Drawing.Point(9, 178);
             this.groupBox1.Name = "groupBox1";
-            this.groupBox1.Size = new System.Drawing.Size(146, 149);
+            this.groupBox1.Size = new System.Drawing.Size(146, 143);
             this.groupBox1.TabIndex = 2;
             this.groupBox1.TabStop = false;
             this.groupBox1.Text = "Add Song Pool";
             // 
             // btnAddPool
             // 
-            this.btnAddPool.Location = new System.Drawing.Point(9, 120);
+            this.btnAddPool.Location = new System.Drawing.Point(9, 112);
             this.btnAddPool.Name = "btnAddPool";
             this.btnAddPool.Size = new System.Drawing.Size(121, 23);
             this.btnAddPool.TabIndex = 4;
@@ -849,7 +854,7 @@
             // txtNewPoolIsntrument
             // 
             this.txtNewPoolIsntrument.FormattingEnabled = true;
-            this.txtNewPoolIsntrument.Location = new System.Drawing.Point(9, 81);
+            this.txtNewPoolIsntrument.Location = new System.Drawing.Point(9, 83);
             this.txtNewPoolIsntrument.Name = "txtNewPoolIsntrument";
             this.txtNewPoolIsntrument.Size = new System.Drawing.Size(121, 24);
             this.txtNewPoolIsntrument.TabIndex = 3;
@@ -857,7 +862,7 @@
             // label3
             // 
             this.label3.AutoSize = true;
-            this.label3.Location = new System.Drawing.Point(6, 62);
+            this.label3.Location = new System.Drawing.Point(6, 65);
             this.label3.Name = "label3";
             this.label3.Size = new System.Drawing.Size(70, 16);
             this.label3.TabIndex = 2;
@@ -865,7 +870,7 @@
             // 
             // txtNewPoolName
             // 
-            this.txtNewPoolName.Location = new System.Drawing.Point(9, 37);
+            this.txtNewPoolName.Location = new System.Drawing.Point(9, 40);
             this.txtNewPoolName.Name = "txtNewPoolName";
             this.txtNewPoolName.Size = new System.Drawing.Size(121, 22);
             this.txtNewPoolName.TabIndex = 1;
@@ -873,7 +878,7 @@
             // label2
             // 
             this.label2.AutoSize = true;
-            this.label2.Location = new System.Drawing.Point(6, 18);
+            this.label2.Location = new System.Drawing.Point(6, 21);
             this.label2.Name = "label2";
             this.label2.Size = new System.Drawing.Size(47, 16);
             this.label2.TabIndex = 0;
@@ -890,6 +895,7 @@
             // 
             // SongListTab
             // 
+            this.SongListTab.Controls.Add(this.btnFilter);
             this.SongListTab.Controls.Add(this.txtActiveSongFilter);
             this.SongListTab.Controls.Add(this.label17);
             this.SongListTab.Controls.Add(this.txtPoolInclude);
@@ -1065,7 +1071,40 @@
             this.label29.TabIndex = 0;
             this.label29.Text = "Slot Name:";
             // 
-            // Form1
+            // lblDisplayPoolExclusions
+            // 
+            this.lblDisplayPoolExclusions.AutoSize = true;
+            this.lblDisplayPoolExclusions.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.lblDisplayPoolExclusions.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.lblDisplayPoolExclusions.Location = new System.Drawing.Point(6, 295);
+            this.lblDisplayPoolExclusions.Name = "lblDisplayPoolExclusions";
+            this.lblDisplayPoolExclusions.Size = new System.Drawing.Size(137, 15);
+            this.lblDisplayPoolExclusions.TabIndex = 6;
+            this.lblDisplayPoolExclusions.Text = "Edit Force Excluded Songs";
+            // 
+            // lblDisplayPoolInclusions
+            // 
+            this.lblDisplayPoolInclusions.AutoSize = true;
+            this.lblDisplayPoolInclusions.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.lblDisplayPoolInclusions.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.lblDisplayPoolInclusions.Location = new System.Drawing.Point(6, 272);
+            this.lblDisplayPoolInclusions.Name = "lblDisplayPoolInclusions";
+            this.lblDisplayPoolInclusions.Size = new System.Drawing.Size(134, 15);
+            this.lblDisplayPoolInclusions.TabIndex = 7;
+            this.lblDisplayPoolInclusions.Text = "Edit Force Included Songs";
+            // 
+            // btnFilter
+            // 
+            this.btnFilter.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.btnFilter.Location = new System.Drawing.Point(317, 3);
+            this.btnFilter.Name = "btnFilter";
+            this.btnFilter.Size = new System.Drawing.Size(35, 23);
+            this.btnFilter.TabIndex = 9;
+            this.btnFilter.Text = "...";
+            this.btnFilter.UseVisualStyleBackColor = true;
+            this.btnFilter.Click += new System.EventHandler(this.btnFilter_Click);
+            // 
+            // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
@@ -1073,7 +1112,7 @@
             this.Controls.Add(this.tableLayoutPanel1);
             this.Controls.Add(this.menuStrip1);
             this.MainMenuStrip = this.menuStrip1;
-            this.Name = "Form1";
+            this.Name = "MainForm";
             this.Text = "YARG YAML Maker";
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.Form1_FormClosing);
             this.Load += new System.EventHandler(this.Form1_Load);
@@ -1218,6 +1257,9 @@
         private System.Windows.Forms.GroupBox groupBox8;
         private System.Windows.Forms.Button btnAddPool;
         private System.Windows.Forms.Button btnRemovePool;
+        private System.Windows.Forms.Label lblDisplayPoolExclusions;
+        private System.Windows.Forms.Label lblDisplayPoolInclusions;
+        private System.Windows.Forms.Button btnFilter;
     }
 }
 
