@@ -102,6 +102,19 @@ namespace YargArchipelagoPlugin
             var SwapSongRand = AllActionItems.Where(x => x.Type == StaticItems.SwapRandom && !container.seedConfig.ApItemsUsed.Contains(x));
             var LowerDifficulty = AllActionItems.Where(x => x.Type == StaticItems.LowerDifficulty && !container.seedConfig.ApItemsUsed.Contains(x));
 
+            if (container.SlotData.SetlistNeededForGoal > 0)
+            {
+                var current = container.ApItemsRecieved.Count(x => x.Type == StaticItems.SongCompletion);
+                listView.Insert(insertIndex++, new CategoryViewType($"- SETLIST GOAL {current}/{container.SlotData.SetlistNeededForGoal}", current, new SongEntry[0], menu.RefreshAndReselect));
+            }
+            if (container.SlotData.FamePointsForGoal > 0)
+            {
+                var current = container.ApItemsRecieved.Count(x => x.Type == StaticItems.FamePoint);
+                listView.Insert(insertIndex++, new CategoryViewType($"- FAME GOAL {current}/{container.SlotData.FamePointsForGoal}", current, new SongEntry[0], menu.RefreshAndReselect));
+            }
+            if (container.GoalItemInPool(out var GoalItemRecieved, out var recieveInfo))
+                listView.Insert(insertIndex++, new CategoryViewType($"- FOUND GOAL ITEM [{GoalItemRecieved}]", GoalItemRecieved ? 1 : 0, new SongEntry[0], () => ShowGoalRecieveMessage(container, GoalItemRecieved, recieveInfo)));
+
             if (SwapSongs.Any() && allSongs.Any())
                 listView.Insert(insertIndex++, new CategoryViewType($"- USE SWAP SONG (Pick)", SwapSongs.Count(), new SongEntry[0], () => SwapSongMenu.ShowMenu(container, SwapSongs.First())));
 
@@ -125,6 +138,19 @@ namespace YargArchipelagoPlugin
                 foreach (var song in poolSongs)
                     listView.Insert(insertIndex++, new SongViewType(menu, song));
             }
+        }
+
+        public static void ShowGoalRecieveMessage(APConnectionContainer container, bool Recieved, BaseYargAPItem recieveInfo)
+        {
+            if (!Recieved)
+            {
+                ToastManager.ToastError($"Your goal song unlock item has not been found!");
+                return;
+            }
+            var Team = container.GetSession().Players.ActivePlayer.Team;
+            var Player = container.GetSession().Players.GetPlayerInfo(Team, recieveInfo.SendingPlayerSlot);
+            var LocationInfo = container.GetSession().Locations.GetLocationNameFromId(recieveInfo.SendingPlayerLocation, recieveInfo.SendingPlayerGame);
+            var dialog = DialogManager.Instance.ShowMessage("Goal Unlock Item Found!", $"Found by Player\n{Player.Name}\n\nFrom Location\n{LocationInfo}\n\nPlaying game\\{Player.Game}");
         }
 
         /// <summary>

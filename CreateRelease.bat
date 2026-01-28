@@ -1,6 +1,7 @@
 @echo off
 
 set "MSBUILD=C:\Program Files\Microsoft Visual Studio\2022\Community\MSBuild\Current\Bin\MSBuild.exe"
+set "LINUX_PATH=\\tsclient\_home_thedrummonger\Documents\Yarg AP Release\V2"
 
 if not exist "Builds" mkdir "Builds"
 echo Building projects...
@@ -22,5 +23,11 @@ echo Creating Stable plugin zip...
 cd "YargArchipelagoPluginMain\bin\Release"
 powershell -command "Compress-Archive -Path 'YargArchipelagoPluginStable.dll','Archipelago.MultiClient.Net.dll' -DestinationPath '..\..\..\Builds\YargArchipelagoPluginStable.zip' -Force"
 cd ..\..\..
+
+if exist "%LINUX_PATH%" (
+    copy /Y "Builds\Yaml Creator.exe" "%LINUX_PATH%\"
+    copy /Y "Builds\YargArchipelagoPluginNightly.zip" "%LINUX_PATH%\"
+    copy /Y "Builds\YargArchipelagoPluginStable.zip" "%LINUX_PATH%\"
+)
 
 pause

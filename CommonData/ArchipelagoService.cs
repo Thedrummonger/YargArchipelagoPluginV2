@@ -207,6 +207,18 @@ namespace YargArchipelagoPlugin
             }
         }
 
+        public bool GoalItemInPool(out bool Recieved, out BaseYargAPItem recieveInfo)
+        {
+            recieveInfo = null;
+            Recieved = false;
+            if (!IsSessionConnected) return false;
+            Recieved = ReceivedSongUnlockItems.TryGetValue(SlotData.GoalData.UnlockItemID, out recieveInfo);
+            // If we have not recieved the item, it was not in our starting items so it is in the pool
+            // If we have recieved it from someone other than the server, it was in the pool.
+            bool inPool = !Recieved || recieveInfo.SendingPlayerSlot > 0;
+            return inPool;
+        }
+
         public void UpdateDeathLinkTags()
         {
             if (!IsSessionConnected)
