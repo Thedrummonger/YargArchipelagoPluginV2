@@ -34,7 +34,6 @@ namespace Yaml_Creator
             if (YAML is null)
                 YAML = new YAMLCore();
 
-            ValidateIncludeExcludeList();
             LoadYamlToControls();
             CreateListeners();
             Directory.CreateDirectory(OutputFolder);
@@ -56,6 +55,8 @@ namespace Yaml_Creator
             SongPoolListUpdated();
             RegenerateGoalPoolList();
             RegenerateGoalSongList();
+            ValidateIncludeExcludeList();
+            LoadSongPool();
             cmbGoalPoolPlando.Enabled = chkGoalPoolPlando.Checked;
             cmbGoalSongPlando.Enabled = chkGoalSongPlando.Checked;
         }
@@ -66,6 +67,8 @@ namespace Yaml_Creator
             if (SelectedSongPool == null)
             {
                 gbSelectedPool.Enabled = false;
+                foreach(Control i in gbSelectedPool.Controls)
+                    i.Enabled = false;
                 nudAmountInPool.Value = 0;
                 nudPoolMinDifficulty .Value = 0;
                 nudPoolMaxDifficulty .Value = 0;
@@ -77,6 +80,8 @@ namespace Yaml_Creator
                 return;
             }
             gbSelectedPool.Enabled = true;
+            foreach (Control i in gbSelectedPool.Controls)
+                i.Enabled = true;
             nudAmountInPool.Value = SelectedSongPool.Pool.amount_in_pool;
             nudPoolMinDifficulty.Value = SelectedSongPool.Pool.min_difficulty;
             nudPoolMaxDifficulty.Value = SelectedSongPool.Pool.max_difficulty;
