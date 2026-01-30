@@ -141,6 +141,7 @@ namespace YargArchipelagoPlugin
             Session.Items.ItemReceived += eventManager.Items_ItemReceived;
             Session.Locations.CheckedLocationsUpdated += eventManager.Locations_CheckedLocationsUpdated;
             Session.MessageLog.OnMessageReceived += eventManager.RelayChatToYARG;
+            Session.MessageLog.OnMessageReceived += eventManager.UpdateChatHistory;
 
             DeathLinkService.OnDeathLinkReceived += eventManager.OnDeathLinkReceived;
 
@@ -163,6 +164,7 @@ namespace YargArchipelagoPlugin
             Session.Items.ItemReceived -= eventManager.Items_ItemReceived;
             Session.Locations.CheckedLocationsUpdated -= eventManager.Locations_CheckedLocationsUpdated;
             Session.MessageLog.OnMessageReceived -= eventManager.RelayChatToYARG;
+            Session.MessageLog.OnMessageReceived -= eventManager.UpdateChatHistory;
 
             DeathLinkService.OnDeathLinkReceived -= eventManager.OnDeathLinkReceived;
 

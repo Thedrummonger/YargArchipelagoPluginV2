@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Archipelago.MultiClient.Net.MessageLog.Messages;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
@@ -41,6 +42,8 @@ namespace YargArchipelagoPlugin
 
     public class ArchipelagoConnectionDialog : MonoBehaviour
     {
+        public static List<LogMessage> ChatHistory = new List<LogMessage>();
+
         public static ArchipelagoConnectionDialog Instance { get; private set; }
 
         [Header("State")]
@@ -54,6 +57,14 @@ namespace YargArchipelagoPlugin
         private bool _hasPositioned = false;
 
         private Rect _windowRect = new Rect(20, 20, 400, 320);
+
+        private static bool ShowChat = false;
+
+        private Vector2 _chatScrollPosition = Vector2.zero;
+        private string _chatInputText = "";
+        private int _lastChatCount = 0;
+        private float _contentHeight = 0;
+        GUIStyle richTextStyle = null;
 
         public void Initialize(APConnectionContainer container)
         {
@@ -87,39 +98,158 @@ namespace YargArchipelagoPlugin
         }
         private void DrawWindow(int id)
         {
+            if (Event.current.type == EventType.KeyDown && Event.current.keyCode == KeyCode.Return)
+            {
+                Event.current.Use();
+                if (ShowChat)
+                    SendChat();
+                else
+                    ToggleConnect();
+            }
             GUILayout.BeginVertical();
+
+            if (ShowChat)
+                ShowChatBox();
+            else
+                ShowConnectControls();
+
+            GUILayout.BeginHorizontal();
+            if (GUILayout.Button(ShowChat ? "Connection" : "Chat", GUILayout.Height(28)))
+                ShowChat = !ShowChat;
+            if (GUILayout.Button("Close", GUILayout.Height(28)))
+                Show = false;
+            GUILayout.EndHorizontal();
+            GUILayout.EndVertical();
+            GUI.DragWindow(new Rect(0, 0, 10000, 20));
+        }
+
+        private void SendChat()
+        {
+            if (!string.IsNullOrWhiteSpace(_chatInputText))
+            {
+                connectionContainer.GetSession().Say(_chatInputText);
+                _chatInputText = "";
+                GUI.FocusControl(null);
+                GUIUtility.keyboardControl = 0;
+            }
+        }
+
+        private void ToggleConnect()
+        {
+            GUI.FocusControl(null);
+            GUIUtility.keyboardControl = 0;
+            if (connectionContainer.IsSessionConnected)
+            {
+                connectionContainer.Disconnect();
+                ToastManager.ToastInformation($"Disconnected from AP");
+            }
+            else
+            {
+                ToastManager.ToastInformation($"Connecting to {connectionDetails.SlotName}@{connectionDetails.Address}");
+                connectionContainer.Connect(connectionDetails);
+            }
+        }
+
+        private void ShowChatBox()
+        {
+            _chatScrollPosition = GUILayout.BeginScrollView(_chatScrollPosition, GUILayout.Height(190));
+
+            if (richTextStyle == null)
+            {
+                richTextStyle = new GUIStyle(GUI.skin.label);
+                richTextStyle.richText = true;
+            }
+
+            GUILayout.BeginVertical();
+            int startIndex = Mathf.Max(0, ChatHistory.Count - 500);
+            for (int i = startIndex; i < ChatHistory.Count; i++)
+            {
+                string coloredText = "";
+                foreach (var part in ChatHistory[i].Parts)
+                {
+                    string colorHex = ColorUtility.ToHtmlStringRGB(new Color(part.Color.R, part.Color.G, part.Color.B));
+                    coloredText += $"<color=#{colorHex}>{part.Text}</color>";
+                }
+                GUILayout.Label(coloredText, richTextStyle);
+            }
+            GUILayout.EndVertical();
+
+            if (Event.current.type == EventType.Repaint)
+                _contentHeight = GUILayoutUtility.GetLastRect().height;
+
+            GUILayout.EndScrollView();
+
+            float maxScroll = Mathf.Max(0, _contentHeight - 190);
+            bool isAtBottom = _chatScrollPosition.y >= maxScroll - 10;
+
+            if (ChatHistory.Count > _lastChatCount)
+            {
+                if (isAtBottom || _lastChatCount == 0)
+                    _chatScrollPosition.y = float.MaxValue;
+
+                _lastChatCount = ChatHistory.Count;
+            }
+
+            GUILayout.Space(10);
+            GUILayout.BeginHorizontal();
+            GUILayout.Label("Message", GUILayout.Width(80));
+            _chatInputText = GUILayout.TextField(_chatInputText, GUILayout.Width(280));
+            GUILayout.EndHorizontal();
+            GUILayout.Space(6);
+            using (new GUIEnabledScope(connectionContainer.IsSessionConnected))
+                if (GUILayout.Button("Send", GUILayout.Height(28)))
+                    SendChat();
+        }
+
+        private void ShowConnectControls()
+        {
             GUILayout.BeginHorizontal();
             GUILayout.Label("Address", GUILayout.Width(80));
             using (new GUIEnabledScope(!connectionContainer.IsSessionConnected))
+            {
+                GUI.SetNextControlName("Address");
                 connectionDetails.Address = GUILayout.TextField(connectionDetails.Address, GUILayout.Width(280));
+            }
             GUILayout.EndHorizontal();
+
             GUILayout.BeginHorizontal();
             GUILayout.Label("Slot Name", GUILayout.Width(80));
             using (new GUIEnabledScope(!connectionContainer.IsSessionConnected))
+            {
+                GUI.SetNextControlName("SlotName");
                 connectionDetails.SlotName = GUILayout.TextField(connectionDetails.SlotName, GUILayout.Width(280));
+            }
             GUILayout.EndHorizontal();
+
             GUILayout.BeginHorizontal();
             GUILayout.Label("Password", GUILayout.Width(80));
             using (new GUIEnabledScope(!connectionContainer.IsSessionConnected))
+            {
+                GUI.SetNextControlName("Password");
                 connectionDetails.Password = GUILayout.PasswordField(connectionDetails.Password, '*', GUILayout.Width(280));
+            }
             GUILayout.EndHorizontal();
+
+            if (Event.current.type == EventType.KeyDown && Event.current.keyCode == KeyCode.Tab)
+            {
+                Event.current.Use();
+                string focused = GUI.GetNameOfFocusedControl();
+
+                if (focused == "Address")
+                    GUI.FocusControl("SlotName");
+                else if (focused == "SlotName")
+                    GUI.FocusControl("Password");
+                else if (focused == "Password")
+                    GUI.FocusControl("Address");
+                else
+                    GUI.FocusControl("Address");
+            }
+
+
             GUILayout.Space(10);
             string buttonText = connectionContainer.IsSessionConnected ? "Disconnect" : "Connect";
             if (GUILayout.Button(buttonText, GUILayout.Height(28)))
-            {
-                GUI.FocusControl(null);
-                GUIUtility.keyboardControl = 0;
-                if (connectionContainer.IsSessionConnected)
-                {
-                    connectionContainer.Disconnect();
-                    ToastManager.ToastInformation($"Disconnected from AP");
-                }
-                else
-                {
-                    ToastManager.ToastInformation($"Connecting to {connectionDetails.SlotName}@{connectionDetails.Address}");
-                    connectionContainer.Connect(connectionDetails);
-                }
-            }
+                ToggleConnect();
 
             GUILayout.Space(6);
 
@@ -131,7 +261,7 @@ namespace YargArchipelagoPlugin
             {
                 GUILayout.BeginHorizontal();
 
-                GUILayout.BeginVertical(GUILayout.Width(190));
+                GUILayout.BeginVertical(GUILayout.Width(188));
                 string deathLinkYaml = isConnected ? connectionContainer.SlotData.DeathLink.GetDescription() : "N/A";
                 GUILayout.Label($"Death Link:");
                 GUILayout.Label($"YAML: {deathLinkYaml}");
@@ -144,7 +274,7 @@ namespace YargArchipelagoPlugin
                     }
                 GUILayout.EndVertical();
 
-                GUILayout.BeginVertical(GUILayout.Width(190));
+                GUILayout.BeginVertical(GUILayout.Width(188));
                 string energyLinkYaml = isConnected ? connectionContainer.SlotData.EnergyLink.GetDescription() : "N/A";
                 GUILayout.Label($"Energy Link:");
                 GUILayout.Label($"YAML: {energyLinkYaml}");
@@ -161,7 +291,7 @@ namespace YargArchipelagoPlugin
 
                 GUILayout.BeginHorizontal();
 
-                GUILayout.BeginVertical(GUILayout.Width(190));
+                GUILayout.BeginVertical(GUILayout.Width(188));
                 GUILayout.Label("Item Log:");
                 string itemLogText = isConnected ? connectionContainer.seedConfig.InGameItemLog.GetDescription() : "N/A";
                 if (GUILayout.Button(itemLogText, GUILayout.Height(20)))
@@ -172,7 +302,7 @@ namespace YargArchipelagoPlugin
                     }
                 GUILayout.EndVertical();
 
-                GUILayout.BeginVertical(GUILayout.Width(190));
+                GUILayout.BeginVertical(GUILayout.Width(188));
                 GUILayout.Label("AP Chat:");
                 string apChatText = isConnected ? (connectionContainer.seedConfig.InGameAPChat ? "On" : "Off") : "N/A";
                 if (GUILayout.Button(apChatText, GUILayout.Height(20)))
@@ -185,11 +315,6 @@ namespace YargArchipelagoPlugin
 
                 GUILayout.EndHorizontal();
             }
-
-            if (GUILayout.Button("Close", GUILayout.Height(28)))
-                Show = false;
-            GUILayout.EndVertical();
-            GUI.DragWindow(new Rect(0, 0, 10000, 20));
         }
 
         private T CycleEnum<T>(T currentValue) where T : System.Enum

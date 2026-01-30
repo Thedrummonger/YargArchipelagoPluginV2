@@ -41,10 +41,11 @@ namespace YargArchipelagoPlugin
         [HarmonyPostfix]
         public static void MainMenu_Start(MainMenu __instance)
         {
-            if (!FirstAwake)
-                return;
-            ArchipelagoPlugin.ToggleArchipelagoDialog();
-            FirstAwake = false;
+            if (FirstAwake)
+            {
+                ArchipelagoPlugin.ToggleArchipelagoDialog();
+                FirstAwake = false;
+            }
         }
 
         [HarmonyPatch(typeof(GameManager), "Awake")]
@@ -105,7 +106,6 @@ namespace YargArchipelagoPlugin
         [HarmonyPostfix]
         public static void DevWatermark_Start_Postfix(DevWatermark __instance)
         {
-            // Get the _watermarkText field via reflection
             var field = typeof(DevWatermark).GetField("_watermarkText", BindingFlags.NonPublic | BindingFlags.Instance);
 
             if (field == null) return;

@@ -52,15 +52,11 @@ namespace YargArchipelagoPlugin
 
         public void FailedSong(GameManager gameManager)
         {
-            if (!parent.IsSessionConnected)
+            if (!parent.IsSessionConnected || parent.seedConfig is null)
                 return;
-#if NIGHTLY
-            if (SettingsManager.Settings.NoFailMode.Value && gameManager.IsPractice && gameManager.PlayerHasFailed) return;
-#endif
-            if ((parent.seedConfig?.DeathLinkMode ?? DeathLinkType.disabled) > DeathLinkType.disabled)
-                parent.DeathLinkService?.SendDeathLink(
-                    new DeathLink(parent.LastUsedConnectionInfo?.SlotName,
-                    $"Failed Song {gameManager.Song.Name} by {gameManager.Song.Artist}"));
+
+            if (parent.seedConfig.DeathLinkMode > DeathLinkType.disabled)
+                parent.DeathLinkService?.SendDeathLink(new DeathLink(parent.LastUsedConnectionInfo?.SlotName, $"Failed Song {gameManager.Song.Name} by {gameManager.Song.Artist}"));
         }
 
         public void TryCheckSongLocations(GameManager gameManager)
@@ -146,6 +142,8 @@ namespace YargArchipelagoPlugin
                 return parent.seedConfig.InGameItemLog == CommonData.ItemLog.All;
             }
         }
+
+        public void UpdateChatHistory(LogMessage message) => ArchipelagoConnectionDialog.ChatHistory.Add(message);
 
         public void VerifyServerConnection()
         {
@@ -244,16 +242,16 @@ namespace YargArchipelagoPlugin
     }
     public static partial class ExtraAPFunctionalityHelper
     {
-        public const long minEnergyLinkScale = 20000;
-        public const long maxEnergyLinkScale = 1000000;
+        public const long minEnergyLinkScale = 50000;
+        public const long maxEnergyLinkScale = 100000;
         public static Dictionary<StaticItems, long> PriceDict = new Dictionary<StaticItems, long>
         {
-            { StaticItems.SwapRandom, 17_000_000_000 },
-            { StaticItems.SwapPick, 20_000_000_000 },
-            { StaticItems.LowerDifficulty, 15_000_000_000 }
+            { StaticItems.SwapRandom, 30_000_000_000 },
+            { StaticItems.SwapPick, 35_000_000_000 },
+            { StaticItems.LowerDifficulty, 32_000_000_000 }
         };
 
-    public static string EnergyLinkKey(ArchipelagoSession session) => $"EnergyLink{session.Players.ActivePlayer.Team}";
+        public static string EnergyLinkKey(ArchipelagoSession session) => $"EnergyLink{session.Players.ActivePlayer.Team}";
         public static bool TryPurchaseItem(APConnectionContainer container, StaticItems Type)
         {
             var CurrentEnergy = GetEnergy(container);

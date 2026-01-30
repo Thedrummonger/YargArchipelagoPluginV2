@@ -16,6 +16,7 @@ cd ..\..\..
 
 echo Creating Nightly plugin zip...
 cd "YargArchipelagoPluginNightly\bin\Release"
+copy /Y "YargArchipelagoPluginNightly.dll" "%LINUX_PATH%\"
 powershell -command "Compress-Archive -Path 'YargArchipelagoPluginNightly.dll','Archipelago.MultiClient.Net.dll' -DestinationPath '..\..\..\Builds\YargArchipelagoPluginNightly.zip' -Force"
 cd ..\..\..
 

@@ -9,15 +9,13 @@ namespace YargArchipelagoPlugin
     public class ArchipelagoPlugin : BaseUnityPlugin
     {
         public const string pluginGuid = "thedrummonger.yarg.archipelago";
-        public const string pluginVersion = "0.2.0.0";
+        public const string pluginVersion = "0.2.1.0";
 #if NIGHTLY
         public const string pluginName = "YARG Nightly Archipelago Plugin";
 #else
         public const string pluginName = "YARG Archipelago Plugin";
 #endif
         public static APConnectionContainer APcontainer;
-
-        private ArchipelagoConnectionDialog dialog;
         public void Awake()
         {
             var patcher = new Harmony(pluginGuid);
@@ -30,13 +28,11 @@ namespace YargArchipelagoPlugin
 
         private void Update()
         {
-            if (!Application.isFocused) return;
+            if (!Application.isFocused) 
+                return;
 
-            if (UnityEngine.InputSystem.Keyboard.current != null &&
-                UnityEngine.InputSystem.Keyboard.current.f10Key.wasPressedThisFrame)
-            {
+            if (UnityEngine.InputSystem.Keyboard.current != null && UnityEngine.InputSystem.Keyboard.current.f10Key.wasPressedThisFrame)
                 ToggleArchipelagoDialog();
-            }
         }
         public static void ToggleArchipelagoDialog()
         {
