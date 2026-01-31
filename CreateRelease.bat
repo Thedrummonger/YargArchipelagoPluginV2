@@ -22,6 +22,7 @@ cd ..\..\..
 
 echo Creating Stable plugin zip...
 cd "YargArchipelagoPluginMain\bin\Release"
+copy /Y "YargArchipelagoPluginStable.dll" "%LINUX_PATH%\"
 powershell -command "Compress-Archive -Path 'YargArchipelagoPluginStable.dll','Archipelago.MultiClient.Net.dll' -DestinationPath '..\..\..\Builds\YargArchipelagoPluginStable.zip' -Force"
 cd ..\..\..
 

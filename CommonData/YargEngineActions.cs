@@ -161,9 +161,9 @@ namespace YargArchipelagoPlugin
         }
 
         /// <summary>
-        /// A special MessageDialog with no gui elements. Used to block the ui while custom Bepin menus are being displayed. Must be closed manually. 
+        /// Creates an invisible blocking dialog used to prevent UI interaction while custom BepInEx menus are displayed.
+        /// Must be closed manually.
         /// </summary>
-        /// <returns></returns>
         public static MessageDialog ShowBlockerDialog()
         {
             var dialog = DialogManager.Instance.ShowMessage("", "");
@@ -203,7 +203,9 @@ namespace YargArchipelagoPlugin
                 .AppendLine($"Minimum Score: {SongPool.completion_requirements.reward2_req.GetDescription()}");
             DialogManager.Instance.ShowMessage(Title, Result.ToString());
         }
-
+        /// <summary>
+        /// Grants star power to all active players when an Archipelago star power item is received.
+        /// </summary>
         public static void ApplyStarPowerItem(APConnectionContainer handler)
         {
             if (!handler.IsInSong(out var current, out _))
@@ -214,20 +216,21 @@ namespace YargArchipelagoPlugin
                 method.Invoke(player.BaseEngine, new object[] { player.BaseEngine.TicksPerQuarterSpBar });
 
         }
+        /// <summary>
+        /// Reduces the rock meter for all active players by 1/4 when an Archipelago trap item is received.
+        /// </summary>
         public static void ApplyRockMetertrapItem(APConnectionContainer handler)
         {
             if (!handler.IsInSong(out var current, out _))
                 return;
-#if NIGHTLY
             handler.logger.LogInfo($"Reducing Rock Meter");
             foreach (var player in current.Players)
-                AddHappiness(player.GetEngineContainer(), -0.25f);
-#else
-            GlobalAudioHandler.PlaySoundEffect(SfxSample.NoteMiss);
-#endif
+                AddHappiness(player, -0.25f);
 
         }
-
+        /// <summary>
+        /// Applies the effects of a received DeathLink, either reducing rock meter or forcing instant fail based on settings.
+        /// </summary>
         public static void ApplyDeathLink(APConnectionContainer handler, DeathLink deathLink)
         {
             if (!handler.IsInSong(out var current, out _))
@@ -235,7 +238,6 @@ namespace YargArchipelagoPlugin
             try
             {
                 handler.logger.LogInfo($"Applying Death Link");
-#if NIGHTLY
                 switch (handler.seedConfig.DeathLinkMode)
                 {
                     case CommonData.DeathLinkType.rock_meter:
@@ -247,9 +249,6 @@ namespace YargArchipelagoPlugin
                     default:
                         return;
                 }
-#else
-                ForceExitSong(handler);
-#endif
                 ToastManager.ToastInformation($"DeathLink Received!\n\n{deathLink.Source} {deathLink.Cause}");
             }
             catch (Exception e)
@@ -257,7 +256,9 @@ namespace YargArchipelagoPlugin
                 handler.logger.LogError($"Failed to apply deathlink\n{e}");
             }
         }
-
+        /// <summary>
+        /// Forces the current song to restart by opening the pause menu and triggering restart.
+        /// </summary>
         public static void ForceRestartSong(APConnectionContainer handler)
         {
             if (!handler.IsInSong(out var current, out _))
@@ -280,9 +281,9 @@ namespace YargArchipelagoPlugin
                 handler.logger.LogError($"Failed to force restart song\n{e}");
             }
         }
-
-#if NIGHTLY
-
+        /// <summary>
+        /// Forces the current song to fail without triggering a DeathLink send. Reimplements song fail behavior to avoid recursion.
+        /// </summary>
         public static async void ForceFailSong(APConnectionContainer handler)
         {
             if (!handler.IsInSong(out var gameManager, out _) || gameManager.IsPractice)
@@ -301,6 +302,9 @@ namespace YargArchipelagoPlugin
             gameManager.Pause(true);
         }
 
+        /// <summary>
+        /// Sets all players' happiness to the specified value or their starting happiness if no value provided.
+        /// </summary>
         public static void SetBandHappiness(APConnectionContainer handler, float? delta = null)
         {
             if (!handler.IsInSong(out var gameManager, out _) || gameManager.IsPractice)
@@ -308,7 +312,7 @@ namespace YargArchipelagoPlugin
             foreach (var player in gameManager.Players)
             {
                 var EngineContainer = player.GetEngineContainer();
-                EngineContainer.SetHappiness(gameManager.EngineManager, delta ?? EngineContainer.RockMeterPreset.StartingHappiness);
+                EngineContainer.SetHappiness(delta ?? EngineContainer.RockMeterPreset.StartingHappiness);
             }
         }
 
@@ -316,38 +320,132 @@ namespace YargArchipelagoPlugin
         private static PropertyInfo _happinessProperty;
         private static MethodInfo _updateHappinessMethod;
         private static FieldInfo _engineContainerField;
+        private static MethodInfo _getAverageHappinessMethod;
+        private static FieldInfo _allEnginesField; private static FieldInfo _containerEngineManagerField;
+
+        /// <summary>
+        /// Gets the parent EngineManager for a container.
+        /// </summary>
+        public static EngineManager GetEngineManager(this EngineManager.EngineContainer container)
+        {
+            if (_containerEngineManagerField == null) _containerEngineManagerField = typeof(EngineManager.EngineContainer).GetField("_engineManager", BindingFlags.NonPublic | BindingFlags.Instance);
+            return (EngineManager)_containerEngineManagerField?.GetValue(container);
+        }
+
+        /// <summary>
+        /// Gets the EngineContainer for a player.
+        /// </summary>
         public static EngineManager.EngineContainer GetEngineContainer(this BasePlayer player)
         {
-            if (_engineContainerField == null)
-                _engineContainerField = typeof(BasePlayer).GetField("EngineContainer", BindingFlags.NonPublic | BindingFlags.Instance);
-
+            if (_engineContainerField == null) _engineContainerField = typeof(BasePlayer).GetField("EngineContainer", BindingFlags.NonPublic | BindingFlags.Instance);
             return (EngineManager.EngineContainer)_engineContainerField.GetValue(player);
         }
 
+        /// <summary>
+        /// Gets all EngineContainers in the given EngineManager.
+        /// Note: This could also be done by looping through players.
+        /// </summary>
+        public static List<EngineManager.EngineContainer> GetAllEngines(this EngineManager engineManager)
+        {
+            if (_allEnginesField == null) _allEnginesField = typeof(EngineManager).GetField("_allEngines", BindingFlags.NonPublic | BindingFlags.Instance);
+            return (List<EngineManager.EngineContainer>)_allEnginesField?.GetValue(engineManager);
+        }
+        /// <summary>
+        /// Adds happiness to a player's rock meter. This method will trigger any harmony patches applied to AddHappiness.
+        /// </summary>
+        public static void AddHappiness(this BasePlayer player, float delta) => AddHappiness(player.GetEngineContainer(), delta);
+        /// <summary>
+        /// Adds happiness to an engine container. This method will trigger any harmony patches applied to AddHappiness.
+        /// </summary>
         public static void AddHappiness(this EngineManager.EngineContainer container, float delta)
         {
-            if (_addHappinessMethod == null)
-                _addHappinessMethod = typeof(EngineManager.EngineContainer).GetMethod("AddHappiness", BindingFlags.NonPublic | BindingFlags.Instance);
-
+            if (_addHappinessMethod == null) _addHappinessMethod = typeof(EngineManager.EngineContainer).GetMethod("AddHappiness", BindingFlags.NonPublic | BindingFlags.Instance);
             _addHappinessMethod?.Invoke(container, new object[] { delta });
         }
-
-        public static void SetHappiness(this EngineManager.EngineContainer container, EngineManager engineManager, float value)
+        /// <summary>
+        /// Adds happiness without triggering harmony patches.
+        /// </summary>
+        public static void AddHappinessRaw(this BasePlayer player, float delta) => AddHappinessRaw(player.GetEngineContainer(), delta);
+        /// <summary>
+        /// Adds happiness without triggering harmony patches.
+        /// </summary>
+        public static void AddHappinessRaw(this EngineManager.EngineContainer container, float delta)
         {
-            if (_happinessProperty == null)
-                _happinessProperty = typeof(EngineManager.EngineContainer).GetProperty("Happiness", BindingFlags.Public | BindingFlags.Instance);
+            if (_happinessProperty == null) _happinessProperty = typeof(EngineManager.EngineContainer).GetProperty("Happiness", BindingFlags.Public | BindingFlags.Instance);
+            if (_updateHappinessMethod == null) _updateHappinessMethod = typeof(EngineManager).GetMethod("UpdateHappiness", BindingFlags.NonPublic | BindingFlags.Instance);
 
-            if (_updateHappinessMethod == null)
-                _updateHappinessMethod = typeof(EngineManager).GetMethod("UpdateHappiness", BindingFlags.NonPublic | BindingFlags.Instance);
+            float newHappiness = Mathf.Clamp(container.Happiness + delta, -3f, 1f);
+            _happinessProperty.SetValue(container, newHappiness);
+            _updateHappinessMethod?.Invoke(container.GetEngineManager(), null);
+        }
 
+        /// <summary>
+        /// Sets a player's happiness to a specific value.
+        /// </summary>
+        public static void SetHappiness(this BasePlayer player, float value) => SetHappiness(player.GetEngineContainer(), value);
+        /// <summary>
+        /// Sets an engine container's happiness to a specific value.
+        /// </summary>
+        public static void SetHappiness(this EngineManager.EngineContainer container, float value)
+        {
+            if (_happinessProperty == null) _happinessProperty = typeof(EngineManager.EngineContainer).GetProperty("Happiness", BindingFlags.Public | BindingFlags.Instance);
+            if (_updateHappinessMethod == null) _updateHappinessMethod = typeof(EngineManager).GetMethod("UpdateHappiness", BindingFlags.NonPublic | BindingFlags.Instance);
             value = Mathf.Clamp(value, -3f, 1f);
-
             _happinessProperty?.SetValue(container, value);
-
+            var engineManager = container.GetEngineManager();
             _updateHappinessMethod?.Invoke(engineManager, null);
         }
-#endif
+        /// <summary>
+        /// Gets the average happiness across all players in the engine manager.
+        /// </summary>
+        public static float GetAverageHappiness(this EngineManager engineManager)
+        {
+            if (_getAverageHappinessMethod == null) 
+                _getAverageHappinessMethod = typeof(EngineManager).GetMethod("GetAverageHappiness", BindingFlags.NonPublic | BindingFlags.Instance);
+            return (float)_getAverageHappinessMethod?.Invoke(engineManager, null);
+        }
+        /// <summary>
+        /// Finds and returns the engine container with the lowest happiness value.
+        /// </summary>
+        public static EngineManager.EngineContainer GetLowestHappiness(this EngineManager engineManager)
+        {
+            EngineManager.EngineContainer lowestContainer = null;
+            float lowestHappiness = float.MaxValue;
 
+            foreach (var container in engineManager.GetAllEngines())
+            {
+                if (container.Happiness < lowestHappiness)
+                {
+                    lowestHappiness = container.Happiness;
+                    lowestContainer = container;
+                }
+            }
+            return lowestContainer;
+        }
+        /// <summary>
+        /// Prevents song failure by boosting the lowest player's happiness until average happiness reaches 0.25 (quarter bar).
+        /// Repeatedly adds single-note-hit worth of happiness to the lowest player.
+        /// </summary>
+        public static void PreventSongFail(this EngineManager engineManager)
+        {
+            /// <see cref="EngineManager.EngineContainer"/> private const HAPPINESS_PER_NOTE_HIT = 1f / 168f
+            const float HAPPINESS_PER_NOTE_HIT = 1f / 168f;
+            const float TARGET_HAPPINESS = 0.25f;
+
+            while (engineManager.GetAverageHappiness() < TARGET_HAPPINESS)
+            {
+                EngineManager.EngineContainer lowestContainer = GetLowestHappiness(engineManager);
+
+                if (lowestContainer == null)
+                    break;
+
+                lowestContainer.AddHappinessRaw(HAPPINESS_PER_NOTE_HIT);
+            }
+        }
+
+        /// <summary>
+        /// Forces the player to exit the current song immediately. Alternative to failing a song for Stable.
+        /// </summary>
         private static void ForceExitSong(APConnectionContainer handler)
         {
             if (!handler.IsInSong(out var current, out _))

@@ -62,11 +62,18 @@ namespace YargArchipelagoPlugin
         public static void GameManager_RecordScores_Postfix(GameManager __instance, ReplayInfo replayInfo) =>
             OnRecordScore?.Invoke(__instance);
 
-#if NIGHTLY 
         [HarmonyPatch(typeof(GameManager), "OnSongFailed")]
         [HarmonyPrefix]
         public static void GameManager_OnSongFailed(GameManager __instance) => OnSongFail?.Invoke(__instance);
-#endif
+
+        [HarmonyPatch(typeof(EngineManager), "UpdateHappiness", MethodType.Normal)]
+        [HarmonyPrefix]
+        public static void EngineManager_UpdateHappiness(EngineManager __instance)
+        {
+            // Check if We have a Fail Prevention item to use
+            //if (__instance.GetAverageHappiness() < 0.0f)
+            //    __instance.PreventSongFail();
+        }
 
         [HarmonyPatch(typeof(SongContainer), "FillContainers")]
         [HarmonyPostfix]
