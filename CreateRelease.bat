@@ -11,7 +11,7 @@ echo Building projects...
 
 echo Packing executable...
 cd "Yaml Creator\bin\Release"
-ILRepack.exe /target:winexe /out:"..\..\..\Builds\Yaml Creator.exe" "Yaml Creator.exe" Newtonsoft.Json.dll YamlDotNet.dll YargArchipelagoPluginNightly.dll Archipelago.MultiClient.Net.dll YARG.Core.Package.dll
+ILRepack.exe /target:winexe /out:"..\..\..\Builds\YAYARG Yaml Creator.exe" "Yaml Creator.exe" Newtonsoft.Json.dll YamlDotNet.dll YargArchipelagoPluginNightly.dll Archipelago.MultiClient.Net.dll YARG.Core.Package.dll
 cd ..\..\..
 
 echo Creating Nightly plugin zip...
@@ -27,7 +27,7 @@ powershell -command "Compress-Archive -Path 'YargArchipelagoPluginStable.dll','A
 cd ..\..\..
 
 if exist "%LINUX_PATH%" (
-    copy /Y "Builds\Yaml Creator.exe" "%LINUX_PATH%\"
+    copy /Y "Builds\YAYARG Yaml Creator.exe" "%LINUX_PATH%\"
     copy /Y "Builds\YargArchipelagoPluginNightly.zip" "%LINUX_PATH%\"
     copy /Y "Builds\YargArchipelagoPluginStable.zip" "%LINUX_PATH%\"
 )

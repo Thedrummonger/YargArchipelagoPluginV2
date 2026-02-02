@@ -128,8 +128,16 @@ namespace Yaml_Creator
                     stringBuilder.Append($"[{extendedData.core.Genre}] ");
                 if (CurrentTypes.Contains(DisplayTypes.Charter) && !string.IsNullOrWhiteSpace(extendedData.core.Charter))
                     stringBuilder.Append($"[{extendedData.core.Charter}] ");
-                stringBuilder.Append(extendedData.ToString());
-                return stringBuilder.ToString();
+                if (CurrentTypes.Contains(DisplayTypes.Name))
+                    stringBuilder.Append($"{extendedData.core.Name} ");
+                if (CurrentTypes.Contains(DisplayTypes.Artist))
+                    stringBuilder.Append($"by {extendedData.core.Artist} ");
+                if (CurrentTypes.Contains(DisplayTypes.Album))
+                    stringBuilder.Append($"from {extendedData.core.Album} ");
+                if (CurrentTypes.Contains(DisplayTypes.Hash))
+                    stringBuilder.Append($"[{extendedData.core.SongChecksum}]");
+                var final = stringBuilder.ToString();
+                return string.IsNullOrWhiteSpace(final) ? extendedData.core.SongChecksum : stringBuilder.ToString();
             }
             bool IsExcluded(SongExportExtendedData song) => YAML.YAYARG.song_exclusion_list.Contains(song.core.SongChecksum);
             PrintingSongs = false;
@@ -467,11 +475,15 @@ namespace Yaml_Creator
 
         private enum DisplayTypes
         {
+            Hash,
+            Name,
+            Artist,
+            Album,
             Source,
             Charter,
             Genre
         }
-        HashSet<DisplayTypes> CurrentTypes = new HashSet<DisplayTypes>();
+        HashSet<DisplayTypes> CurrentTypes = new HashSet<DisplayTypes>() { DisplayTypes.Name, DisplayTypes.Artist };
         private void btnFilter_Click(object sender, EventArgs e)
         {
             ValueSelectForm form = new ValueSelectForm($"Select Extra data to show");
