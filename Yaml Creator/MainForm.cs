@@ -208,6 +208,7 @@ namespace Yaml_Creator
             txtNewPoolIsntrument.DataSource = Utility.GetEnumDataSource<SupportedInstrument>();
 
             lbActiveSongs.ItemCheck += (s, e) => ToggleGlobalExludeList(((TaggedSongExportExtendedData)lbActiveSongs.Items[e.Index]).core, e.NewValue);
+            lbActiveSongs.SelectedIndexChanged += lbActiveSongs_SelectedIndexChanged;
 
             txtPoolExclude.DoubleClick += (s, e) => EditExculdeIncludeDictForSong(YAML.YAYARG.exclusions_per_pool, "Exclude");
             txtPoolInclude.DoubleClick += (s, e) => EditExculdeIncludeDictForSong(YAML.YAYARG.inclusions_per_pool, "Include");
