@@ -18,8 +18,9 @@ namespace Yaml_Creator
         public string accessibility = "full";
         public string songList = "";
         public Dictionary<string, SongPool> song_pools = new Dictionary<string, SongPool>();
-        public Dictionary<string, string[]> song_pool_exclusions = new Dictionary<string, string[]>();
-        public Dictionary<string, string[]> song_pool_inclusions = new Dictionary<string, string[]>();
+        public HashSet<string> song_exclusion_list = new HashSet<string>();
+        public Dictionary<string, string[]> exclusions_per_pool = new Dictionary<string, string[]>();
+        public Dictionary<string, string[]> inclusions_per_pool = new Dictionary<string, string[]>();
         public string goal_pool_plando = string.Empty;
         public string goal_song_plando = string.Empty;
         public int song_check_extra = 100;

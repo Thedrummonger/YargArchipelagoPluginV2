@@ -89,7 +89,6 @@ namespace Yaml_Creator
             cmbReward2Diff.SelectedItem = cmbReward2Diff.Items.Cast<DisplayItem<SupportedDifficulty>>().FirstOrDefault(x => x.Value == SelectedSongPool.Pool.completion_requirements.reward2_diff);
             cmbReward1Score.SelectedItem = cmbReward1Score.Items.Cast<DisplayItem<CompletionReq>>().FirstOrDefault(x => x.Value == SelectedSongPool.Pool.completion_requirements.reward1_req);
             cmbReward2Score.SelectedItem = cmbReward2Score.Items.Cast<DisplayItem<CompletionReq>>().FirstOrDefault(x => x.Value == SelectedSongPool.Pool.completion_requirements.reward2_req);
-            UpdateIncludeExcludeListOnPoolPage();
             IsLoadingNewSongPool = false;
             return;
         }
@@ -108,11 +107,17 @@ namespace Yaml_Creator
             SelectedSongPool.Pool.completion_requirements.reward2_req = cmbReward2Score.SelectedItem is DisplayItem<CompletionReq> item4 ? item4.Value : CompletionReq.Clear;
         }
 
+        bool PrintingSongs = false;
         public void PrintActiveSongs(object sender, EventArgs e)
         {
+            PrintingSongs = true;
             var ActiveSongs = FormHelpers.FilterItems(ExportFile, txtActiveSongFilter.Text, x => AddTags(x));
             ActiveSongs = ActiveSongs.OrderBy(x => x.ToString()).ToArray();
             lbActiveSongs.DataSource = ActiveSongs.Select(x => new TaggedSongExportExtendedData(x, AddTags)).ToArray();
+
+            Debug.WriteLine(JsonConvert.SerializeObject(YAML.YAYARG.song_exclusion_list, Formatting.Indented));
+            for (int i = 0; i < ActiveSongs.Length; i++)
+                lbActiveSongs.SetItemChecked(i, !IsExcluded(ActiveSongs[i]));
 
             string AddTags(SongExportExtendedData extendedData)
             {
@@ -126,6 +131,8 @@ namespace Yaml_Creator
                 stringBuilder.Append(extendedData.ToString());
                 return stringBuilder.ToString();
             }
+            bool IsExcluded(SongExportExtendedData song) => YAML.YAYARG.song_exclusion_list.Contains(song.core.SongChecksum);
+            PrintingSongs = false;
         }
 
         private void CreateListeners()
@@ -200,16 +207,15 @@ namespace Yaml_Creator
             };
             txtNewPoolIsntrument.DataSource = Utility.GetEnumDataSource<SupportedInstrument>();
 
-            txtPoolExclude.DoubleClick += (s, e) => EditExculdeIncludeDictForSong(YAML.YAYARG.song_pool_exclusions, "Exclude");
-            txtPoolInclude.DoubleClick += (s, e) => EditExculdeIncludeDictForSong(YAML.YAYARG.song_pool_inclusions, "Include");
+            lbActiveSongs.ItemCheck += (s, e) => ToggleGlobalExludeList(((TaggedSongExportExtendedData)lbActiveSongs.Items[e.Index]).core, e.NewValue);
+
+            txtPoolExclude.DoubleClick += (s, e) => EditExculdeIncludeDictForSong(YAML.YAYARG.exclusions_per_pool, "Exclude");
+            txtPoolInclude.DoubleClick += (s, e) => EditExculdeIncludeDictForSong(YAML.YAYARG.inclusions_per_pool, "Include");
 
             btnCopyHash.Click += (s, e) => { Clipboard.SetText((lbActiveSongs.SelectedItem as SongExportExtendedData)?.core?.SongChecksum ?? ""); };
 
             btnExportToText.Click += (s, e) => { SaveSongData(true); };
             btnExportToJson.Click += (s, e) => { SaveSongData(false); };
-
-            lblDisplayPoolExclusions.Click += (s, e) => { EditExcludeIncludePerPool(false); };
-            lblDisplayPoolInclusions.Click += (s, e) => { EditExcludeIncludePerPool(true); };
 
             btnGenYaml.Click += SaveYaml;
         }
@@ -350,18 +356,16 @@ namespace Yaml_Creator
 
         private void UpdateIncludeExcludeListOnSongPage()
         {
+            txtPoolInclude.Text = "";
+            txtPoolExclude.Text = "";
             SongExportExtendedData ExtendedData = lbActiveSongs.SelectedItem is SongExportExtendedData ed ? ed : null;
-            var PoolIncludingThisSong = YAML.YAYARG.song_pool_inclusions.Where(x => x.Value.Contains(ExtendedData.core.SongChecksum)).Select(x => x.Key);
-            txtPoolInclude.Text = ExtendedData != null ? string.Join(", ", PoolIncludingThisSong) : "";
-            var PoolExcludingThisSong = YAML.YAYARG.song_pool_exclusions.Where(x => x.Value.Contains(ExtendedData.core.SongChecksum)).Select(x => x.Key);
-            txtPoolExclude.Text = ExtendedData != null ? string.Join(", ", PoolExcludingThisSong) : "";
-        }
-        private void UpdateIncludeExcludeListOnPoolPage()
-        {
-            if (SelectedSongPool == null)
+            if (ExtendedData is null)
                 return;
-            lblDisplayPoolExclusions.Text = $"Edit Song Exclusions: {(YAML.YAYARG.song_pool_exclusions.TryGetValue(SelectedSongPool.Name, out var v1) ? v1.Count().ToString() : "0")}";
-            lblDisplayPoolInclusions.Text = $"Edit Song Inclusions: {(YAML.YAYARG.song_pool_inclusions.TryGetValue(SelectedSongPool.Name, out var v2) ? v2.Count().ToString() : "0")}";
+
+            if (YAML.YAYARG.exclusions_per_pool.TryGetValue(ExtendedData.core.SongChecksum, out var exList))
+                txtPoolExclude.Text = string.Join(", ", exList);
+            if (YAML.YAYARG.inclusions_per_pool.TryGetValue(ExtendedData.core.SongChecksum, out var incList))
+                txtPoolInclude.Text = string.Join(", ", incList);
         }
 
         private void Form1_FormClosing(object sender, FormClosingEventArgs e)
@@ -402,45 +406,28 @@ namespace Yaml_Creator
 
         private void ValidateIncludeExcludeList()
         {
-            validate(YAML.YAYARG.song_pool_inclusions);
-            validate(YAML.YAYARG.song_pool_exclusions);
+            validate(YAML.YAYARG.exclusions_per_pool);
+            validate(YAML.YAYARG.inclusions_per_pool);
             void validate(Dictionary<string, string[]> Target)
             {
-                foreach (var i in Target.Keys.ToArray())
+                foreach (var hash in Target.Keys.ToArray())
                 {
-                    if (!YAML.YAYARG.song_pools.ContainsKey(i))
+                    var Song = ExportFile.FirstOrDefault(x => x.core.SongChecksum == hash);
+                    if (Song is null)
                     {
-                        Target.Remove(i);
+                        Target.Remove(hash);
                         continue;
                     }
-                    Target[i] = Target[i].Where(targetHash =>
+                    HashSet<string> InvalidPools = new HashSet<string>();
+                    foreach(var pool in Target[hash].ToArray())
                     {
-                        var TargetSong = ExportFile.FirstOrDefault(x => x.core.SongChecksum == targetHash);
-                        if (TargetSong == null)
-                            return false;
-                        return TargetSong.core.ValidForPool(YAML.YAYARG.song_pools[i]);
-                    }).ToArray();
+                        if (!YAML.YAYARG.song_pools.TryGetValue(pool, out var poolData))
+                            InvalidPools.Add(pool);
+                        else if (!Song.core.ValidForPool(poolData))
+                            InvalidPools.Add(pool);
+                    }
+                    Target[hash] = Target[hash].Where(x => !InvalidPools.Contains(x)).ToArray();
                 }
-            }
-        }
-
-        private void EditExcludeIncludePerPool(bool Include)
-        {
-            if (SelectedSongPool == null)
-                return;
-
-            var Target = Include ? YAML.YAYARG.song_pool_inclusions : YAML.YAYARG.song_pool_exclusions;
-            var CurrentSelection = Target.TryGetValue(SelectedSongPool.Name, out var c) ? c : new string[0];
-            var AllSongs = ExportFile.Where(x => x.core.ValidForPool(SelectedSongPool.Pool));
-            var AlreadySelected = AllSongs.Where(x => CurrentSelection.Contains(x.core.SongChecksum));
-
-            ValueSelectForm form = new ValueSelectForm($"Select songs to {(Include ? "Include in" : "Exclude from")} pool {SelectedSongPool.Name}");
-            form.SetItems<SongExportExtendedData>(AllSongs, x => $"{x.core.Name} ny {x.core.Artist}", AlreadySelected);
-            if (form.ShowDialog() == DialogResult.OK)
-            {
-                Target[SelectedSongPool.Name] = form.GetSelectedValues<SongExportExtendedData>().Select(x => x.core.SongChecksum).ToArray();
-                UpdateIncludeExcludeListOnSongPage();
-                UpdateIncludeExcludeListOnPoolPage();
             }
         }
 
@@ -452,23 +439,29 @@ namespace Yaml_Creator
 
             ValueSelectForm form = new ValueSelectForm($"Select pools to {Action} {ExtendedData.core.Name} by {ExtendedData.core.Artist}");
             var allPools = YAML.YAYARG.song_pools.Keys;
-            var currentlySelected = Target.Where(x => x.Value.Contains(ExtendedData.core.SongChecksum)).Select(x => x.Key);
+            var currentlySelected = Target.TryGetValue(ExtendedData.core.SongChecksum, out var cur) ? cur : Array.Empty<string>(); ;
             form.SetItems<string>(allPools, x => x, currentlySelected);
 
             if (form.ShowDialog() == DialogResult.OK)
             {
-                foreach (var i in Target.Keys.ToList())
-                    Target[i] = Target[i].Where(x => x != ExtendedData.core.SongChecksum).ToArray();
-
-                foreach (var i in form.GetSelectedValues<string>())
-                {
-                    var CurrentValues = Target.TryGetValue(i, out var current) ? current.ToHashSet() : new HashSet<string>();
-                    CurrentValues.Add(ExtendedData.core.SongChecksum);
-                    Target[i] = CurrentValues.ToArray();
-                }
+                var Selected = form.GetSelectedValues<string>().ToArray();
+                if (Selected.Length > 0)
+                    Target[ExtendedData.core.SongChecksum] = form.GetSelectedValues<string>().ToArray();
+                else
+                    Target.Remove(ExtendedData.core.SongChecksum);
                 UpdateIncludeExcludeListOnSongPage();
-                UpdateIncludeExcludeListOnPoolPage();
             }
+        }
+
+        private void ToggleGlobalExludeList(SongExportData item, CheckState CheckState)
+        {
+            if (PrintingSongs)
+                return;
+
+            if (CheckState != CheckState.Checked)
+                YAML.YAYARG.song_exclusion_list.Add(item.SongChecksum);
+            else
+                YAML.YAYARG.song_exclusion_list.Remove(item.SongChecksum);
         }
 
         private enum DisplayTypes
