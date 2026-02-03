@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Diagnostics;
+using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -22,7 +23,7 @@ namespace Yaml_Creator
         public static SongPoolContainer SelectedSongPool = null;
         public bool IsLoadingNewSongPool = false;
         private const string cache = "cache";
-        private ContextMenuStrip activeSongsMenu = new ContextMenuStrip();
+        private ContextMenuStrip ctxMenu = new ContextMenuStrip();
         public MainForm()
         {
             InitializeComponent();
@@ -223,9 +224,14 @@ namespace Yaml_Creator
             btnEditIncludePools.Click += (s, e) => EditExculdeIncludeDictForSong(YAML.YAYARG.inclusions_per_pool, "Include");
 
             lbActiveSongs.MouseDown += LbActiveSongs_MouseDown;
-            
-            btnExportToText.Click += (s, e) => { SaveSongData(true); };
-            btnExportToJson.Click += (s, e) => { SaveSongData(false); };
+
+            btnExport.Click += (s, e) =>
+            {
+                ctxMenu.Items.Clear();
+                ctxMenu.Items.Add("Export as Text File", null, (_, __) => SaveSongData(true));
+                ctxMenu.Items.Add("Export as Json File", null, (_, __) => SaveSongData(true));
+                ctxMenu.Show(btnExport, new Point(0, btnExport.Height));
+            };
 
             btnGenYaml.Click += SaveYaml;
         }
@@ -243,13 +249,13 @@ namespace Yaml_Creator
 
             var item = (TaggedSongExportExtendedData)lbActiveSongs.Items[index];
 
-            activeSongsMenu.Items.Clear();
-            activeSongsMenu.Items.Add("Copy song hash", null, (_, __) =>
+            ctxMenu.Items.Clear();
+            ctxMenu.Items.Add("Copy song hash", null, (_, __) =>
             {
                 Clipboard.SetText(item.core.SongChecksum);
             });
 
-            activeSongsMenu.Show(lbActiveSongs, e.Location);
+            ctxMenu.Show(lbActiveSongs, e.Location);
         }
 
         private void SaveSongData(bool AsHash)
