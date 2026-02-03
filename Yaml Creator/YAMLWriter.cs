@@ -10,16 +10,7 @@ namespace Yaml_Creator
 
     public static class YAMLWriter
     {
-        public static void WriteToFile(YAMLCore core, string filePath)
-        {
-            var serializer = new SerializerBuilder()
-                .WithTypeConverter(new EnumDescriptionConverter())
-                .ConfigureDefaultValuesHandling(DefaultValuesHandling.OmitNull)
-                .Build();
-
-            string yaml = serializer.Serialize(core);
-            File.WriteAllText(filePath, yaml);
-        }
+        public static void WriteToFile(YAMLCore core, string filePath) => File.WriteAllText(filePath, SerializeToString(core));
 
         public static string SerializeToString(YAMLCore core)
         {

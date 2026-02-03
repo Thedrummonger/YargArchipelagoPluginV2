@@ -34,7 +34,7 @@ namespace YargArchipelagoPlugin
             List<(SongEntry, SongAPData)> SongEntries = new List<(SongEntry, SongAPData)>();
             foreach (var i in parent.SlotData.SongsByInstrument)
             {
-                if (!parent.ReceivedInstruments.ContainsKey(i.Key)) continue;
+                if (!parent.seedConfig.ShowMissingInstruments && !parent.ReceivedInstruments.ContainsKey(i.Key)) continue;
                 foreach (var song in i.Value)
                 {
                     if (!parent.ReceivedSongUnlockItems.ContainsKey(song.UnlockItemID)) continue;

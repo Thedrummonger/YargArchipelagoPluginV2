@@ -242,6 +242,8 @@ namespace YargArchipelagoPlugin
         public Dictionary<string, string> SongProxies { get; } = new Dictionary<string, string>();
         public Dictionary<string, CompletionRequirements> AdjustedDifficulties { get; } = new Dictionary<string, CompletionRequirements>();
 
+        public bool ShowMissingInstruments = false;
+
         public bool InGameAPChat = true;
 
         public ItemLog InGameItemLog = ItemLog.ToMe;

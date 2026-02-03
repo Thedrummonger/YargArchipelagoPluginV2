@@ -139,8 +139,12 @@ namespace YargArchipelagoPlugin
                 .ThenBy(e => e.APData.PoolName, StringComparer.OrdinalIgnoreCase)
                 .GroupBy(e => e.APData.PoolName))
             {
+                string PoolName = pool.Key.ToUpper();
+                if (container.seedConfig.ShowMissingInstruments && !container.ReceivedInstruments.ContainsKey(container.SlotData.Pools[pool.Key].instrument))
+                    PoolName = $"<color=#FF4040>{PoolName}</color>";
+
                 var poolSongs = pool.Select(e => e.song).OrderBy(s => s.Name, StringComparer.OrdinalIgnoreCase).ToArray();
-                listView.Insert(insertIndex++, new CategoryViewType($"AP: {pool.Key.ToUpper()}", poolSongs.Length, poolSongs, () => ShowPoolData(container, pool.Key)));
+                listView.Insert(insertIndex++, new CategoryViewType($"AP: {PoolName}", poolSongs.Length, poolSongs, () => ShowPoolData(container, pool.Key)));
 
                 foreach (var song in poolSongs)
                     listView.Insert(insertIndex++, new SongViewType(menu, song));
