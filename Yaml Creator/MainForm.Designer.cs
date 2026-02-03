@@ -97,8 +97,8 @@
             this.label3 = new System.Windows.Forms.Label();
             this.txtNewPoolName = new System.Windows.Forms.TextBox();
             this.label2 = new System.Windows.Forms.Label();
-            this.label1 = new System.Windows.Forms.Label();
             this.SongListTab = new System.Windows.Forms.TabPage();
+            this.lbActiveSongs = new System.Windows.Forms.CheckedListBox();
             this.btnFilter = new System.Windows.Forms.Button();
             this.txtActiveSongFilter = new System.Windows.Forms.TextBox();
             this.label17 = new System.Windows.Forms.Label();
@@ -117,7 +117,24 @@
             this.panel1 = new System.Windows.Forms.Panel();
             this.txtSlotName = new System.Windows.Forms.TextBox();
             this.label29 = new System.Windows.Forms.Label();
-            this.lbActiveSongs = new System.Windows.Forms.CheckedListBox();
+            this.tableLayoutPanel2 = new System.Windows.Forms.TableLayoutPanel();
+            this.tableLayoutPanel3 = new System.Windows.Forms.TableLayoutPanel();
+            this.tableLayoutPanel4 = new System.Windows.Forms.TableLayoutPanel();
+            this.groupBox2 = new System.Windows.Forms.GroupBox();
+            this.tableLayoutPanel5 = new System.Windows.Forms.TableLayoutPanel();
+            this.tableLayoutPanel6 = new System.Windows.Forms.TableLayoutPanel();
+            this.tableLayoutPanel7 = new System.Windows.Forms.TableLayoutPanel();
+            this.tableLayoutPanel8 = new System.Windows.Forms.TableLayoutPanel();
+            this.btnEditExcludePools = new System.Windows.Forms.Button();
+            this.btnEditIncludePools = new System.Windows.Forms.Button();
+            this.tableLayoutPanel9 = new System.Windows.Forms.TableLayoutPanel();
+            this.tableLayoutPanel10 = new System.Windows.Forms.TableLayoutPanel();
+            this.tableLayoutPanel11 = new System.Windows.Forms.TableLayoutPanel();
+            this.tableLayoutPanel12 = new System.Windows.Forms.TableLayoutPanel();
+            this.tableLayoutPanel13 = new System.Windows.Forms.TableLayoutPanel();
+            this.tableLayoutPanel14 = new System.Windows.Forms.TableLayoutPanel();
+            this.tableLayoutPanel15 = new System.Windows.Forms.TableLayoutPanel();
+            this.tableLayoutPanel16 = new System.Windows.Forms.TableLayoutPanel();
             this.TabControlMain.SuspendLayout();
             this.SettingsTab.SuspendLayout();
             this.groupBox6.SuspendLayout();
@@ -150,6 +167,22 @@
             this.menuStrip1.SuspendLayout();
             this.tableLayoutPanel1.SuspendLayout();
             this.panel1.SuspendLayout();
+            this.tableLayoutPanel2.SuspendLayout();
+            this.tableLayoutPanel3.SuspendLayout();
+            this.tableLayoutPanel4.SuspendLayout();
+            this.groupBox2.SuspendLayout();
+            this.tableLayoutPanel5.SuspendLayout();
+            this.tableLayoutPanel6.SuspendLayout();
+            this.tableLayoutPanel7.SuspendLayout();
+            this.tableLayoutPanel8.SuspendLayout();
+            this.tableLayoutPanel9.SuspendLayout();
+            this.tableLayoutPanel10.SuspendLayout();
+            this.tableLayoutPanel11.SuspendLayout();
+            this.tableLayoutPanel12.SuspendLayout();
+            this.tableLayoutPanel13.SuspendLayout();
+            this.tableLayoutPanel14.SuspendLayout();
+            this.tableLayoutPanel15.SuspendLayout();
+            this.tableLayoutPanel16.SuspendLayout();
             this.SuspendLayout();
             // 
             // TabControlMain
@@ -163,36 +196,30 @@
             this.TabControlMain.Margin = new System.Windows.Forms.Padding(2);
             this.TabControlMain.Name = "TabControlMain";
             this.TabControlMain.SelectedIndex = 0;
-            this.TabControlMain.Size = new System.Drawing.Size(279, 286);
+            this.TabControlMain.Size = new System.Drawing.Size(435, 325);
             this.TabControlMain.TabIndex = 0;
             // 
             // SettingsTab
             // 
-            this.SettingsTab.Controls.Add(this.groupBox6);
-            this.SettingsTab.Controls.Add(this.groupBox5);
+            this.SettingsTab.Controls.Add(this.tableLayoutPanel11);
             this.SettingsTab.Location = new System.Drawing.Point(4, 22);
             this.SettingsTab.Margin = new System.Windows.Forms.Padding(2);
             this.SettingsTab.Name = "SettingsTab";
             this.SettingsTab.Padding = new System.Windows.Forms.Padding(2);
-            this.SettingsTab.Size = new System.Drawing.Size(271, 260);
+            this.SettingsTab.Size = new System.Drawing.Size(434, 310);
             this.SettingsTab.TabIndex = 0;
             this.SettingsTab.Text = "Settings";
             this.SettingsTab.UseVisualStyleBackColor = true;
             // 
             // groupBox6
             // 
-            this.groupBox6.Controls.Add(this.chkGoalItemNeeded);
-            this.groupBox6.Controls.Add(this.label16);
-            this.groupBox6.Controls.Add(this.nudFameAmount);
-            this.groupBox6.Controls.Add(this.nudGoalSetlist);
-            this.groupBox6.Controls.Add(this.label18);
-            this.groupBox6.Controls.Add(this.label20);
-            this.groupBox6.Controls.Add(this.nudGoalFame);
-            this.groupBox6.Location = new System.Drawing.Point(8, 126);
+            this.groupBox6.Controls.Add(this.tableLayoutPanel10);
+            this.groupBox6.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.groupBox6.Location = new System.Drawing.Point(2, 155);
             this.groupBox6.Margin = new System.Windows.Forms.Padding(2);
             this.groupBox6.Name = "groupBox6";
             this.groupBox6.Padding = new System.Windows.Forms.Padding(2);
-            this.groupBox6.Size = new System.Drawing.Size(256, 116);
+            this.groupBox6.Size = new System.Drawing.Size(426, 149);
             this.groupBox6.TabIndex = 16;
             this.groupBox6.TabStop = false;
             this.groupBox6.Text = "Goal Settings";
@@ -200,10 +227,11 @@
             // chkGoalItemNeeded
             // 
             this.chkGoalItemNeeded.AutoSize = true;
-            this.chkGoalItemNeeded.Location = new System.Drawing.Point(7, 95);
+            this.chkGoalItemNeeded.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.chkGoalItemNeeded.Location = new System.Drawing.Point(2, 89);
             this.chkGoalItemNeeded.Margin = new System.Windows.Forms.Padding(2);
             this.chkGoalItemNeeded.Name = "chkGoalItemNeeded";
-            this.chkGoalItemNeeded.Size = new System.Drawing.Size(133, 17);
+            this.chkGoalItemNeeded.Size = new System.Drawing.Size(277, 41);
             this.chkGoalItemNeeded.TabIndex = 6;
             this.chkGoalItemNeeded.Text = "Goal Song Needs Item";
             this.chkGoalItemNeeded.UseVisualStyleBackColor = true;
@@ -211,19 +239,22 @@
             // label16
             // 
             this.label16.AutoSize = true;
-            this.label16.Location = new System.Drawing.Point(4, 22);
+            this.label16.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.label16.Location = new System.Drawing.Point(2, 0);
             this.label16.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.label16.Name = "label16";
-            this.label16.Size = new System.Drawing.Size(118, 13);
+            this.label16.Size = new System.Drawing.Size(277, 29);
             this.label16.TabIndex = 7;
             this.label16.Text = "Goal Setlist Percentage";
+            this.label16.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             // 
             // nudFameAmount
             // 
-            this.nudFameAmount.Location = new System.Drawing.Point(169, 66);
+            this.nudFameAmount.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.nudFameAmount.Location = new System.Drawing.Point(283, 60);
             this.nudFameAmount.Margin = new System.Windows.Forms.Padding(2);
             this.nudFameAmount.Name = "nudFameAmount";
-            this.nudFameAmount.Size = new System.Drawing.Size(54, 20);
+            this.nudFameAmount.Size = new System.Drawing.Size(137, 20);
             this.nudFameAmount.TabIndex = 12;
             this.nudFameAmount.Value = new decimal(new int[] {
             30,
@@ -233,10 +264,11 @@
             // 
             // nudGoalSetlist
             // 
-            this.nudGoalSetlist.Location = new System.Drawing.Point(169, 20);
+            this.nudGoalSetlist.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.nudGoalSetlist.Location = new System.Drawing.Point(283, 2);
             this.nudGoalSetlist.Margin = new System.Windows.Forms.Padding(2);
             this.nudGoalSetlist.Name = "nudGoalSetlist";
-            this.nudGoalSetlist.Size = new System.Drawing.Size(54, 20);
+            this.nudGoalSetlist.Size = new System.Drawing.Size(137, 20);
             this.nudGoalSetlist.TabIndex = 8;
             this.nudGoalSetlist.Value = new decimal(new int[] {
             50,
@@ -247,29 +279,34 @@
             // label18
             // 
             this.label18.AutoSize = true;
-            this.label18.Location = new System.Drawing.Point(4, 67);
+            this.label18.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.label18.Location = new System.Drawing.Point(2, 58);
             this.label18.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.label18.Name = "label18";
-            this.label18.Size = new System.Drawing.Size(99, 13);
+            this.label18.Size = new System.Drawing.Size(277, 29);
             this.label18.TabIndex = 11;
             this.label18.Text = "Fame Point Amount";
+            this.label18.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             // 
             // label20
             // 
             this.label20.AutoSize = true;
-            this.label20.Location = new System.Drawing.Point(4, 45);
+            this.label20.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.label20.Location = new System.Drawing.Point(2, 29);
             this.label20.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.label20.Name = "label20";
-            this.label20.Size = new System.Drawing.Size(143, 13);
+            this.label20.Size = new System.Drawing.Size(277, 29);
             this.label20.TabIndex = 9;
             this.label20.Text = "Goal Fame Point Percentage";
+            this.label20.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             // 
             // nudGoalFame
             // 
-            this.nudGoalFame.Location = new System.Drawing.Point(169, 43);
+            this.nudGoalFame.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.nudGoalFame.Location = new System.Drawing.Point(283, 31);
             this.nudGoalFame.Margin = new System.Windows.Forms.Padding(2);
             this.nudGoalFame.Name = "nudGoalFame";
-            this.nudGoalFame.Size = new System.Drawing.Size(54, 20);
+            this.nudGoalFame.Size = new System.Drawing.Size(137, 20);
             this.nudGoalFame.TabIndex = 10;
             this.nudGoalFame.Value = new decimal(new int[] {
             80,
@@ -279,19 +316,13 @@
             // 
             // groupBox5
             // 
-            this.groupBox5.Controls.Add(this.label14);
-            this.groupBox5.Controls.Add(this.nudStartingSongs);
-            this.groupBox5.Controls.Add(this.nudSongExtra);
-            this.groupBox5.Controls.Add(this.label19);
-            this.groupBox5.Controls.Add(this.label15);
-            this.groupBox5.Controls.Add(this.nudSongPack);
-            this.groupBox5.Controls.Add(this.chkReuseSongs);
-            this.groupBox5.Controls.Add(this.chkInstrumentShuffle);
-            this.groupBox5.Location = new System.Drawing.Point(8, 5);
+            this.groupBox5.Controls.Add(this.tableLayoutPanel9);
+            this.groupBox5.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.groupBox5.Location = new System.Drawing.Point(2, 2);
             this.groupBox5.Margin = new System.Windows.Forms.Padding(2);
             this.groupBox5.Name = "groupBox5";
             this.groupBox5.Padding = new System.Windows.Forms.Padding(2);
-            this.groupBox5.Size = new System.Drawing.Size(257, 116);
+            this.groupBox5.Size = new System.Drawing.Size(426, 149);
             this.groupBox5.TabIndex = 15;
             this.groupBox5.TabStop = false;
             this.groupBox5.Text = "Song Check Settings";
@@ -299,16 +330,19 @@
             // label14
             // 
             this.label14.AutoSize = true;
-            this.label14.Location = new System.Drawing.Point(4, 22);
+            this.label14.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.label14.Location = new System.Drawing.Point(2, 0);
             this.label14.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.label14.Name = "label14";
-            this.label14.Size = new System.Drawing.Size(151, 13);
+            this.label14.Size = new System.Drawing.Size(277, 29);
             this.label14.TabIndex = 0;
             this.label14.Text = "Song Extra Check Percentage";
+            this.label14.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             // 
             // nudStartingSongs
             // 
-            this.nudStartingSongs.Location = new System.Drawing.Point(169, 58);
+            this.nudStartingSongs.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.nudStartingSongs.Location = new System.Drawing.Point(283, 60);
             this.nudStartingSongs.Margin = new System.Windows.Forms.Padding(2);
             this.nudStartingSongs.Minimum = new decimal(new int[] {
             1,
@@ -316,7 +350,7 @@
             0,
             0});
             this.nudStartingSongs.Name = "nudStartingSongs";
-            this.nudStartingSongs.Size = new System.Drawing.Size(54, 20);
+            this.nudStartingSongs.Size = new System.Drawing.Size(137, 20);
             this.nudStartingSongs.TabIndex = 14;
             this.nudStartingSongs.Value = new decimal(new int[] {
             3,
@@ -326,10 +360,11 @@
             // 
             // nudSongExtra
             // 
-            this.nudSongExtra.Location = new System.Drawing.Point(169, 20);
+            this.nudSongExtra.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.nudSongExtra.Location = new System.Drawing.Point(283, 2);
             this.nudSongExtra.Margin = new System.Windows.Forms.Padding(2);
             this.nudSongExtra.Name = "nudSongExtra";
-            this.nudSongExtra.Size = new System.Drawing.Size(54, 20);
+            this.nudSongExtra.Size = new System.Drawing.Size(137, 20);
             this.nudSongExtra.TabIndex = 1;
             this.nudSongExtra.Value = new decimal(new int[] {
             100,
@@ -340,29 +375,34 @@
             // label19
             // 
             this.label19.AutoSize = true;
-            this.label19.Location = new System.Drawing.Point(4, 60);
+            this.label19.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.label19.Location = new System.Drawing.Point(2, 58);
             this.label19.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.label19.Name = "label19";
-            this.label19.Size = new System.Drawing.Size(76, 13);
+            this.label19.Size = new System.Drawing.Size(277, 29);
             this.label19.TabIndex = 13;
             this.label19.Text = "Starting Songs";
+            this.label19.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             // 
             // label15
             // 
             this.label15.AutoSize = true;
-            this.label15.Location = new System.Drawing.Point(4, 41);
+            this.label15.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.label15.Location = new System.Drawing.Point(2, 29);
             this.label15.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.label15.Name = "label15";
-            this.label15.Size = new System.Drawing.Size(99, 13);
+            this.label15.Size = new System.Drawing.Size(277, 29);
             this.label15.TabIndex = 2;
             this.label15.Text = "Song Pack Amount";
+            this.label15.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             // 
             // nudSongPack
             // 
-            this.nudSongPack.Location = new System.Drawing.Point(169, 39);
+            this.nudSongPack.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.nudSongPack.Location = new System.Drawing.Point(283, 31);
             this.nudSongPack.Margin = new System.Windows.Forms.Padding(2);
             this.nudSongPack.Name = "nudSongPack";
-            this.nudSongPack.Size = new System.Drawing.Size(54, 20);
+            this.nudSongPack.Size = new System.Drawing.Size(137, 20);
             this.nudSongPack.TabIndex = 3;
             this.nudSongPack.Value = new decimal(new int[] {
             1,
@@ -373,77 +413,78 @@
             // chkReuseSongs
             // 
             this.chkReuseSongs.AutoSize = true;
-            this.chkReuseSongs.Location = new System.Drawing.Point(7, 81);
+            this.chkReuseSongs.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.chkReuseSongs.Location = new System.Drawing.Point(2, 89);
             this.chkReuseSongs.Margin = new System.Windows.Forms.Padding(2);
             this.chkReuseSongs.Name = "chkReuseSongs";
-            this.chkReuseSongs.Size = new System.Drawing.Size(115, 30);
+            this.chkReuseSongs.Size = new System.Drawing.Size(277, 41);
             this.chkReuseSongs.TabIndex = 4;
-            this.chkReuseSongs.Text = "Reuse Songs \r\nAcross Instruments";
+            this.chkReuseSongs.Text = "Reuse Songs Across Instruments";
             this.chkReuseSongs.UseVisualStyleBackColor = true;
             // 
             // chkInstrumentShuffle
             // 
             this.chkInstrumentShuffle.AutoSize = true;
-            this.chkInstrumentShuffle.Location = new System.Drawing.Point(169, 81);
+            this.chkInstrumentShuffle.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.chkInstrumentShuffle.Location = new System.Drawing.Point(283, 89);
             this.chkInstrumentShuffle.Margin = new System.Windows.Forms.Padding(2);
             this.chkInstrumentShuffle.Name = "chkInstrumentShuffle";
-            this.chkInstrumentShuffle.Size = new System.Drawing.Size(78, 30);
+            this.chkInstrumentShuffle.Size = new System.Drawing.Size(137, 41);
             this.chkInstrumentShuffle.TabIndex = 5;
-            this.chkInstrumentShuffle.Text = "Instrument \r\nShuffle";
+            this.chkInstrumentShuffle.Text = "Instrument Shuffle";
             this.chkInstrumentShuffle.UseVisualStyleBackColor = true;
             // 
             // ExtraTab
             // 
-            this.ExtraTab.Controls.Add(this.groupBox9);
-            this.ExtraTab.Controls.Add(this.groupBox8);
-            this.ExtraTab.Controls.Add(this.groupBox7);
+            this.ExtraTab.Controls.Add(this.tableLayoutPanel15);
             this.ExtraTab.Location = new System.Drawing.Point(4, 22);
             this.ExtraTab.Margin = new System.Windows.Forms.Padding(2);
             this.ExtraTab.Name = "ExtraTab";
-            this.ExtraTab.Size = new System.Drawing.Size(271, 260);
+            this.ExtraTab.Size = new System.Drawing.Size(281, 270);
             this.ExtraTab.TabIndex = 3;
             this.ExtraTab.Text = "Extra";
             this.ExtraTab.UseVisualStyleBackColor = true;
             // 
             // groupBox9
             // 
-            this.groupBox9.Controls.Add(this.cmbGoalPoolPlando);
-            this.groupBox9.Controls.Add(this.chkGoalPoolPlando);
-            this.groupBox9.Controls.Add(this.cmbGoalSongPlando);
-            this.groupBox9.Controls.Add(this.chkGoalSongPlando);
-            this.groupBox9.Location = new System.Drawing.Point(8, 72);
+            this.groupBox9.Controls.Add(this.tableLayoutPanel12);
+            this.groupBox9.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.groupBox9.Location = new System.Drawing.Point(2, 82);
             this.groupBox9.Margin = new System.Windows.Forms.Padding(2);
             this.groupBox9.Name = "groupBox9";
             this.groupBox9.Padding = new System.Windows.Forms.Padding(2);
-            this.groupBox9.Size = new System.Drawing.Size(256, 43);
+            this.groupBox9.Size = new System.Drawing.Size(277, 46);
             this.groupBox9.TabIndex = 6;
             this.groupBox9.TabStop = false;
             this.groupBox9.Text = "Goal Song Plando";
             // 
             // cmbGoalPoolPlando
             // 
+            this.cmbGoalPoolPlando.Dock = System.Windows.Forms.DockStyle.Fill;
             this.cmbGoalPoolPlando.FormattingEnabled = true;
-            this.cmbGoalPoolPlando.Location = new System.Drawing.Point(173, 17);
+            this.cmbGoalPoolPlando.Location = new System.Drawing.Point(198, 2);
             this.cmbGoalPoolPlando.Margin = new System.Windows.Forms.Padding(2);
             this.cmbGoalPoolPlando.Name = "cmbGoalPoolPlando";
-            this.cmbGoalPoolPlando.Size = new System.Drawing.Size(74, 21);
+            this.cmbGoalPoolPlando.Size = new System.Drawing.Size(73, 21);
             this.cmbGoalPoolPlando.TabIndex = 3;
             // 
             // chkGoalPoolPlando
             // 
             this.chkGoalPoolPlando.AutoSize = true;
-            this.chkGoalPoolPlando.Location = new System.Drawing.Point(125, 19);
+            this.chkGoalPoolPlando.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.chkGoalPoolPlando.Location = new System.Drawing.Point(138, 2);
             this.chkGoalPoolPlando.Margin = new System.Windows.Forms.Padding(2);
             this.chkGoalPoolPlando.Name = "chkGoalPoolPlando";
-            this.chkGoalPoolPlando.Size = new System.Drawing.Size(47, 17);
+            this.chkGoalPoolPlando.Size = new System.Drawing.Size(56, 25);
             this.chkGoalPoolPlando.TabIndex = 2;
             this.chkGoalPoolPlando.Text = "Pool";
             this.chkGoalPoolPlando.UseVisualStyleBackColor = true;
             // 
             // cmbGoalSongPlando
             // 
+            this.cmbGoalSongPlando.Dock = System.Windows.Forms.DockStyle.Fill;
             this.cmbGoalSongPlando.FormattingEnabled = true;
-            this.cmbGoalSongPlando.Location = new System.Drawing.Point(50, 17);
+            this.cmbGoalSongPlando.Location = new System.Drawing.Point(62, 2);
             this.cmbGoalSongPlando.Margin = new System.Windows.Forms.Padding(2);
             this.cmbGoalSongPlando.Name = "cmbGoalSongPlando";
             this.cmbGoalSongPlando.Size = new System.Drawing.Size(72, 21);
@@ -452,25 +493,24 @@
             // chkGoalSongPlando
             // 
             this.chkGoalSongPlando.AutoSize = true;
-            this.chkGoalSongPlando.Location = new System.Drawing.Point(4, 19);
+            this.chkGoalSongPlando.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.chkGoalSongPlando.Location = new System.Drawing.Point(2, 2);
             this.chkGoalSongPlando.Margin = new System.Windows.Forms.Padding(2);
             this.chkGoalSongPlando.Name = "chkGoalSongPlando";
-            this.chkGoalSongPlando.Size = new System.Drawing.Size(51, 17);
+            this.chkGoalSongPlando.Size = new System.Drawing.Size(56, 25);
             this.chkGoalSongPlando.TabIndex = 0;
             this.chkGoalSongPlando.Text = "Song";
             this.chkGoalSongPlando.UseVisualStyleBackColor = true;
             // 
             // groupBox8
             // 
-            this.groupBox8.Controls.Add(this.label22);
-            this.groupBox8.Controls.Add(this.label21);
-            this.groupBox8.Controls.Add(this.cmbEnergyLink);
-            this.groupBox8.Controls.Add(this.cmbDeathLink);
-            this.groupBox8.Location = new System.Drawing.Point(8, 2);
+            this.groupBox8.Controls.Add(this.tableLayoutPanel13);
+            this.groupBox8.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.groupBox8.Location = new System.Drawing.Point(2, 2);
             this.groupBox8.Margin = new System.Windows.Forms.Padding(2);
             this.groupBox8.Name = "groupBox8";
             this.groupBox8.Padding = new System.Windows.Forms.Padding(2);
-            this.groupBox8.Size = new System.Drawing.Size(256, 65);
+            this.groupBox8.Size = new System.Drawing.Size(277, 76);
             this.groupBox8.TabIndex = 5;
             this.groupBox8.TabStop = false;
             this.groupBox8.Text = "Link Settings";
@@ -478,60 +518,54 @@
             // label22
             // 
             this.label22.AutoSize = true;
-            this.label22.Location = new System.Drawing.Point(4, 42);
+            this.label22.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.label22.Location = new System.Drawing.Point(2, 29);
             this.label22.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.label22.Name = "label22";
-            this.label22.Size = new System.Drawing.Size(89, 13);
+            this.label22.Size = new System.Drawing.Size(96, 30);
             this.label22.TabIndex = 1;
             this.label22.Text = "Death Link Mode";
             // 
             // label21
             // 
             this.label21.AutoSize = true;
-            this.label21.Location = new System.Drawing.Point(4, 15);
+            this.label21.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.label21.Location = new System.Drawing.Point(2, 0);
             this.label21.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.label21.Name = "label21";
-            this.label21.Size = new System.Drawing.Size(93, 13);
+            this.label21.Size = new System.Drawing.Size(96, 29);
             this.label21.TabIndex = 0;
             this.label21.Text = "Energy Link Mode";
             // 
             // cmbEnergyLink
             // 
+            this.cmbEnergyLink.Dock = System.Windows.Forms.DockStyle.Fill;
             this.cmbEnergyLink.FormattingEnabled = true;
-            this.cmbEnergyLink.Location = new System.Drawing.Point(130, 15);
+            this.cmbEnergyLink.Location = new System.Drawing.Point(102, 2);
             this.cmbEnergyLink.Margin = new System.Windows.Forms.Padding(2);
             this.cmbEnergyLink.Name = "cmbEnergyLink";
-            this.cmbEnergyLink.Size = new System.Drawing.Size(115, 21);
+            this.cmbEnergyLink.Size = new System.Drawing.Size(169, 21);
             this.cmbEnergyLink.TabIndex = 3;
             // 
             // cmbDeathLink
             // 
+            this.cmbDeathLink.Dock = System.Windows.Forms.DockStyle.Fill;
             this.cmbDeathLink.FormattingEnabled = true;
-            this.cmbDeathLink.Location = new System.Drawing.Point(130, 40);
+            this.cmbDeathLink.Location = new System.Drawing.Point(102, 31);
             this.cmbDeathLink.Margin = new System.Windows.Forms.Padding(2);
             this.cmbDeathLink.Name = "cmbDeathLink";
-            this.cmbDeathLink.Size = new System.Drawing.Size(115, 21);
+            this.cmbDeathLink.Size = new System.Drawing.Size(169, 21);
             this.cmbDeathLink.TabIndex = 2;
             // 
             // groupBox7
             // 
-            this.groupBox7.Controls.Add(this.label26);
-            this.groupBox7.Controls.Add(this.label27);
-            this.groupBox7.Controls.Add(this.nudRestartTrap);
-            this.groupBox7.Controls.Add(this.nudRockTrap);
-            this.groupBox7.Controls.Add(this.nudLowerDiff);
-            this.groupBox7.Controls.Add(this.label28);
-            this.groupBox7.Controls.Add(this.label25);
-            this.groupBox7.Controls.Add(this.label24);
-            this.groupBox7.Controls.Add(this.nudSwapPick);
-            this.groupBox7.Controls.Add(this.nudSwapRandom);
-            this.groupBox7.Controls.Add(this.nudStarPower);
-            this.groupBox7.Controls.Add(this.label23);
-            this.groupBox7.Location = new System.Drawing.Point(8, 120);
+            this.groupBox7.Controls.Add(this.tableLayoutPanel14);
+            this.groupBox7.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.groupBox7.Location = new System.Drawing.Point(2, 132);
             this.groupBox7.Margin = new System.Windows.Forms.Padding(2);
             this.groupBox7.Name = "groupBox7";
             this.groupBox7.Padding = new System.Windows.Forms.Padding(2);
-            this.groupBox7.Size = new System.Drawing.Size(256, 134);
+            this.groupBox7.Size = new System.Drawing.Size(277, 136);
             this.groupBox7.TabIndex = 4;
             this.groupBox7.TabStop = false;
             this.groupBox7.Text = "Filler Item Weights";
@@ -539,39 +573,43 @@
             // label26
             // 
             this.label26.AutoSize = true;
-            this.label26.Location = new System.Drawing.Point(168, 73);
+            this.label26.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.label26.Location = new System.Drawing.Point(183, 58);
             this.label26.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.label26.Name = "label26";
-            this.label26.Size = new System.Drawing.Size(44, 26);
+            this.label26.Size = new System.Drawing.Size(88, 29);
             this.label26.TabIndex = 11;
-            this.label26.Text = "Restart \r\nTrap";
+            this.label26.Text = "Restart Trap";
             this.label26.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             // 
             // label27
             // 
             this.label27.AutoSize = true;
-            this.label27.Location = new System.Drawing.Point(86, 73);
+            this.label27.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.label27.Location = new System.Drawing.Point(92, 58);
             this.label27.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.label27.Name = "label27";
-            this.label27.Size = new System.Drawing.Size(63, 26);
+            this.label27.Size = new System.Drawing.Size(87, 29);
             this.label27.TabIndex = 10;
-            this.label27.Text = "Rock Meter\r\nTrap";
+            this.label27.Text = "Rock Meter Trap";
             this.label27.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             // 
             // nudRestartTrap
             // 
-            this.nudRestartTrap.Location = new System.Drawing.Point(170, 102);
+            this.nudRestartTrap.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.nudRestartTrap.Location = new System.Drawing.Point(183, 89);
             this.nudRestartTrap.Margin = new System.Windows.Forms.Padding(2);
             this.nudRestartTrap.Name = "nudRestartTrap";
-            this.nudRestartTrap.Size = new System.Drawing.Size(69, 20);
+            this.nudRestartTrap.Size = new System.Drawing.Size(88, 20);
             this.nudRestartTrap.TabIndex = 9;
             // 
             // nudRockTrap
             // 
-            this.nudRockTrap.Location = new System.Drawing.Point(88, 102);
+            this.nudRockTrap.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.nudRockTrap.Location = new System.Drawing.Point(92, 89);
             this.nudRockTrap.Margin = new System.Windows.Forms.Padding(2);
             this.nudRockTrap.Name = "nudRockTrap";
-            this.nudRockTrap.Size = new System.Drawing.Size(69, 20);
+            this.nudRockTrap.Size = new System.Drawing.Size(87, 20);
             this.nudRockTrap.TabIndex = 8;
             this.nudRockTrap.Value = new decimal(new int[] {
             1,
@@ -581,10 +619,11 @@
             // 
             // nudLowerDiff
             // 
-            this.nudLowerDiff.Location = new System.Drawing.Point(7, 102);
+            this.nudLowerDiff.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.nudLowerDiff.Location = new System.Drawing.Point(2, 89);
             this.nudLowerDiff.Margin = new System.Windows.Forms.Padding(2);
             this.nudLowerDiff.Name = "nudLowerDiff";
-            this.nudLowerDiff.Size = new System.Drawing.Size(69, 20);
+            this.nudLowerDiff.Size = new System.Drawing.Size(86, 20);
             this.nudLowerDiff.TabIndex = 7;
             this.nudLowerDiff.Value = new decimal(new int[] {
             2,
@@ -595,42 +634,46 @@
             // label28
             // 
             this.label28.AutoSize = true;
-            this.label28.Location = new System.Drawing.Point(4, 80);
+            this.label28.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.label28.Location = new System.Drawing.Point(2, 58);
             this.label28.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.label28.Name = "label28";
-            this.label28.Size = new System.Drawing.Size(79, 13);
+            this.label28.Size = new System.Drawing.Size(86, 29);
             this.label28.TabIndex = 6;
             this.label28.Text = "Lower Difficulty";
-            this.label28.TextAlign = System.Drawing.ContentAlignment.TopCenter;
+            this.label28.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             // 
             // label25
             // 
             this.label25.AutoSize = true;
-            this.label25.Location = new System.Drawing.Point(168, 23);
+            this.label25.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.label25.Location = new System.Drawing.Point(183, 0);
             this.label25.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.label25.Name = "label25";
-            this.label25.Size = new System.Drawing.Size(65, 26);
+            this.label25.Size = new System.Drawing.Size(88, 29);
             this.label25.TabIndex = 5;
-            this.label25.Text = "Swap Song \r\nPick";
+            this.label25.Text = "Swap Song Pick";
             this.label25.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             // 
             // label24
             // 
             this.label24.AutoSize = true;
-            this.label24.Location = new System.Drawing.Point(86, 23);
+            this.label24.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.label24.Location = new System.Drawing.Point(92, 0);
             this.label24.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.label24.Name = "label24";
-            this.label24.Size = new System.Drawing.Size(73, 26);
+            this.label24.Size = new System.Drawing.Size(87, 29);
             this.label24.TabIndex = 4;
-            this.label24.Text = "Swamp Song \r\nRandom";
+            this.label24.Text = "Swamp Song Random";
             this.label24.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             // 
             // nudSwapPick
             // 
-            this.nudSwapPick.Location = new System.Drawing.Point(170, 51);
+            this.nudSwapPick.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.nudSwapPick.Location = new System.Drawing.Point(183, 31);
             this.nudSwapPick.Margin = new System.Windows.Forms.Padding(2);
             this.nudSwapPick.Name = "nudSwapPick";
-            this.nudSwapPick.Size = new System.Drawing.Size(69, 20);
+            this.nudSwapPick.Size = new System.Drawing.Size(88, 20);
             this.nudSwapPick.TabIndex = 3;
             this.nudSwapPick.Value = new decimal(new int[] {
             3,
@@ -640,10 +683,11 @@
             // 
             // nudSwapRandom
             // 
-            this.nudSwapRandom.Location = new System.Drawing.Point(88, 51);
+            this.nudSwapRandom.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.nudSwapRandom.Location = new System.Drawing.Point(92, 31);
             this.nudSwapRandom.Margin = new System.Windows.Forms.Padding(2);
             this.nudSwapRandom.Name = "nudSwapRandom";
-            this.nudSwapRandom.Size = new System.Drawing.Size(69, 20);
+            this.nudSwapRandom.Size = new System.Drawing.Size(87, 20);
             this.nudSwapRandom.TabIndex = 2;
             this.nudSwapRandom.Value = new decimal(new int[] {
             5,
@@ -653,10 +697,11 @@
             // 
             // nudStarPower
             // 
-            this.nudStarPower.Location = new System.Drawing.Point(7, 51);
+            this.nudStarPower.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.nudStarPower.Location = new System.Drawing.Point(2, 31);
             this.nudStarPower.Margin = new System.Windows.Forms.Padding(2);
             this.nudStarPower.Name = "nudStarPower";
-            this.nudStarPower.Size = new System.Drawing.Size(69, 20);
+            this.nudStarPower.Size = new System.Drawing.Size(86, 20);
             this.nudStarPower.TabIndex = 1;
             this.nudStarPower.Value = new decimal(new int[] {
             5,
@@ -667,37 +712,34 @@
             // label23
             // 
             this.label23.AutoSize = true;
-            this.label23.Location = new System.Drawing.Point(4, 30);
+            this.label23.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.label23.Location = new System.Drawing.Point(2, 0);
             this.label23.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.label23.Name = "label23";
-            this.label23.Size = new System.Drawing.Size(59, 13);
+            this.label23.Size = new System.Drawing.Size(86, 29);
             this.label23.TabIndex = 0;
             this.label23.Text = "Star Power";
-            this.label23.TextAlign = System.Drawing.ContentAlignment.TopCenter;
+            this.label23.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             // 
             // SongPoolTab
             // 
-            this.SongPoolTab.Controls.Add(this.btnRemovePool);
-            this.SongPoolTab.Controls.Add(this.groupBox3);
-            this.SongPoolTab.Controls.Add(this.lbSongPoolList);
-            this.SongPoolTab.Controls.Add(this.gbSelectedPool);
-            this.SongPoolTab.Controls.Add(this.groupBox1);
-            this.SongPoolTab.Controls.Add(this.label1);
+            this.SongPoolTab.Controls.Add(this.tableLayoutPanel7);
             this.SongPoolTab.Location = new System.Drawing.Point(4, 22);
             this.SongPoolTab.Margin = new System.Windows.Forms.Padding(2);
             this.SongPoolTab.Name = "SongPoolTab";
             this.SongPoolTab.Padding = new System.Windows.Forms.Padding(2);
-            this.SongPoolTab.Size = new System.Drawing.Size(271, 260);
+            this.SongPoolTab.Size = new System.Drawing.Size(427, 299);
             this.SongPoolTab.TabIndex = 1;
             this.SongPoolTab.Text = "Song Pools";
             this.SongPoolTab.UseVisualStyleBackColor = true;
             // 
             // btnRemovePool
             // 
-            this.btnRemovePool.Location = new System.Drawing.Point(7, 121);
+            this.btnRemovePool.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.btnRemovePool.Location = new System.Drawing.Point(2, 117);
             this.btnRemovePool.Margin = new System.Windows.Forms.Padding(2);
             this.btnRemovePool.Name = "btnRemovePool";
-            this.btnRemovePool.Size = new System.Drawing.Size(107, 19);
+            this.btnRemovePool.Size = new System.Drawing.Size(195, 21);
             this.btnRemovePool.TabIndex = 5;
             this.btnRemovePool.Text = "Remove Selected";
             this.btnRemovePool.UseVisualStyleBackColor = true;
@@ -705,15 +747,13 @@
             // 
             // groupBox3
             // 
-            this.groupBox3.Controls.Add(this.label7);
-            this.groupBox3.Controls.Add(this.label8);
-            this.groupBox3.Controls.Add(this.cmbReward1Diff);
-            this.groupBox3.Controls.Add(this.cmbReward1Score);
-            this.groupBox3.Location = new System.Drawing.Point(119, 162);
+            this.groupBox3.Controls.Add(this.tableLayoutPanel3);
+            this.groupBox3.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.groupBox3.Location = new System.Drawing.Point(2, 134);
             this.groupBox3.Margin = new System.Windows.Forms.Padding(2);
             this.groupBox3.Name = "groupBox3";
             this.groupBox3.Padding = new System.Windows.Forms.Padding(2);
-            this.groupBox3.Size = new System.Drawing.Size(75, 88);
+            this.groupBox3.Size = new System.Drawing.Size(98, 138);
             this.groupBox3.TabIndex = 6;
             this.groupBox3.TabStop = false;
             this.groupBox3.Text = "Reward 1";
@@ -721,79 +761,80 @@
             // label7
             // 
             this.label7.AutoSize = true;
-            this.label7.Location = new System.Drawing.Point(4, 15);
+            this.label7.Dock = System.Windows.Forms.DockStyle.Left;
+            this.label7.Location = new System.Drawing.Point(2, 0);
             this.label7.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.label7.Name = "label7";
-            this.label7.Size = new System.Drawing.Size(67, 13);
+            this.label7.Size = new System.Drawing.Size(67, 30);
             this.label7.TabIndex = 6;
             this.label7.Text = "Min Difficulty";
+            this.label7.TextAlign = System.Drawing.ContentAlignment.BottomLeft;
             // 
             // label8
             // 
             this.label8.AutoSize = true;
-            this.label8.Location = new System.Drawing.Point(4, 51);
+            this.label8.Dock = System.Windows.Forms.DockStyle.Left;
+            this.label8.Location = new System.Drawing.Point(2, 60);
             this.label8.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.label8.Name = "label8";
-            this.label8.Size = new System.Drawing.Size(55, 13);
+            this.label8.Size = new System.Drawing.Size(55, 30);
             this.label8.TabIndex = 7;
             this.label8.Text = "Min Score";
+            this.label8.TextAlign = System.Drawing.ContentAlignment.BottomLeft;
             // 
             // cmbReward1Diff
             // 
+            this.cmbReward1Diff.Dock = System.Windows.Forms.DockStyle.Fill;
             this.cmbReward1Diff.FormattingEnabled = true;
-            this.cmbReward1Diff.Location = new System.Drawing.Point(7, 29);
+            this.cmbReward1Diff.Location = new System.Drawing.Point(2, 32);
             this.cmbReward1Diff.Margin = new System.Windows.Forms.Padding(2);
             this.cmbReward1Diff.Name = "cmbReward1Diff";
-            this.cmbReward1Diff.Size = new System.Drawing.Size(59, 21);
+            this.cmbReward1Diff.Size = new System.Drawing.Size(90, 21);
             this.cmbReward1Diff.TabIndex = 8;
             // 
             // cmbReward1Score
             // 
+            this.cmbReward1Score.Dock = System.Windows.Forms.DockStyle.Fill;
             this.cmbReward1Score.FormattingEnabled = true;
-            this.cmbReward1Score.Location = new System.Drawing.Point(7, 64);
+            this.cmbReward1Score.Location = new System.Drawing.Point(2, 92);
             this.cmbReward1Score.Margin = new System.Windows.Forms.Padding(2);
             this.cmbReward1Score.Name = "cmbReward1Score";
-            this.cmbReward1Score.Size = new System.Drawing.Size(59, 21);
+            this.cmbReward1Score.Size = new System.Drawing.Size(90, 21);
             this.cmbReward1Score.TabIndex = 10;
             // 
             // lbSongPoolList
             // 
+            this.lbSongPoolList.Dock = System.Windows.Forms.DockStyle.Fill;
             this.lbSongPoolList.FormattingEnabled = true;
-            this.lbSongPoolList.Location = new System.Drawing.Point(7, 22);
+            this.lbSongPoolList.Location = new System.Drawing.Point(2, 2);
             this.lbSongPoolList.Margin = new System.Windows.Forms.Padding(2);
             this.lbSongPoolList.Name = "lbSongPoolList";
-            this.lbSongPoolList.Size = new System.Drawing.Size(108, 95);
+            this.lbSongPoolList.Size = new System.Drawing.Size(195, 111);
             this.lbSongPoolList.TabIndex = 4;
             // 
             // gbSelectedPool
             // 
-            this.gbSelectedPool.Controls.Add(this.groupBox4);
-            this.gbSelectedPool.Controls.Add(this.nudPoolMaxDifficulty);
-            this.gbSelectedPool.Controls.Add(this.label6);
-            this.gbSelectedPool.Controls.Add(this.nudPoolMinDifficulty);
-            this.gbSelectedPool.Controls.Add(this.label5);
-            this.gbSelectedPool.Controls.Add(this.nudAmountInPool);
-            this.gbSelectedPool.Controls.Add(this.label4);
-            this.gbSelectedPool.Location = new System.Drawing.Point(121, 5);
+            this.gbSelectedPool.Controls.Add(this.tableLayoutPanel2);
+            this.gbSelectedPool.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.gbSelectedPool.Location = new System.Drawing.Point(213, 2);
             this.gbSelectedPool.Margin = new System.Windows.Forms.Padding(2);
             this.gbSelectedPool.Name = "gbSelectedPool";
             this.gbSelectedPool.Padding = new System.Windows.Forms.Padding(2);
-            this.gbSelectedPool.Size = new System.Drawing.Size(147, 257);
+            this.tableLayoutPanel7.SetRowSpan(this.gbSelectedPool, 2);
+            this.gbSelectedPool.Size = new System.Drawing.Size(208, 291);
             this.gbSelectedPool.TabIndex = 3;
             this.gbSelectedPool.TabStop = false;
             this.gbSelectedPool.Text = "SelectedPool";
             // 
             // groupBox4
             // 
-            this.groupBox4.Controls.Add(this.label10);
-            this.groupBox4.Controls.Add(this.label9);
-            this.groupBox4.Controls.Add(this.cmbReward2Diff);
-            this.groupBox4.Controls.Add(this.cmbReward2Score);
-            this.groupBox4.Location = new System.Drawing.Point(73, 157);
+            this.groupBox4.Controls.Add(this.tableLayoutPanel4);
+            this.groupBox4.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.groupBox4.Location = new System.Drawing.Point(104, 134);
             this.groupBox4.Margin = new System.Windows.Forms.Padding(2);
             this.groupBox4.Name = "groupBox4";
             this.groupBox4.Padding = new System.Windows.Forms.Padding(2);
-            this.groupBox4.Size = new System.Drawing.Size(75, 88);
+            this.groupBox4.Size = new System.Drawing.Size(98, 138);
             this.groupBox4.TabIndex = 7;
             this.groupBox4.TabStop = false;
             this.groupBox4.Text = "Reward 2";
@@ -801,120 +842,133 @@
             // label10
             // 
             this.label10.AutoSize = true;
-            this.label10.Location = new System.Drawing.Point(4, 51);
+            this.label10.Dock = System.Windows.Forms.DockStyle.Bottom;
+            this.label10.Location = new System.Drawing.Point(2, 77);
             this.label10.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.label10.Name = "label10";
-            this.label10.Size = new System.Drawing.Size(56, 13);
+            this.label10.Size = new System.Drawing.Size(90, 13);
             this.label10.TabIndex = 13;
-            this.label10.Text = "MIn Score";
+            this.label10.Text = "Min Score";
+            this.label10.TextAlign = System.Drawing.ContentAlignment.BottomLeft;
             // 
             // label9
             // 
             this.label9.AutoSize = true;
-            this.label9.Location = new System.Drawing.Point(4, 15);
+            this.label9.Dock = System.Windows.Forms.DockStyle.Bottom;
+            this.label9.Location = new System.Drawing.Point(2, 17);
             this.label9.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.label9.Name = "label9";
-            this.label9.Size = new System.Drawing.Size(67, 13);
+            this.label9.Size = new System.Drawing.Size(90, 13);
             this.label9.TabIndex = 12;
             this.label9.Text = "Min Difficulty";
+            this.label9.TextAlign = System.Drawing.ContentAlignment.BottomLeft;
             // 
             // cmbReward2Diff
             // 
+            this.cmbReward2Diff.Dock = System.Windows.Forms.DockStyle.Fill;
             this.cmbReward2Diff.FormattingEnabled = true;
-            this.cmbReward2Diff.Location = new System.Drawing.Point(7, 29);
+            this.cmbReward2Diff.Location = new System.Drawing.Point(2, 32);
             this.cmbReward2Diff.Margin = new System.Windows.Forms.Padding(2);
             this.cmbReward2Diff.Name = "cmbReward2Diff";
-            this.cmbReward2Diff.Size = new System.Drawing.Size(59, 21);
+            this.cmbReward2Diff.Size = new System.Drawing.Size(90, 21);
             this.cmbReward2Diff.TabIndex = 9;
             // 
             // cmbReward2Score
             // 
+            this.cmbReward2Score.Dock = System.Windows.Forms.DockStyle.Fill;
             this.cmbReward2Score.FormattingEnabled = true;
-            this.cmbReward2Score.Location = new System.Drawing.Point(7, 64);
+            this.cmbReward2Score.Location = new System.Drawing.Point(2, 92);
             this.cmbReward2Score.Margin = new System.Windows.Forms.Padding(2);
             this.cmbReward2Score.Name = "cmbReward2Score";
-            this.cmbReward2Score.Size = new System.Drawing.Size(59, 21);
+            this.cmbReward2Score.Size = new System.Drawing.Size(90, 21);
             this.cmbReward2Score.TabIndex = 11;
             // 
             // nudPoolMaxDifficulty
             // 
-            this.nudPoolMaxDifficulty.Location = new System.Drawing.Point(5, 123);
+            this.nudPoolMaxDifficulty.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.nudPoolMaxDifficulty.Location = new System.Drawing.Point(2, 109);
             this.nudPoolMaxDifficulty.Margin = new System.Windows.Forms.Padding(2);
             this.nudPoolMaxDifficulty.Name = "nudPoolMaxDifficulty";
-            this.nudPoolMaxDifficulty.Size = new System.Drawing.Size(62, 20);
+            this.nudPoolMaxDifficulty.Size = new System.Drawing.Size(98, 20);
             this.nudPoolMaxDifficulty.TabIndex = 5;
             // 
             // label6
             // 
             this.label6.AutoSize = true;
-            this.label6.Location = new System.Drawing.Point(2, 108);
+            this.tableLayoutPanel2.SetColumnSpan(this.label6, 2);
+            this.label6.Dock = System.Windows.Forms.DockStyle.Left;
+            this.label6.Location = new System.Drawing.Point(2, 88);
             this.label6.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.label6.Name = "label6";
-            this.label6.Size = new System.Drawing.Size(97, 13);
+            this.label6.Size = new System.Drawing.Size(97, 19);
             this.label6.TabIndex = 4;
             this.label6.Text = "Min Difficulty Value";
-            this.label6.TextAlign = System.Drawing.ContentAlignment.TopCenter;
+            this.label6.TextAlign = System.Drawing.ContentAlignment.BottomLeft;
             // 
             // nudPoolMinDifficulty
             // 
-            this.nudPoolMinDifficulty.Location = new System.Drawing.Point(5, 75);
+            this.nudPoolMinDifficulty.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.nudPoolMinDifficulty.Location = new System.Drawing.Point(2, 65);
             this.nudPoolMinDifficulty.Margin = new System.Windows.Forms.Padding(2);
             this.nudPoolMinDifficulty.Name = "nudPoolMinDifficulty";
-            this.nudPoolMinDifficulty.Size = new System.Drawing.Size(62, 20);
+            this.nudPoolMinDifficulty.Size = new System.Drawing.Size(98, 20);
             this.nudPoolMinDifficulty.TabIndex = 3;
             // 
             // label5
             // 
             this.label5.AutoSize = true;
-            this.label5.Location = new System.Drawing.Point(2, 60);
+            this.tableLayoutPanel2.SetColumnSpan(this.label5, 2);
+            this.label5.Dock = System.Windows.Forms.DockStyle.Left;
+            this.label5.Location = new System.Drawing.Point(2, 44);
             this.label5.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.label5.Name = "label5";
-            this.label5.Size = new System.Drawing.Size(100, 13);
+            this.label5.Size = new System.Drawing.Size(100, 19);
             this.label5.TabIndex = 2;
             this.label5.Text = "Max Difficulty Value";
-            this.label5.TextAlign = System.Drawing.ContentAlignment.TopCenter;
+            this.label5.TextAlign = System.Drawing.ContentAlignment.BottomLeft;
             // 
             // nudAmountInPool
             // 
-            this.nudAmountInPool.Location = new System.Drawing.Point(5, 30);
+            this.nudAmountInPool.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.nudAmountInPool.Location = new System.Drawing.Point(2, 21);
             this.nudAmountInPool.Margin = new System.Windows.Forms.Padding(2);
             this.nudAmountInPool.Name = "nudAmountInPool";
-            this.nudAmountInPool.Size = new System.Drawing.Size(62, 20);
+            this.nudAmountInPool.Size = new System.Drawing.Size(98, 20);
             this.nudAmountInPool.TabIndex = 1;
             // 
             // label4
             // 
             this.label4.AutoSize = true;
-            this.label4.Location = new System.Drawing.Point(2, 15);
+            this.tableLayoutPanel2.SetColumnSpan(this.label4, 2);
+            this.label4.Dock = System.Windows.Forms.DockStyle.Left;
+            this.label4.Location = new System.Drawing.Point(2, 0);
             this.label4.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.label4.Name = "label4";
-            this.label4.Size = new System.Drawing.Size(140, 13);
+            this.label4.Size = new System.Drawing.Size(140, 19);
             this.label4.TabIndex = 0;
             this.label4.Text = "Amount of songs in this Pool";
-            this.label4.TextAlign = System.Drawing.ContentAlignment.TopCenter;
+            this.label4.TextAlign = System.Drawing.ContentAlignment.BottomLeft;
             // 
             // groupBox1
             // 
-            this.groupBox1.Controls.Add(this.btnAddPool);
-            this.groupBox1.Controls.Add(this.txtNewPoolIsntrument);
-            this.groupBox1.Controls.Add(this.label3);
-            this.groupBox1.Controls.Add(this.txtNewPoolName);
-            this.groupBox1.Controls.Add(this.label2);
-            this.groupBox1.Location = new System.Drawing.Point(7, 145);
+            this.groupBox1.Controls.Add(this.tableLayoutPanel6);
+            this.groupBox1.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.groupBox1.Location = new System.Drawing.Point(2, 167);
             this.groupBox1.Margin = new System.Windows.Forms.Padding(2);
             this.groupBox1.Name = "groupBox1";
             this.groupBox1.Padding = new System.Windows.Forms.Padding(2);
-            this.groupBox1.Size = new System.Drawing.Size(110, 116);
+            this.groupBox1.Size = new System.Drawing.Size(207, 126);
             this.groupBox1.TabIndex = 2;
             this.groupBox1.TabStop = false;
             this.groupBox1.Text = "Add Song Pool";
             // 
             // btnAddPool
             // 
-            this.btnAddPool.Location = new System.Drawing.Point(7, 91);
+            this.btnAddPool.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.btnAddPool.Location = new System.Drawing.Point(2, 86);
             this.btnAddPool.Margin = new System.Windows.Forms.Padding(2);
             this.btnAddPool.Name = "btnAddPool";
-            this.btnAddPool.Size = new System.Drawing.Size(91, 19);
+            this.btnAddPool.Size = new System.Drawing.Size(199, 21);
             this.btnAddPool.TabIndex = 4;
             this.btnAddPool.Text = "Add Pool";
             this.btnAddPool.UseVisualStyleBackColor = true;
@@ -922,79 +976,77 @@
             // 
             // txtNewPoolIsntrument
             // 
+            this.txtNewPoolIsntrument.Dock = System.Windows.Forms.DockStyle.Fill;
             this.txtNewPoolIsntrument.FormattingEnabled = true;
-            this.txtNewPoolIsntrument.Location = new System.Drawing.Point(7, 67);
+            this.txtNewPoolIsntrument.Location = new System.Drawing.Point(2, 61);
             this.txtNewPoolIsntrument.Margin = new System.Windows.Forms.Padding(2);
             this.txtNewPoolIsntrument.Name = "txtNewPoolIsntrument";
-            this.txtNewPoolIsntrument.Size = new System.Drawing.Size(92, 21);
+            this.txtNewPoolIsntrument.Size = new System.Drawing.Size(199, 21);
             this.txtNewPoolIsntrument.TabIndex = 3;
             // 
             // label3
             // 
             this.label3.AutoSize = true;
-            this.label3.Location = new System.Drawing.Point(4, 53);
+            this.label3.Dock = System.Windows.Forms.DockStyle.Bottom;
+            this.label3.Location = new System.Drawing.Point(2, 46);
             this.label3.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.label3.Name = "label3";
-            this.label3.Size = new System.Drawing.Size(59, 13);
+            this.label3.Size = new System.Drawing.Size(199, 13);
             this.label3.TabIndex = 2;
             this.label3.Text = "Instrument:";
+            this.label3.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             // 
             // txtNewPoolName
             // 
-            this.txtNewPoolName.Location = new System.Drawing.Point(7, 32);
+            this.txtNewPoolName.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.txtNewPoolName.Location = new System.Drawing.Point(2, 19);
             this.txtNewPoolName.Margin = new System.Windows.Forms.Padding(2);
             this.txtNewPoolName.Name = "txtNewPoolName";
-            this.txtNewPoolName.Size = new System.Drawing.Size(92, 20);
+            this.txtNewPoolName.Size = new System.Drawing.Size(199, 20);
             this.txtNewPoolName.TabIndex = 1;
             // 
             // label2
             // 
             this.label2.AutoSize = true;
-            this.label2.Location = new System.Drawing.Point(4, 17);
+            this.label2.Dock = System.Windows.Forms.DockStyle.Bottom;
+            this.label2.Location = new System.Drawing.Point(2, 4);
             this.label2.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.label2.Name = "label2";
-            this.label2.Size = new System.Drawing.Size(38, 13);
+            this.label2.Size = new System.Drawing.Size(199, 13);
             this.label2.TabIndex = 0;
             this.label2.Text = "Name:";
-            // 
-            // label1
-            // 
-            this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(4, 2);
-            this.label1.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
-            this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(94, 13);
-            this.label1.TabIndex = 0;
-            this.label1.Text = "Select Song Pools";
+            this.label2.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             // 
             // SongListTab
             // 
-            this.SongListTab.Controls.Add(this.lbActiveSongs);
-            this.SongListTab.Controls.Add(this.btnFilter);
-            this.SongListTab.Controls.Add(this.txtActiveSongFilter);
-            this.SongListTab.Controls.Add(this.label17);
-            this.SongListTab.Controls.Add(this.txtPoolInclude);
-            this.SongListTab.Controls.Add(this.label13);
-            this.SongListTab.Controls.Add(this.txtPoolExclude);
-            this.SongListTab.Controls.Add(this.label12);
-            this.SongListTab.Controls.Add(this.btnCopyHash);
-            this.SongListTab.Controls.Add(this.label11);
+            this.SongListTab.Controls.Add(this.tableLayoutPanel8);
             this.SongListTab.Location = new System.Drawing.Point(4, 22);
             this.SongListTab.Margin = new System.Windows.Forms.Padding(2);
             this.SongListTab.Name = "SongListTab";
             this.SongListTab.Padding = new System.Windows.Forms.Padding(2);
-            this.SongListTab.Size = new System.Drawing.Size(271, 260);
+            this.SongListTab.Size = new System.Drawing.Size(443, 295);
             this.SongListTab.TabIndex = 2;
             this.SongListTab.Text = "Active Songs";
             this.SongListTab.UseVisualStyleBackColor = true;
             // 
+            // lbActiveSongs
+            // 
+            this.tableLayoutPanel8.SetColumnSpan(this.lbActiveSongs, 4);
+            this.lbActiveSongs.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.lbActiveSongs.FormattingEnabled = true;
+            this.lbActiveSongs.Location = new System.Drawing.Point(3, 53);
+            this.lbActiveSongs.Name = "lbActiveSongs";
+            this.lbActiveSongs.Size = new System.Drawing.Size(433, 145);
+            this.lbActiveSongs.TabIndex = 10;
+            // 
             // btnFilter
             // 
+            this.btnFilter.Dock = System.Windows.Forms.DockStyle.Fill;
             this.btnFilter.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.btnFilter.Location = new System.Drawing.Point(238, 2);
+            this.btnFilter.Location = new System.Drawing.Point(411, 2);
             this.btnFilter.Margin = new System.Windows.Forms.Padding(2);
             this.btnFilter.Name = "btnFilter";
-            this.btnFilter.Size = new System.Drawing.Size(26, 19);
+            this.btnFilter.Size = new System.Drawing.Size(26, 21);
             this.btnFilter.TabIndex = 9;
             this.btnFilter.Text = "...";
             this.btnFilter.UseVisualStyleBackColor = true;
@@ -1002,79 +1054,91 @@
             // 
             // txtActiveSongFilter
             // 
-            this.txtActiveSongFilter.Location = new System.Drawing.Point(38, 20);
+            this.tableLayoutPanel8.SetColumnSpan(this.txtActiveSongFilter, 3);
+            this.txtActiveSongFilter.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.txtActiveSongFilter.Location = new System.Drawing.Point(42, 27);
             this.txtActiveSongFilter.Margin = new System.Windows.Forms.Padding(2);
             this.txtActiveSongFilter.Name = "txtActiveSongFilter";
-            this.txtActiveSongFilter.Size = new System.Drawing.Size(228, 20);
+            this.txtActiveSongFilter.Size = new System.Drawing.Size(395, 20);
             this.txtActiveSongFilter.TabIndex = 8;
             // 
             // label17
             // 
             this.label17.AutoSize = true;
-            this.label17.Location = new System.Drawing.Point(2, 23);
+            this.label17.Dock = System.Windows.Forms.DockStyle.Bottom;
+            this.label17.Location = new System.Drawing.Point(2, 37);
             this.label17.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.label17.Name = "label17";
-            this.label17.Size = new System.Drawing.Size(35, 13);
+            this.label17.Size = new System.Drawing.Size(36, 13);
             this.label17.TabIndex = 7;
             this.label17.Text = "Filter: ";
             // 
             // txtPoolInclude
             // 
-            this.txtPoolInclude.Location = new System.Drawing.Point(169, 237);
+            this.txtPoolInclude.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.txtPoolInclude.Location = new System.Drawing.Point(92, 268);
             this.txtPoolInclude.Margin = new System.Windows.Forms.Padding(2);
             this.txtPoolInclude.Name = "txtPoolInclude";
-            this.txtPoolInclude.Size = new System.Drawing.Size(102, 20);
+            this.txtPoolInclude.Size = new System.Drawing.Size(315, 20);
             this.txtPoolInclude.TabIndex = 6;
             // 
             // label13
             // 
             this.label13.AutoSize = true;
-            this.label13.Location = new System.Drawing.Point(74, 240);
+            this.label13.Dock = System.Windows.Forms.DockStyle.Bottom;
+            this.label13.Location = new System.Drawing.Point(92, 253);
             this.label13.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.label13.Name = "label13";
-            this.label13.Size = new System.Drawing.Size(81, 13);
+            this.label13.Size = new System.Drawing.Size(315, 13);
             this.label13.TabIndex = 5;
             this.label13.Text = "Include in pools";
             // 
             // txtPoolExclude
             // 
-            this.txtPoolExclude.Location = new System.Drawing.Point(169, 214);
+            this.txtPoolExclude.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.txtPoolExclude.Location = new System.Drawing.Point(92, 223);
             this.txtPoolExclude.Margin = new System.Windows.Forms.Padding(2);
             this.txtPoolExclude.Name = "txtPoolExclude";
-            this.txtPoolExclude.Size = new System.Drawing.Size(102, 20);
+            this.txtPoolExclude.Size = new System.Drawing.Size(315, 20);
             this.txtPoolExclude.TabIndex = 4;
             // 
             // label12
             // 
             this.label12.AutoSize = true;
-            this.label12.Location = new System.Drawing.Point(74, 214);
+            this.label12.Dock = System.Windows.Forms.DockStyle.Bottom;
+            this.label12.Location = new System.Drawing.Point(92, 208);
             this.label12.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.label12.Name = "label12";
-            this.label12.Size = new System.Drawing.Size(96, 13);
+            this.label12.Size = new System.Drawing.Size(315, 13);
             this.label12.TabIndex = 3;
             this.label12.Text = "Exclude from pools";
             // 
             // btnCopyHash
             // 
+            this.tableLayoutPanel8.SetColumnSpan(this.btnCopyHash, 2);
+            this.btnCopyHash.Dock = System.Windows.Forms.DockStyle.Fill;
             this.btnCopyHash.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.btnCopyHash.Location = new System.Drawing.Point(0, 202);
+            this.btnCopyHash.Location = new System.Drawing.Point(0, 201);
             this.btnCopyHash.Margin = new System.Windows.Forms.Padding(0);
             this.btnCopyHash.Name = "btnCopyHash";
-            this.btnCopyHash.Size = new System.Drawing.Size(69, 58);
+            this.tableLayoutPanel8.SetRowSpan(this.btnCopyHash, 4);
+            this.btnCopyHash.Size = new System.Drawing.Size(90, 90);
             this.btnCopyHash.TabIndex = 2;
             this.btnCopyHash.Text = "Copy Hash to \r\nClipboard";
-            this.btnCopyHash.TextAlign = System.Drawing.ContentAlignment.TopCenter;
             this.btnCopyHash.UseVisualStyleBackColor = true;
             // 
             // label11
             // 
             this.label11.AutoSize = true;
-            this.label11.Location = new System.Drawing.Point(2, 2);
+            this.tableLayoutPanel8.SetColumnSpan(this.label11, 3);
+            this.label11.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.label11.Location = new System.Drawing.Point(2, 0);
             this.label11.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.label11.Name = "label11";
-            this.label11.Size = new System.Drawing.Size(116, 13);
+            this.label11.Size = new System.Drawing.Size(405, 25);
             this.label11.TabIndex = 1;
             this.label11.Text = "Available YARG Songs";
+            this.label11.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             // 
             // menuStrip1
             // 
@@ -1084,7 +1148,7 @@
             this.menuStrip1.Location = new System.Drawing.Point(0, 0);
             this.menuStrip1.Name = "menuStrip1";
             this.menuStrip1.Padding = new System.Windows.Forms.Padding(4, 2, 0, 2);
-            this.menuStrip1.Size = new System.Drawing.Size(283, 24);
+            this.menuStrip1.Size = new System.Drawing.Size(439, 24);
             this.menuStrip1.TabIndex = 1;
             this.menuStrip1.Text = "menuStrip1";
             // 
@@ -1128,55 +1192,398 @@
             this.tableLayoutPanel1.RowCount = 2;
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 24F));
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
-            this.tableLayoutPanel1.Size = new System.Drawing.Size(283, 314);
+            this.tableLayoutPanel1.Size = new System.Drawing.Size(439, 353);
             this.tableLayoutPanel1.TabIndex = 2;
             // 
             // panel1
             // 
-            this.panel1.Controls.Add(this.txtSlotName);
-            this.panel1.Controls.Add(this.label29);
+            this.panel1.Controls.Add(this.tableLayoutPanel16);
             this.panel1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.panel1.Location = new System.Drawing.Point(2, 2);
             this.panel1.Margin = new System.Windows.Forms.Padding(2);
             this.panel1.Name = "panel1";
-            this.panel1.Size = new System.Drawing.Size(279, 20);
+            this.panel1.Size = new System.Drawing.Size(435, 20);
             this.panel1.TabIndex = 1;
             // 
             // txtSlotName
             // 
-            this.txtSlotName.Location = new System.Drawing.Point(62, 0);
+            this.txtSlotName.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.txtSlotName.Location = new System.Drawing.Point(82, 2);
             this.txtSlotName.Margin = new System.Windows.Forms.Padding(2);
             this.txtSlotName.Name = "txtSlotName";
-            this.txtSlotName.Size = new System.Drawing.Size(206, 20);
+            this.txtSlotName.Size = new System.Drawing.Size(351, 20);
             this.txtSlotName.TabIndex = 1;
             // 
             // label29
             // 
             this.label29.AutoSize = true;
-            this.label29.Location = new System.Drawing.Point(2, 4);
+            this.label29.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.label29.Location = new System.Drawing.Point(2, 0);
             this.label29.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.label29.Name = "label29";
-            this.label29.Size = new System.Drawing.Size(59, 13);
+            this.label29.Size = new System.Drawing.Size(76, 20);
             this.label29.TabIndex = 0;
             this.label29.Text = "Slot Name:";
+            this.label29.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             // 
-            // lbActiveSongs
+            // tableLayoutPanel2
             // 
-            this.lbActiveSongs.FormattingEnabled = true;
-            this.lbActiveSongs.Location = new System.Drawing.Point(1, 39);
-            this.lbActiveSongs.Name = "lbActiveSongs";
-            this.lbActiveSongs.Size = new System.Drawing.Size(270, 169);
-            this.lbActiveSongs.TabIndex = 10;
+            this.tableLayoutPanel2.ColumnCount = 2;
+            this.tableLayoutPanel2.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 50F));
+            this.tableLayoutPanel2.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 50F));
+            this.tableLayoutPanel2.Controls.Add(this.groupBox4, 1, 6);
+            this.tableLayoutPanel2.Controls.Add(this.label4, 0, 0);
+            this.tableLayoutPanel2.Controls.Add(this.nudPoolMaxDifficulty, 0, 5);
+            this.tableLayoutPanel2.Controls.Add(this.groupBox3, 0, 6);
+            this.tableLayoutPanel2.Controls.Add(this.nudAmountInPool, 0, 1);
+            this.tableLayoutPanel2.Controls.Add(this.label6, 0, 4);
+            this.tableLayoutPanel2.Controls.Add(this.label5, 0, 2);
+            this.tableLayoutPanel2.Controls.Add(this.nudPoolMinDifficulty, 0, 3);
+            this.tableLayoutPanel2.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.tableLayoutPanel2.Location = new System.Drawing.Point(2, 15);
+            this.tableLayoutPanel2.Name = "tableLayoutPanel2";
+            this.tableLayoutPanel2.RowCount = 7;
+            this.tableLayoutPanel2.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 10F));
+            this.tableLayoutPanel2.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 25F));
+            this.tableLayoutPanel2.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 10F));
+            this.tableLayoutPanel2.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 25F));
+            this.tableLayoutPanel2.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 10F));
+            this.tableLayoutPanel2.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 25F));
+            this.tableLayoutPanel2.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 70F));
+            this.tableLayoutPanel2.Size = new System.Drawing.Size(204, 274);
+            this.tableLayoutPanel2.TabIndex = 7;
+            // 
+            // tableLayoutPanel3
+            // 
+            this.tableLayoutPanel3.ColumnCount = 1;
+            this.tableLayoutPanel3.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 100F));
+            this.tableLayoutPanel3.Controls.Add(this.label7, 0, 0);
+            this.tableLayoutPanel3.Controls.Add(this.label8, 0, 2);
+            this.tableLayoutPanel3.Controls.Add(this.cmbReward1Diff, 0, 1);
+            this.tableLayoutPanel3.Controls.Add(this.cmbReward1Score, 0, 3);
+            this.tableLayoutPanel3.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.tableLayoutPanel3.Location = new System.Drawing.Point(2, 15);
+            this.tableLayoutPanel3.Name = "tableLayoutPanel3";
+            this.tableLayoutPanel3.RowCount = 4;
+            this.tableLayoutPanel3.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 50F));
+            this.tableLayoutPanel3.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 30F));
+            this.tableLayoutPanel3.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 50F));
+            this.tableLayoutPanel3.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 30F));
+            this.tableLayoutPanel3.Size = new System.Drawing.Size(94, 121);
+            this.tableLayoutPanel3.TabIndex = 0;
+            // 
+            // tableLayoutPanel4
+            // 
+            this.tableLayoutPanel4.ColumnCount = 1;
+            this.tableLayoutPanel4.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 100F));
+            this.tableLayoutPanel4.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 20F));
+            this.tableLayoutPanel4.Controls.Add(this.label10, 0, 2);
+            this.tableLayoutPanel4.Controls.Add(this.cmbReward2Score, 0, 3);
+            this.tableLayoutPanel4.Controls.Add(this.label9, 0, 0);
+            this.tableLayoutPanel4.Controls.Add(this.cmbReward2Diff, 0, 1);
+            this.tableLayoutPanel4.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.tableLayoutPanel4.Location = new System.Drawing.Point(2, 15);
+            this.tableLayoutPanel4.Name = "tableLayoutPanel4";
+            this.tableLayoutPanel4.RowCount = 4;
+            this.tableLayoutPanel4.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 50F));
+            this.tableLayoutPanel4.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 30F));
+            this.tableLayoutPanel4.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 50F));
+            this.tableLayoutPanel4.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 30F));
+            this.tableLayoutPanel4.Size = new System.Drawing.Size(94, 121);
+            this.tableLayoutPanel4.TabIndex = 0;
+            // 
+            // groupBox2
+            // 
+            this.groupBox2.Controls.Add(this.tableLayoutPanel5);
+            this.groupBox2.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.groupBox2.Location = new System.Drawing.Point(3, 3);
+            this.groupBox2.Name = "groupBox2";
+            this.groupBox2.Size = new System.Drawing.Size(205, 159);
+            this.groupBox2.TabIndex = 6;
+            this.groupBox2.TabStop = false;
+            this.groupBox2.Text = "Song Pools";
+            // 
+            // tableLayoutPanel5
+            // 
+            this.tableLayoutPanel5.ColumnCount = 1;
+            this.tableLayoutPanel5.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 100F));
+            this.tableLayoutPanel5.Controls.Add(this.lbSongPoolList, 0, 0);
+            this.tableLayoutPanel5.Controls.Add(this.btnRemovePool, 0, 1);
+            this.tableLayoutPanel5.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.tableLayoutPanel5.Location = new System.Drawing.Point(3, 16);
+            this.tableLayoutPanel5.Name = "tableLayoutPanel5";
+            this.tableLayoutPanel5.RowCount = 2;
+            this.tableLayoutPanel5.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
+            this.tableLayoutPanel5.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 25F));
+            this.tableLayoutPanel5.Size = new System.Drawing.Size(199, 140);
+            this.tableLayoutPanel5.TabIndex = 0;
+            // 
+            // tableLayoutPanel6
+            // 
+            this.tableLayoutPanel6.ColumnCount = 1;
+            this.tableLayoutPanel6.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 100F));
+            this.tableLayoutPanel6.Controls.Add(this.btnAddPool, 0, 4);
+            this.tableLayoutPanel6.Controls.Add(this.label2, 0, 0);
+            this.tableLayoutPanel6.Controls.Add(this.txtNewPoolIsntrument, 0, 3);
+            this.tableLayoutPanel6.Controls.Add(this.label3, 0, 2);
+            this.tableLayoutPanel6.Controls.Add(this.txtNewPoolName, 0, 1);
+            this.tableLayoutPanel6.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.tableLayoutPanel6.Location = new System.Drawing.Point(2, 15);
+            this.tableLayoutPanel6.Name = "tableLayoutPanel6";
+            this.tableLayoutPanel6.RowCount = 5;
+            this.tableLayoutPanel6.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 50F));
+            this.tableLayoutPanel6.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 25F));
+            this.tableLayoutPanel6.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 50F));
+            this.tableLayoutPanel6.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 25F));
+            this.tableLayoutPanel6.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 25F));
+            this.tableLayoutPanel6.Size = new System.Drawing.Size(203, 109);
+            this.tableLayoutPanel6.TabIndex = 0;
+            // 
+            // tableLayoutPanel7
+            // 
+            this.tableLayoutPanel7.ColumnCount = 2;
+            this.tableLayoutPanel7.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 50F));
+            this.tableLayoutPanel7.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 50F));
+            this.tableLayoutPanel7.Controls.Add(this.groupBox2, 0, 0);
+            this.tableLayoutPanel7.Controls.Add(this.gbSelectedPool, 1, 0);
+            this.tableLayoutPanel7.Controls.Add(this.groupBox1, 0, 1);
+            this.tableLayoutPanel7.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.tableLayoutPanel7.Location = new System.Drawing.Point(2, 2);
+            this.tableLayoutPanel7.Name = "tableLayoutPanel7";
+            this.tableLayoutPanel7.RowCount = 2;
+            this.tableLayoutPanel7.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
+            this.tableLayoutPanel7.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 130F));
+            this.tableLayoutPanel7.Size = new System.Drawing.Size(423, 295);
+            this.tableLayoutPanel7.TabIndex = 7;
+            // 
+            // tableLayoutPanel8
+            // 
+            this.tableLayoutPanel8.ColumnCount = 4;
+            this.tableLayoutPanel8.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 40F));
+            this.tableLayoutPanel8.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 50F));
+            this.tableLayoutPanel8.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 100F));
+            this.tableLayoutPanel8.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 30F));
+            this.tableLayoutPanel8.Controls.Add(this.btnEditIncludePools, 3, 6);
+            this.tableLayoutPanel8.Controls.Add(this.btnEditExcludePools, 3, 4);
+            this.tableLayoutPanel8.Controls.Add(this.label11, 0, 0);
+            this.tableLayoutPanel8.Controls.Add(this.btnCopyHash, 0, 3);
+            this.tableLayoutPanel8.Controls.Add(this.txtPoolInclude, 2, 6);
+            this.tableLayoutPanel8.Controls.Add(this.lbActiveSongs, 0, 2);
+            this.tableLayoutPanel8.Controls.Add(this.txtPoolExclude, 2, 4);
+            this.tableLayoutPanel8.Controls.Add(this.label13, 2, 5);
+            this.tableLayoutPanel8.Controls.Add(this.btnFilter, 3, 0);
+            this.tableLayoutPanel8.Controls.Add(this.txtActiveSongFilter, 1, 1);
+            this.tableLayoutPanel8.Controls.Add(this.label12, 2, 3);
+            this.tableLayoutPanel8.Controls.Add(this.label17, 0, 1);
+            this.tableLayoutPanel8.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.tableLayoutPanel8.Location = new System.Drawing.Point(2, 2);
+            this.tableLayoutPanel8.Name = "tableLayoutPanel8";
+            this.tableLayoutPanel8.RowCount = 7;
+            this.tableLayoutPanel8.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 25F));
+            this.tableLayoutPanel8.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 25F));
+            this.tableLayoutPanel8.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
+            this.tableLayoutPanel8.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 20F));
+            this.tableLayoutPanel8.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 25F));
+            this.tableLayoutPanel8.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 20F));
+            this.tableLayoutPanel8.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 25F));
+            this.tableLayoutPanel8.Size = new System.Drawing.Size(439, 291);
+            this.tableLayoutPanel8.TabIndex = 11;
+            // 
+            // btnEditExcludePools
+            // 
+            this.btnEditExcludePools.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.btnEditExcludePools.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.btnEditExcludePools.Location = new System.Drawing.Point(411, 223);
+            this.btnEditExcludePools.Margin = new System.Windows.Forms.Padding(2);
+            this.btnEditExcludePools.Name = "btnEditExcludePools";
+            this.btnEditExcludePools.Size = new System.Drawing.Size(26, 21);
+            this.btnEditExcludePools.TabIndex = 11;
+            this.btnEditExcludePools.Text = "...";
+            this.btnEditExcludePools.UseVisualStyleBackColor = true;
+            // 
+            // btnEditIncludePools
+            // 
+            this.btnEditIncludePools.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.btnEditIncludePools.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.btnEditIncludePools.Location = new System.Drawing.Point(411, 268);
+            this.btnEditIncludePools.Margin = new System.Windows.Forms.Padding(2);
+            this.btnEditIncludePools.Name = "btnEditIncludePools";
+            this.btnEditIncludePools.Size = new System.Drawing.Size(26, 21);
+            this.btnEditIncludePools.TabIndex = 12;
+            this.btnEditIncludePools.Text = "...";
+            this.btnEditIncludePools.UseVisualStyleBackColor = true;
+            // 
+            // tableLayoutPanel9
+            // 
+            this.tableLayoutPanel9.ColumnCount = 2;
+            this.tableLayoutPanel9.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 66.66666F));
+            this.tableLayoutPanel9.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 33.33333F));
+            this.tableLayoutPanel9.Controls.Add(this.nudStartingSongs, 1, 2);
+            this.tableLayoutPanel9.Controls.Add(this.label14, 0, 0);
+            this.tableLayoutPanel9.Controls.Add(this.nudSongPack, 1, 1);
+            this.tableLayoutPanel9.Controls.Add(this.nudSongExtra, 1, 0);
+            this.tableLayoutPanel9.Controls.Add(this.chkReuseSongs, 0, 3);
+            this.tableLayoutPanel9.Controls.Add(this.label19, 0, 2);
+            this.tableLayoutPanel9.Controls.Add(this.chkInstrumentShuffle, 1, 3);
+            this.tableLayoutPanel9.Controls.Add(this.label15, 0, 1);
+            this.tableLayoutPanel9.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.tableLayoutPanel9.Location = new System.Drawing.Point(2, 15);
+            this.tableLayoutPanel9.Name = "tableLayoutPanel9";
+            this.tableLayoutPanel9.RowCount = 4;
+            this.tableLayoutPanel9.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 22F));
+            this.tableLayoutPanel9.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 22F));
+            this.tableLayoutPanel9.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 22F));
+            this.tableLayoutPanel9.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 34F));
+            this.tableLayoutPanel9.Size = new System.Drawing.Size(422, 132);
+            this.tableLayoutPanel9.TabIndex = 17;
+            // 
+            // tableLayoutPanel10
+            // 
+            this.tableLayoutPanel10.ColumnCount = 2;
+            this.tableLayoutPanel10.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 66.66666F));
+            this.tableLayoutPanel10.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 33.33333F));
+            this.tableLayoutPanel10.Controls.Add(this.nudFameAmount, 1, 2);
+            this.tableLayoutPanel10.Controls.Add(this.chkGoalItemNeeded, 0, 3);
+            this.tableLayoutPanel10.Controls.Add(this.nudGoalFame, 1, 1);
+            this.tableLayoutPanel10.Controls.Add(this.nudGoalSetlist, 1, 0);
+            this.tableLayoutPanel10.Controls.Add(this.label16, 0, 0);
+            this.tableLayoutPanel10.Controls.Add(this.label20, 0, 1);
+            this.tableLayoutPanel10.Controls.Add(this.label18, 0, 2);
+            this.tableLayoutPanel10.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.tableLayoutPanel10.Location = new System.Drawing.Point(2, 15);
+            this.tableLayoutPanel10.Name = "tableLayoutPanel10";
+            this.tableLayoutPanel10.RowCount = 4;
+            this.tableLayoutPanel10.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 22F));
+            this.tableLayoutPanel10.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 22F));
+            this.tableLayoutPanel10.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 22F));
+            this.tableLayoutPanel10.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 34F));
+            this.tableLayoutPanel10.Size = new System.Drawing.Size(422, 132);
+            this.tableLayoutPanel10.TabIndex = 17;
+            // 
+            // tableLayoutPanel11
+            // 
+            this.tableLayoutPanel11.ColumnCount = 1;
+            this.tableLayoutPanel11.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 100F));
+            this.tableLayoutPanel11.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 20F));
+            this.tableLayoutPanel11.Controls.Add(this.groupBox5, 0, 0);
+            this.tableLayoutPanel11.Controls.Add(this.groupBox6, 0, 1);
+            this.tableLayoutPanel11.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.tableLayoutPanel11.Location = new System.Drawing.Point(2, 2);
+            this.tableLayoutPanel11.Name = "tableLayoutPanel11";
+            this.tableLayoutPanel11.RowCount = 2;
+            this.tableLayoutPanel11.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 50F));
+            this.tableLayoutPanel11.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 50F));
+            this.tableLayoutPanel11.Size = new System.Drawing.Size(430, 306);
+            this.tableLayoutPanel11.TabIndex = 17;
+            // 
+            // tableLayoutPanel12
+            // 
+            this.tableLayoutPanel12.ColumnCount = 4;
+            this.tableLayoutPanel12.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 60F));
+            this.tableLayoutPanel12.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 50F));
+            this.tableLayoutPanel12.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 60F));
+            this.tableLayoutPanel12.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 50F));
+            this.tableLayoutPanel12.Controls.Add(this.cmbGoalPoolPlando, 3, 0);
+            this.tableLayoutPanel12.Controls.Add(this.chkGoalSongPlando, 0, 0);
+            this.tableLayoutPanel12.Controls.Add(this.cmbGoalSongPlando, 1, 0);
+            this.tableLayoutPanel12.Controls.Add(this.chkGoalPoolPlando, 2, 0);
+            this.tableLayoutPanel12.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.tableLayoutPanel12.Location = new System.Drawing.Point(2, 15);
+            this.tableLayoutPanel12.Name = "tableLayoutPanel12";
+            this.tableLayoutPanel12.RowCount = 1;
+            this.tableLayoutPanel12.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
+            this.tableLayoutPanel12.Size = new System.Drawing.Size(273, 29);
+            this.tableLayoutPanel12.TabIndex = 7;
+            // 
+            // tableLayoutPanel13
+            // 
+            this.tableLayoutPanel13.ColumnCount = 2;
+            this.tableLayoutPanel13.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 100F));
+            this.tableLayoutPanel13.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 100F));
+            this.tableLayoutPanel13.Controls.Add(this.cmbDeathLink, 1, 1);
+            this.tableLayoutPanel13.Controls.Add(this.cmbEnergyLink, 1, 0);
+            this.tableLayoutPanel13.Controls.Add(this.label22, 0, 1);
+            this.tableLayoutPanel13.Controls.Add(this.label21, 0, 0);
+            this.tableLayoutPanel13.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.tableLayoutPanel13.Location = new System.Drawing.Point(2, 15);
+            this.tableLayoutPanel13.Name = "tableLayoutPanel13";
+            this.tableLayoutPanel13.RowCount = 2;
+            this.tableLayoutPanel13.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 50F));
+            this.tableLayoutPanel13.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 50F));
+            this.tableLayoutPanel13.Size = new System.Drawing.Size(273, 59);
+            this.tableLayoutPanel13.TabIndex = 7;
+            // 
+            // tableLayoutPanel14
+            // 
+            this.tableLayoutPanel14.ColumnCount = 3;
+            this.tableLayoutPanel14.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 33.33333F));
+            this.tableLayoutPanel14.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 33.33334F));
+            this.tableLayoutPanel14.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 33.33334F));
+            this.tableLayoutPanel14.Controls.Add(this.nudRestartTrap, 2, 3);
+            this.tableLayoutPanel14.Controls.Add(this.label26, 2, 2);
+            this.tableLayoutPanel14.Controls.Add(this.nudRockTrap, 1, 3);
+            this.tableLayoutPanel14.Controls.Add(this.label23, 0, 0);
+            this.tableLayoutPanel14.Controls.Add(this.nudLowerDiff, 0, 3);
+            this.tableLayoutPanel14.Controls.Add(this.label27, 1, 2);
+            this.tableLayoutPanel14.Controls.Add(this.nudSwapPick, 2, 1);
+            this.tableLayoutPanel14.Controls.Add(this.label24, 1, 0);
+            this.tableLayoutPanel14.Controls.Add(this.nudSwapRandom, 1, 1);
+            this.tableLayoutPanel14.Controls.Add(this.label25, 2, 0);
+            this.tableLayoutPanel14.Controls.Add(this.nudStarPower, 0, 1);
+            this.tableLayoutPanel14.Controls.Add(this.label28, 0, 2);
+            this.tableLayoutPanel14.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.tableLayoutPanel14.Location = new System.Drawing.Point(2, 15);
+            this.tableLayoutPanel14.Name = "tableLayoutPanel14";
+            this.tableLayoutPanel14.RowCount = 4;
+            this.tableLayoutPanel14.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 25F));
+            this.tableLayoutPanel14.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 25F));
+            this.tableLayoutPanel14.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 25F));
+            this.tableLayoutPanel14.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 25F));
+            this.tableLayoutPanel14.Size = new System.Drawing.Size(273, 119);
+            this.tableLayoutPanel14.TabIndex = 7;
+            // 
+            // tableLayoutPanel15
+            // 
+            this.tableLayoutPanel15.ColumnCount = 1;
+            this.tableLayoutPanel15.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 100F));
+            this.tableLayoutPanel15.Controls.Add(this.groupBox8, 0, 0);
+            this.tableLayoutPanel15.Controls.Add(this.groupBox7, 0, 2);
+            this.tableLayoutPanel15.Controls.Add(this.groupBox9, 0, 1);
+            this.tableLayoutPanel15.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.tableLayoutPanel15.Location = new System.Drawing.Point(0, 0);
+            this.tableLayoutPanel15.Name = "tableLayoutPanel15";
+            this.tableLayoutPanel15.RowCount = 3;
+            this.tableLayoutPanel15.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 80F));
+            this.tableLayoutPanel15.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 50F));
+            this.tableLayoutPanel15.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
+            this.tableLayoutPanel15.Size = new System.Drawing.Size(281, 270);
+            this.tableLayoutPanel15.TabIndex = 7;
+            // 
+            // tableLayoutPanel16
+            // 
+            this.tableLayoutPanel16.ColumnCount = 2;
+            this.tableLayoutPanel16.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 80F));
+            this.tableLayoutPanel16.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 100F));
+            this.tableLayoutPanel16.Controls.Add(this.txtSlotName, 1, 0);
+            this.tableLayoutPanel16.Controls.Add(this.label29, 0, 0);
+            this.tableLayoutPanel16.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.tableLayoutPanel16.Location = new System.Drawing.Point(0, 0);
+            this.tableLayoutPanel16.Name = "tableLayoutPanel16";
+            this.tableLayoutPanel16.RowCount = 1;
+            this.tableLayoutPanel16.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
+            this.tableLayoutPanel16.Size = new System.Drawing.Size(435, 20);
+            this.tableLayoutPanel16.TabIndex = 2;
             // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(283, 338);
+            this.ClientSize = new System.Drawing.Size(439, 377);
             this.Controls.Add(this.tableLayoutPanel1);
             this.Controls.Add(this.menuStrip1);
             this.MainMenuStrip = this.menuStrip1;
             this.Margin = new System.Windows.Forms.Padding(2);
+            this.MinimumSize = new System.Drawing.Size(337, 387);
             this.Name = "MainForm";
             this.Text = "YARG YAML Maker";
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.Form1_FormClosing);
@@ -1184,22 +1591,17 @@
             this.TabControlMain.ResumeLayout(false);
             this.SettingsTab.ResumeLayout(false);
             this.groupBox6.ResumeLayout(false);
-            this.groupBox6.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.nudFameAmount)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.nudGoalSetlist)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.nudGoalFame)).EndInit();
             this.groupBox5.ResumeLayout(false);
-            this.groupBox5.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.nudStartingSongs)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.nudSongExtra)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.nudSongPack)).EndInit();
             this.ExtraTab.ResumeLayout(false);
             this.groupBox9.ResumeLayout(false);
-            this.groupBox9.PerformLayout();
             this.groupBox8.ResumeLayout(false);
-            this.groupBox8.PerformLayout();
             this.groupBox7.ResumeLayout(false);
-            this.groupBox7.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.nudRestartTrap)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.nudRockTrap)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.nudLowerDiff)).EndInit();
@@ -1207,25 +1609,45 @@
             ((System.ComponentModel.ISupportInitialize)(this.nudSwapRandom)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.nudStarPower)).EndInit();
             this.SongPoolTab.ResumeLayout(false);
-            this.SongPoolTab.PerformLayout();
             this.groupBox3.ResumeLayout(false);
-            this.groupBox3.PerformLayout();
             this.gbSelectedPool.ResumeLayout(false);
-            this.gbSelectedPool.PerformLayout();
             this.groupBox4.ResumeLayout(false);
-            this.groupBox4.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.nudPoolMaxDifficulty)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.nudPoolMinDifficulty)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.nudAmountInPool)).EndInit();
             this.groupBox1.ResumeLayout(false);
-            this.groupBox1.PerformLayout();
             this.SongListTab.ResumeLayout(false);
-            this.SongListTab.PerformLayout();
             this.menuStrip1.ResumeLayout(false);
             this.menuStrip1.PerformLayout();
             this.tableLayoutPanel1.ResumeLayout(false);
             this.panel1.ResumeLayout(false);
-            this.panel1.PerformLayout();
+            this.tableLayoutPanel2.ResumeLayout(false);
+            this.tableLayoutPanel2.PerformLayout();
+            this.tableLayoutPanel3.ResumeLayout(false);
+            this.tableLayoutPanel3.PerformLayout();
+            this.tableLayoutPanel4.ResumeLayout(false);
+            this.tableLayoutPanel4.PerformLayout();
+            this.groupBox2.ResumeLayout(false);
+            this.tableLayoutPanel5.ResumeLayout(false);
+            this.tableLayoutPanel6.ResumeLayout(false);
+            this.tableLayoutPanel6.PerformLayout();
+            this.tableLayoutPanel7.ResumeLayout(false);
+            this.tableLayoutPanel8.ResumeLayout(false);
+            this.tableLayoutPanel8.PerformLayout();
+            this.tableLayoutPanel9.ResumeLayout(false);
+            this.tableLayoutPanel9.PerformLayout();
+            this.tableLayoutPanel10.ResumeLayout(false);
+            this.tableLayoutPanel10.PerformLayout();
+            this.tableLayoutPanel11.ResumeLayout(false);
+            this.tableLayoutPanel12.ResumeLayout(false);
+            this.tableLayoutPanel12.PerformLayout();
+            this.tableLayoutPanel13.ResumeLayout(false);
+            this.tableLayoutPanel13.PerformLayout();
+            this.tableLayoutPanel14.ResumeLayout(false);
+            this.tableLayoutPanel14.PerformLayout();
+            this.tableLayoutPanel15.ResumeLayout(false);
+            this.tableLayoutPanel16.ResumeLayout(false);
+            this.tableLayoutPanel16.PerformLayout();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -1237,7 +1659,6 @@
         private System.Windows.Forms.TabPage SettingsTab;
         private System.Windows.Forms.TabPage SongPoolTab;
         private System.Windows.Forms.TabPage SongListTab;
-        private System.Windows.Forms.Label label1;
         private System.Windows.Forms.GroupBox gbSelectedPool;
         private System.Windows.Forms.NumericUpDown nudPoolMinDifficulty;
         private System.Windows.Forms.Label label5;
@@ -1323,6 +1744,24 @@
         private System.Windows.Forms.Button btnRemovePool;
         private System.Windows.Forms.Button btnFilter;
         private System.Windows.Forms.CheckedListBox lbActiveSongs;
+        private System.Windows.Forms.TableLayoutPanel tableLayoutPanel2;
+        private System.Windows.Forms.TableLayoutPanel tableLayoutPanel4;
+        private System.Windows.Forms.TableLayoutPanel tableLayoutPanel3;
+        private System.Windows.Forms.TableLayoutPanel tableLayoutPanel7;
+        private System.Windows.Forms.GroupBox groupBox2;
+        private System.Windows.Forms.TableLayoutPanel tableLayoutPanel5;
+        private System.Windows.Forms.TableLayoutPanel tableLayoutPanel6;
+        private System.Windows.Forms.TableLayoutPanel tableLayoutPanel8;
+        private System.Windows.Forms.Button btnEditIncludePools;
+        private System.Windows.Forms.Button btnEditExcludePools;
+        private System.Windows.Forms.TableLayoutPanel tableLayoutPanel10;
+        private System.Windows.Forms.TableLayoutPanel tableLayoutPanel9;
+        private System.Windows.Forms.TableLayoutPanel tableLayoutPanel11;
+        private System.Windows.Forms.TableLayoutPanel tableLayoutPanel12;
+        private System.Windows.Forms.TableLayoutPanel tableLayoutPanel14;
+        private System.Windows.Forms.TableLayoutPanel tableLayoutPanel13;
+        private System.Windows.Forms.TableLayoutPanel tableLayoutPanel15;
+        private System.Windows.Forms.TableLayoutPanel tableLayoutPanel16;
     }
 }
 
