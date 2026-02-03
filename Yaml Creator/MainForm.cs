@@ -218,8 +218,8 @@ namespace Yaml_Creator
             lbActiveSongs.ItemCheck += (s, e) => ToggleGlobalExludeList(((TaggedSongExportExtendedData)lbActiveSongs.Items[e.Index]).core, e.NewValue);
             lbActiveSongs.SelectedIndexChanged += lbActiveSongs_SelectedIndexChanged;
 
-            txtPoolExclude.DoubleClick += (s, e) => EditExculdeIncludeDictForSong(YAML.YAYARG.exclusions_per_pool, "Exclude");
-            txtPoolInclude.DoubleClick += (s, e) => EditExculdeIncludeDictForSong(YAML.YAYARG.inclusions_per_pool, "Include");
+            btnEditExcludePools.Click += (s, e) => EditExculdeIncludeDictForSong(YAML.YAYARG.exclusions_per_pool, "Exclude");
+            btnEditIncludePools.Click += (s, e) => EditExculdeIncludeDictForSong(YAML.YAYARG.inclusions_per_pool, "Include");
 
             btnCopyHash.Click += (s, e) => { Clipboard.SetText((lbActiveSongs.SelectedItem as SongExportExtendedData)?.core?.SongChecksum ?? ""); };
 
