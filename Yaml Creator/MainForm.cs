@@ -22,6 +22,7 @@ namespace Yaml_Creator
         public static SongPoolContainer SelectedSongPool = null;
         public bool IsLoadingNewSongPool = false;
         private const string cache = "cache";
+        private ContextMenuStrip activeSongsMenu = new ContextMenuStrip();
         public MainForm()
         {
             InitializeComponent();
@@ -216,17 +217,39 @@ namespace Yaml_Creator
             txtNewPoolIsntrument.DataSource = Utility.GetEnumDataSource<SupportedInstrument>();
 
             lbActiveSongs.ItemCheck += (s, e) => ToggleGlobalExludeList(((TaggedSongExportExtendedData)lbActiveSongs.Items[e.Index]).core, e.NewValue);
-            lbActiveSongs.SelectedIndexChanged += lbActiveSongs_SelectedIndexChanged;
+            lbActiveSongs.SelectedIndexChanged += (s, e) => UpdateIncludeExcludeListOnSongPage();
 
             btnEditExcludePools.Click += (s, e) => EditExculdeIncludeDictForSong(YAML.YAYARG.exclusions_per_pool, "Exclude");
             btnEditIncludePools.Click += (s, e) => EditExculdeIncludeDictForSong(YAML.YAYARG.inclusions_per_pool, "Include");
 
-            btnCopyHash.Click += (s, e) => { Clipboard.SetText((lbActiveSongs.SelectedItem as SongExportExtendedData)?.core?.SongChecksum ?? ""); };
-
+            lbActiveSongs.MouseDown += LbActiveSongs_MouseDown;
+            
             btnExportToText.Click += (s, e) => { SaveSongData(true); };
             btnExportToJson.Click += (s, e) => { SaveSongData(false); };
 
             btnGenYaml.Click += SaveYaml;
+        }
+
+        private void LbActiveSongs_MouseDown(object sender, MouseEventArgs e)
+        {
+            if (e.Button != MouseButtons.Right)
+                return;
+
+            int index = lbActiveSongs.IndexFromPoint(e.Location);
+            if (index == ListBox.NoMatches)
+                return;
+
+            lbActiveSongs.SelectedIndex = index;
+
+            var item = (TaggedSongExportExtendedData)lbActiveSongs.Items[index];
+
+            activeSongsMenu.Items.Clear();
+            activeSongsMenu.Items.Add("Copy song hash", null, (_, __) =>
+            {
+                Clipboard.SetText(item.core.SongChecksum);
+            });
+
+            activeSongsMenu.Show(lbActiveSongs, e.Location);
         }
 
         private void SaveSongData(bool AsHash)
@@ -356,17 +379,12 @@ namespace Yaml_Creator
             RegenerateGoalSongList();
         }
 
-        private void lbActiveSongs_SelectedIndexChanged(object sender, EventArgs e)
-        {
-            SongExportExtendedData ExtendedData = lbActiveSongs.SelectedItem is SongExportExtendedData ed ? ed : null;
-            btnCopyHash.Enabled = ExtendedData != null;
-            UpdateIncludeExcludeListOnSongPage();
-        }
-
         private void UpdateIncludeExcludeListOnSongPage()
         {
             txtPoolInclude.Text = "";
             txtPoolExclude.Text = "";
+            btnEditExcludePools.Enabled = false;
+            btnEditIncludePools.Enabled = false;
             SongExportExtendedData ExtendedData = lbActiveSongs.SelectedItem is SongExportExtendedData ed ? ed : null;
             if (ExtendedData is null)
                 return;
@@ -375,6 +393,8 @@ namespace Yaml_Creator
                 txtPoolExclude.Text = string.Join(", ", exList);
             if (YAML.YAYARG.inclusions_per_pool.TryGetValue(ExtendedData.core.SongChecksum, out var incList))
                 txtPoolInclude.Text = string.Join(", ", incList);
+            btnEditExcludePools.Enabled = true;
+            btnEditIncludePools.Enabled = true;
         }
 
         private void Form1_FormClosing(object sender, FormClosingEventArgs e)
@@ -447,7 +467,7 @@ namespace Yaml_Creator
                 return;
 
             ValueSelectForm form = new ValueSelectForm($"Select pools to {Action} {ExtendedData.core.Name} by {ExtendedData.core.Artist}");
-            var allPools = YAML.YAYARG.song_pools.Keys;
+            var allPools = YAML.YAYARG.song_pools.Where(x => ExtendedData.core.TryGetDifficulty(x.Value.instrument, out _)).Select(x => x.Key);
             var currentlySelected = Target.TryGetValue(ExtendedData.core.SongChecksum, out var cur) ? cur : Array.Empty<string>(); ;
             form.SetItems<string>(allPools, x => x, currentlySelected);
 

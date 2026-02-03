@@ -117,7 +117,6 @@
             this.tableLayoutPanel8 = new System.Windows.Forms.TableLayoutPanel();
             this.lbActiveSongs = new System.Windows.Forms.CheckedListBox();
             this.txtActiveSongFilter = new System.Windows.Forms.TextBox();
-            this.btnCopyHash = new System.Windows.Forms.Button();
             this.label11 = new System.Windows.Forms.Label();
             this.btnEditIncludePools = new System.Windows.Forms.Button();
             this.btnEditExcludePools = new System.Windows.Forms.Button();
@@ -138,6 +137,7 @@
             this.txtSlotName = new System.Windows.Forms.TextBox();
             this.label29 = new System.Windows.Forms.Label();
             this.YamlTT = new System.Windows.Forms.ToolTip(this.components);
+            this.tableLayoutPanel17 = new System.Windows.Forms.TableLayoutPanel();
             this.TabControlMain.SuspendLayout();
             this.SettingsTab.SuspendLayout();
             this.tableLayoutPanel11.SuspendLayout();
@@ -186,6 +186,7 @@
             this.tableLayoutPanel1.SuspendLayout();
             this.panel1.SuspendLayout();
             this.tableLayoutPanel16.SuspendLayout();
+            this.tableLayoutPanel17.SuspendLayout();
             this.SuspendLayout();
             // 
             // TabControlMain
@@ -1347,29 +1348,23 @@
             this.tableLayoutPanel8.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 50F));
             this.tableLayoutPanel8.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 100F));
             this.tableLayoutPanel8.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 30F));
-            this.tableLayoutPanel8.Controls.Add(this.btnEditIncludePools, 3, 6);
-            this.tableLayoutPanel8.Controls.Add(this.btnEditExcludePools, 3, 4);
             this.tableLayoutPanel8.Controls.Add(this.label11, 0, 0);
-            this.tableLayoutPanel8.Controls.Add(this.btnCopyHash, 0, 3);
-            this.tableLayoutPanel8.Controls.Add(this.txtPoolInclude, 2, 6);
             this.tableLayoutPanel8.Controls.Add(this.lbActiveSongs, 0, 2);
-            this.tableLayoutPanel8.Controls.Add(this.txtPoolExclude, 2, 4);
-            this.tableLayoutPanel8.Controls.Add(this.label13, 2, 5);
             this.tableLayoutPanel8.Controls.Add(this.btnFilter, 3, 0);
             this.tableLayoutPanel8.Controls.Add(this.txtActiveSongFilter, 1, 1);
-            this.tableLayoutPanel8.Controls.Add(this.label12, 2, 3);
             this.tableLayoutPanel8.Controls.Add(this.label17, 0, 1);
+            this.tableLayoutPanel8.Controls.Add(this.tableLayoutPanel17, 0, 3);
             this.tableLayoutPanel8.Dock = System.Windows.Forms.DockStyle.Fill;
             this.tableLayoutPanel8.Location = new System.Drawing.Point(2, 2);
             this.tableLayoutPanel8.Name = "tableLayoutPanel8";
-            this.tableLayoutPanel8.RowCount = 7;
+            this.tableLayoutPanel8.RowCount = 5;
             this.tableLayoutPanel8.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 25F));
             this.tableLayoutPanel8.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 25F));
             this.tableLayoutPanel8.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
-            this.tableLayoutPanel8.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 20F));
+            this.tableLayoutPanel8.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 25F));
             this.tableLayoutPanel8.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 25F));
             this.tableLayoutPanel8.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 20F));
-            this.tableLayoutPanel8.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 25F));
+            this.tableLayoutPanel8.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 20F));
             this.tableLayoutPanel8.Size = new System.Drawing.Size(423, 295);
             this.tableLayoutPanel8.TabIndex = 11;
             // 
@@ -1380,7 +1375,7 @@
             this.lbActiveSongs.FormattingEnabled = true;
             this.lbActiveSongs.Location = new System.Drawing.Point(3, 53);
             this.lbActiveSongs.Name = "lbActiveSongs";
-            this.lbActiveSongs.Size = new System.Drawing.Size(417, 149);
+            this.lbActiveSongs.Size = new System.Drawing.Size(417, 189);
             this.lbActiveSongs.TabIndex = 10;
             // 
             // txtActiveSongFilter
@@ -1392,20 +1387,6 @@
             this.txtActiveSongFilter.Name = "txtActiveSongFilter";
             this.txtActiveSongFilter.Size = new System.Drawing.Size(379, 20);
             this.txtActiveSongFilter.TabIndex = 8;
-            // 
-            // btnCopyHash
-            // 
-            this.tableLayoutPanel8.SetColumnSpan(this.btnCopyHash, 2);
-            this.btnCopyHash.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.btnCopyHash.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.btnCopyHash.Location = new System.Drawing.Point(0, 205);
-            this.btnCopyHash.Margin = new System.Windows.Forms.Padding(0);
-            this.btnCopyHash.Name = "btnCopyHash";
-            this.tableLayoutPanel8.SetRowSpan(this.btnCopyHash, 4);
-            this.btnCopyHash.Size = new System.Drawing.Size(90, 90);
-            this.btnCopyHash.TabIndex = 2;
-            this.btnCopyHash.Text = "Copy Hash to \r\nClipboard";
-            this.btnCopyHash.UseVisualStyleBackColor = true;
             // 
             // label11
             // 
@@ -1424,10 +1405,11 @@
             // 
             this.btnEditIncludePools.Dock = System.Windows.Forms.DockStyle.Fill;
             this.btnEditIncludePools.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.btnEditIncludePools.Location = new System.Drawing.Point(395, 272);
+            this.btnEditIncludePools.Font = new System.Drawing.Font("Microsoft Sans Serif", 6F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.btnEditIncludePools.Location = new System.Drawing.Point(388, 2);
             this.btnEditIncludePools.Margin = new System.Windows.Forms.Padding(2);
             this.btnEditIncludePools.Name = "btnEditIncludePools";
-            this.btnEditIncludePools.Size = new System.Drawing.Size(26, 21);
+            this.btnEditIncludePools.Size = new System.Drawing.Size(27, 18);
             this.btnEditIncludePools.TabIndex = 12;
             this.btnEditIncludePools.Text = "...";
             this.btnEditIncludePools.UseVisualStyleBackColor = true;
@@ -1436,42 +1418,48 @@
             // 
             this.btnEditExcludePools.Dock = System.Windows.Forms.DockStyle.Fill;
             this.btnEditExcludePools.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.btnEditExcludePools.Location = new System.Drawing.Point(395, 227);
+            this.btnEditExcludePools.Font = new System.Drawing.Font("Microsoft Sans Serif", 6F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.btnEditExcludePools.Location = new System.Drawing.Point(180, 2);
             this.btnEditExcludePools.Margin = new System.Windows.Forms.Padding(2);
             this.btnEditExcludePools.Name = "btnEditExcludePools";
-            this.btnEditExcludePools.Size = new System.Drawing.Size(26, 21);
+            this.btnEditExcludePools.Size = new System.Drawing.Size(26, 18);
             this.btnEditExcludePools.TabIndex = 11;
             this.btnEditExcludePools.Text = "...";
             this.btnEditExcludePools.UseVisualStyleBackColor = true;
             // 
             // txtPoolInclude
             // 
+            this.tableLayoutPanel17.SetColumnSpan(this.txtPoolInclude, 2);
             this.txtPoolInclude.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.txtPoolInclude.Location = new System.Drawing.Point(92, 272);
+            this.txtPoolInclude.Location = new System.Drawing.Point(210, 24);
             this.txtPoolInclude.Margin = new System.Windows.Forms.Padding(2);
             this.txtPoolInclude.Name = "txtPoolInclude";
-            this.txtPoolInclude.Size = new System.Drawing.Size(299, 20);
+            this.txtPoolInclude.Size = new System.Drawing.Size(205, 20);
             this.txtPoolInclude.TabIndex = 6;
+            this.YamlTT.SetToolTip(this.txtPoolInclude, "A list of pools this song must appear in at least one of.");
             // 
             // txtPoolExclude
             // 
+            this.tableLayoutPanel17.SetColumnSpan(this.txtPoolExclude, 2);
             this.txtPoolExclude.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.txtPoolExclude.Location = new System.Drawing.Point(92, 227);
+            this.txtPoolExclude.Location = new System.Drawing.Point(2, 24);
             this.txtPoolExclude.Margin = new System.Windows.Forms.Padding(2);
             this.txtPoolExclude.Name = "txtPoolExclude";
-            this.txtPoolExclude.Size = new System.Drawing.Size(299, 20);
+            this.txtPoolExclude.Size = new System.Drawing.Size(204, 20);
             this.txtPoolExclude.TabIndex = 4;
+            this.YamlTT.SetToolTip(this.txtPoolExclude, "A list of pools this song will never be included in.");
             // 
             // label13
             // 
             this.label13.AutoSize = true;
-            this.label13.Dock = System.Windows.Forms.DockStyle.Bottom;
-            this.label13.Location = new System.Drawing.Point(92, 257);
+            this.label13.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.label13.Location = new System.Drawing.Point(210, 0);
             this.label13.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.label13.Name = "label13";
-            this.label13.Size = new System.Drawing.Size(299, 13);
+            this.label13.Size = new System.Drawing.Size(174, 22);
             this.label13.TabIndex = 5;
             this.label13.Text = "Include in pools";
+            this.label13.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             // 
             // btnFilter
             // 
@@ -1489,24 +1477,26 @@
             // label12
             // 
             this.label12.AutoSize = true;
-            this.label12.Dock = System.Windows.Forms.DockStyle.Bottom;
-            this.label12.Location = new System.Drawing.Point(92, 212);
+            this.label12.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.label12.Location = new System.Drawing.Point(2, 0);
             this.label12.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.label12.Name = "label12";
-            this.label12.Size = new System.Drawing.Size(299, 13);
+            this.label12.Size = new System.Drawing.Size(174, 22);
             this.label12.TabIndex = 3;
             this.label12.Text = "Exclude from pools";
+            this.label12.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             // 
             // label17
             // 
             this.label17.AutoSize = true;
-            this.label17.Dock = System.Windows.Forms.DockStyle.Bottom;
-            this.label17.Location = new System.Drawing.Point(2, 37);
+            this.label17.Dock = System.Windows.Forms.DockStyle.Left;
+            this.label17.Location = new System.Drawing.Point(2, 25);
             this.label17.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.label17.Name = "label17";
-            this.label17.Size = new System.Drawing.Size(36, 13);
+            this.label17.Size = new System.Drawing.Size(35, 25);
             this.label17.TabIndex = 7;
             this.label17.Text = "Filter: ";
+            this.label17.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             // 
             // menuStrip1
             // 
@@ -1615,6 +1605,32 @@
             this.YamlTT.InitialDelay = 500;
             this.YamlTT.ReshowDelay = 100;
             // 
+            // tableLayoutPanel17
+            // 
+            this.tableLayoutPanel17.ColumnCount = 4;
+            this.tableLayoutPanel8.SetColumnSpan(this.tableLayoutPanel17, 4);
+            this.tableLayoutPanel17.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 50F));
+            this.tableLayoutPanel17.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 30F));
+            this.tableLayoutPanel17.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 50F));
+            this.tableLayoutPanel17.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 30F));
+            this.tableLayoutPanel17.Controls.Add(this.btnEditIncludePools, 3, 0);
+            this.tableLayoutPanel17.Controls.Add(this.label12, 0, 0);
+            this.tableLayoutPanel17.Controls.Add(this.btnEditExcludePools, 1, 0);
+            this.tableLayoutPanel17.Controls.Add(this.txtPoolExclude, 0, 1);
+            this.tableLayoutPanel17.Controls.Add(this.label13, 2, 0);
+            this.tableLayoutPanel17.Controls.Add(this.txtPoolInclude, 2, 1);
+            this.tableLayoutPanel17.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.tableLayoutPanel17.Location = new System.Drawing.Point(3, 248);
+            this.tableLayoutPanel17.Name = "tableLayoutPanel17";
+            this.tableLayoutPanel17.RowCount = 2;
+            this.tableLayoutPanel8.SetRowSpan(this.tableLayoutPanel17, 2);
+            this.tableLayoutPanel17.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 50F));
+            this.tableLayoutPanel17.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 50F));
+            this.tableLayoutPanel17.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 20F));
+            this.tableLayoutPanel17.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 20F));
+            this.tableLayoutPanel17.Size = new System.Drawing.Size(417, 44);
+            this.tableLayoutPanel17.TabIndex = 13;
+            // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -1689,6 +1705,8 @@
             this.panel1.ResumeLayout(false);
             this.tableLayoutPanel16.ResumeLayout(false);
             this.tableLayoutPanel16.PerformLayout();
+            this.tableLayoutPanel17.ResumeLayout(false);
+            this.tableLayoutPanel17.PerformLayout();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -1727,7 +1745,6 @@
         private System.Windows.Forms.Label label13;
         private System.Windows.Forms.TextBox txtPoolExclude;
         private System.Windows.Forms.Label label12;
-        private System.Windows.Forms.Button btnCopyHash;
         private System.Windows.Forms.NumericUpDown nudSongExtra;
         private System.Windows.Forms.Label label14;
         private System.Windows.Forms.CheckBox chkInstrumentShuffle;
@@ -1804,6 +1821,7 @@
         private System.Windows.Forms.TableLayoutPanel tableLayoutPanel15;
         private System.Windows.Forms.TableLayoutPanel tableLayoutPanel16;
         private System.Windows.Forms.ToolTip YamlTT;
+        private System.Windows.Forms.TableLayoutPanel tableLayoutPanel17;
     }
 }
 
