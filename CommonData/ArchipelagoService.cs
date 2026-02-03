@@ -231,6 +231,22 @@ namespace YargArchipelagoPlugin
                 DeathLinkService.DisableDeathLink();
         }
 
+        public List<SongAPData> GetAvailableSongs(bool IgnoreInstrument)
+        {
+            List<SongAPData> SongEntries = new List<SongAPData>();
+            foreach (var i in SlotData.SongsByInstrument)
+            {
+                if (!IgnoreInstrument && !ReceivedInstruments.ContainsKey(i.Key)) continue;
+                foreach (var song in i.Value)
+                {
+                    if (!ReceivedSongUnlockItems.ContainsKey(song.UnlockItemID)) continue;
+                    if (!song.HasAvailableLocations(this)) continue;
+                    SongEntries.Add(song);
+                }
+            }
+            return SongEntries;
+        }
+
     }
 
     public class PersistantData

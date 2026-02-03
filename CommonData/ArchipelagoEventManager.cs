@@ -31,19 +31,8 @@ namespace YargArchipelagoPlugin
         {
             if (!parent.IsSessionConnected)
                 return;
-            List<(SongEntry, SongAPData)> SongEntries = new List<(SongEntry, SongAPData)>();
-            foreach (var i in parent.SlotData.SongsByInstrument)
-            {
-                if (!parent.seedConfig.ShowMissingInstruments && !parent.ReceivedInstruments.ContainsKey(i.Key)) continue;
-                foreach (var song in i.Value)
-                {
-                    if (!parent.ReceivedSongUnlockItems.ContainsKey(song.UnlockItemID)) continue;
-                    if (!song.HasAvailableLocations(parent)) continue;
-                    var songObj = song.GetYargSongEntry(parent);
-                    if (songObj != null)
-                        SongEntries.Add((songObj, song));
-                }
-            }
+            var Available = parent.GetAvailableSongs(parent.seedConfig.ShowMissingInstruments);
+            var SongEntries = Available.Select(x => (x.GetYargSongEntry(parent), x)).Where(x => x.Item1 != null);
             YargEngineActions.InsertAPListViewSongs(parent, __instance, __result, SongEntries);
         }
 
