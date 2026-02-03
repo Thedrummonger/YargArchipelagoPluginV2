@@ -117,6 +117,57 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
+  <metadata name="YamlTT.TrayLocation" type="System.Drawing.Point, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
+    <value>132, 17</value>
+  </metadata>
+  <metadata name="YamlTT.TrayLocation" type="System.Drawing.Point, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
+    <value>132, 17</value>
+  </metadata>
+  <data name="nudSongPack.ToolTip" xml:space="preserve">
+    <value>Determines how many songs an unlock item will unlock at once.
+If this is set to 1, you will find individual songs in the pool.
+Otherwise, you will find "Song Pack" items that unlock multiple songs at once.</value>
+  </data>
+  <data name="chkInstrumentShuffle.ToolTip" xml:space="preserve">
+    <value>You will need to collect an instruments item before you can play songs requiring that instrument.
+You start with one random instrument unlocked.
+Requires at least two song pools with different instruments.</value>
+  </data>
+  <data name="cmbDeathLink.ToolTip" xml:space="preserve">
+    <value>Failing a song will send a DeathLink to others. 
+    If you receive a DeathLink, you will instantly fail your current song. 
+
+    Death link will trigger if you fail a song or if you fail to meet the requirements for the song location check after completing it.
+
+    Modes:
+    Instant Fail: Recieving a DeathLink will cause you to instantly fail the song you are currently playing.
+    Rock Meter: Recieving a DeathLink will cause the Rock Meter to decrease low enough that missing a single note will cause you to fail.
+        -Rock Meter is not supported in Yarg Stable. If selected when using that version, Instant Fail will be used instead.
+
+    This setting can be modfied mid-game at any time in the client.</value>
+  </data>
+  <data name="cmbEnergyLink.ToolTip" xml:space="preserve">
+    <value>    Completing songs adds energy to the Energy Link pool based on your total score.
+    The conversion rate scales from 1:20,000 (0% complete) to 1:1,000,000 (100% complete).
+
+    Modes:
+    - Check Song: Only songs that send item checks contribute energy and only once when the location is checked.
+    - Other Song: Only songs without item checks contribute energy.
+    - Any Song: All completed songs contribute energy.</value>
+  </data>
+  <data name="cmbGoalPoolPlando.ToolTip" xml:space="preserve">
+    <value>Forces the goal song into the selected pool. 
+Multiple potential "Goal Pools" can be defined with 0 songs, then this option can be set to a 
+random one of those pools using Archipelago’s built-in option randomization; the selected 
+pool will be set to 1 automatically.</value>
+  </data>
+  <data name="chkGoalPoolPlando.ToolTip" xml:space="preserve">
+    <value>Forces the goal song into the selected pool. 
+Multiple potential "Goal Pools" can be defined with 0 songs, then this option can be set to a 
+random one of those pools using Archipelago’s built-in option randomization; the selected 
+pool will be set to 1 automatically.
+</value>
+  </data>
   <metadata name="menuStrip1.TrayLocation" type="System.Drawing.Point, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
     <value>17, 17</value>
   </metadata>
