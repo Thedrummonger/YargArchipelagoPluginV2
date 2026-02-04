@@ -195,6 +195,8 @@ namespace Yaml_Creator
             nudLowerDiff.ValueChanged += (s, e) => YAML.YAYARG.lower_difficulty = (int)nudLowerDiff.Value;
             nudRestartTrap.ValueChanged += (s, e) => YAML.YAYARG.restart_trap = (int)nudRestartTrap.Value;
             nudRockTrap.ValueChanged += (s, e) => YAML.YAYARG.rock_meter_trap = (int)nudRockTrap.Value;
+            nudNothingItem.ValueChanged += (s, e) => YAML.YAYARG.nothing = (int)nudNothingItem.Value;
+            nudFailPrevention.ValueChanged += (s, e) => YAML.YAYARG.fail_prevention = (int)nudFailPrevention.Value;
             //Song Pools
             cmbReward1Diff.DataSource = Utility.GetEnumDataSource<SupportedDifficulty>();
             cmbReward1Score.DataSource = Utility.GetEnumDataSource<CompletionReq>();
@@ -437,6 +439,8 @@ namespace Yaml_Creator
             nudLowerDiff.Value = YAML.YAYARG.lower_difficulty;
             nudRestartTrap.Value = YAML.YAYARG.restart_trap;
             nudRockTrap.Value = YAML.YAYARG.rock_meter_trap;
+            nudNothingItem.Value = YAML.YAYARG.nothing;
+            nudFailPrevention.Value = YAML.YAYARG.fail_prevention;
         }
 
         private void ValidateIncludeExcludeList()

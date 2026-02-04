@@ -120,22 +120,6 @@
   <metadata name="YamlTT.TrayLocation" type="System.Drawing.Point, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
     <value>132, 17</value>
   </metadata>
-  <data name="cmbGoalPoolPlando.ToolTip" xml:space="preserve">
-    <value>Forces the goal song into the selected pool. 
-Multiple potential "Goal Pools" can be defined with 0 songs, then this option can be set to a 
-random one of those pools using Archipelago’s built-in option randomization; the selected 
-pool will be set to 1 automatically.</value>
-  </data>
-  <data name="chkGoalPoolPlando.ToolTip" xml:space="preserve">
-    <value>Forces the goal song into the selected pool. 
-Multiple potential "Goal Pools" can be defined with 0 songs, then this option can be set to a 
-random one of those pools using Archipelago’s built-in option randomization; the selected 
-pool will be set to 1 automatically.
-</value>
-  </data>
-  <metadata name="YamlTT.TrayLocation" type="System.Drawing.Point, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
-    <value>132, 17</value>
-  </metadata>
   <data name="nudSongPack.ToolTip" xml:space="preserve">
     <value>Determines how many songs an unlock item will unlock at once.
 If this is set to 1, you will find individual songs in the pool.
@@ -167,5 +151,18 @@ Requires at least two song pools with different instruments.</value>
     - Check Song: Only songs that send item checks contribute energy and only once when the location is checked.
     - Other Song: Only songs without item checks contribute energy.
     - Any Song: All completed songs contribute energy.</value>
+  </data>
+  <data name="cmbGoalPoolPlando.ToolTip" xml:space="preserve">
+    <value>Forces the goal song into the selected pool. 
+Multiple potential "Goal Pools" can be defined with 0 songs, then this option can be set to a 
+random one of those pools using Archipelago’s built-in option randomization; the selected 
+pool will be set to 1 automatically.</value>
+  </data>
+  <data name="chkGoalPoolPlando.ToolTip" xml:space="preserve">
+    <value>Forces the goal song into the selected pool. 
+Multiple potential "Goal Pools" can be defined with 0 songs, then this option can be set to a 
+random one of those pools using Archipelago’s built-in option randomization; the selected 
+pool will be set to 1 automatically.
+</value>
   </data>
 </root>

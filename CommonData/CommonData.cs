@@ -52,7 +52,11 @@ namespace YargArchipelagoCommon
             [Description("Restart Trap"), Actionable]
             TrapRestart,
             [Description("Rock Meter Trap"), Actionable]
-            TrapRockMeter
+            TrapRockMeter,
+            [Description("Failure Prevention)")]
+            FailPrevention,
+            [Description("Nothing")]
+            Nothing
         }
 
         public static bool IsActionable(this StaticItems item)

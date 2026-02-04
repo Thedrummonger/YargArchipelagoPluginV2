@@ -38,6 +38,8 @@ namespace Yaml_Creator
         public int lower_difficulty = 1;
         public int restart_trap = 0;
         public int rock_meter_trap = 2;
+        public int nothing = 0;
+        public int fail_prevention = 0;
         public DeathLinkType death_link = DeathLinkType.disabled;
         public EnergyLinkType energy_link = EnergyLinkType.any_song;
     }
