@@ -31,7 +31,7 @@ namespace YargArchipelagoPlugin
         {
             if (!parent.IsSessionConnected)
                 return;
-            var Available = parent.GetAvailableSongs(parent.seedConfig.ShowMissingInstruments);
+            var Available = parent.GetAvailableSongs(true);
             var SongEntries = Available.Select(x => (x.GetYargSongEntry(parent), x)).Where(x => x.Item1 != null);
             YargEngineActions.InsertAPListViewSongs(parent, __instance, __result, SongEntries);
         }
@@ -158,6 +158,7 @@ namespace YargArchipelagoPlugin
 
         public void ApplyPendingTrapsFiller()
         {
+            if (!parent.IsSessionConnected) return;
             if (!PendingTrapsFiller) return;
             if (!parent.IsInSong(out _, out var buffer)) return;
             if (buffer == null || buffer < TimeSpan.FromSeconds(5)) return;
@@ -172,15 +173,19 @@ namespace YargArchipelagoPlugin
             }
 
             var Item = Pending[0];
+            var FromPlayer = parent.GetSession().Players.GetPlayerInfo(Item.SendingPlayerSlot);
             switch (Item.Type)
             {
                 case StaticItems.StarPower:
+                    ToastManager.ToastInformation($"{FromPlayer.Name} sent you Star Power!");
                     YargEngineActions.ApplyStarPowerItem(parent);
                     break;
                 case StaticItems.TrapRestart:
+                    ToastManager.ToastWarning($"{FromPlayer.Name} sent you a Restart Trap!");
                     YargEngineActions.ForceRestartSong(parent);
                     break;
                 case StaticItems.TrapRockMeter:
+                    ToastManager.ToastWarning($"{FromPlayer.Name} sent you a Rock Meter Trap!");
                     YargEngineActions.ApplyRockMetertrapItem(parent);
                     break;
             }

@@ -388,7 +388,7 @@ namespace YargArchipelagoPlugin
             return (currentPage, CurrentFilter);
         }
 
-
+        public static void ClearFilters() => _filterCache.Clear();
         private static readonly Dictionary<(Type, string), object> _filterCache = new Dictionary<(Type, string), object>();
         public static T[] FilterItems<T>(IEnumerable<T> Objects, string filterText, Func<T, string> GetDisplay)
         {
@@ -437,6 +437,7 @@ namespace YargArchipelagoPlugin
 
         protected virtual void Initialize(APConnectionContainer container, Rect size, bool Center = true)
         {
+            FormHelpers.ClearFilters();
             BlockerDialog = YargEngineActions.ShowBlockerDialog();
             this.container = container;
             CurrentInstance = (T)this;
@@ -728,7 +729,7 @@ namespace YargArchipelagoPlugin
                 PerformPurchase(StaticItems.SwapRandom);
             if (GUILayout.Button($"Swap Song (Pick) {ExtraAPFunctionalityHelper.FormatLargeNumber(ExtraAPFunctionalityHelper.PriceDict[StaticItems.SwapPick])}", GUILayout.Height(40)))
                 PerformPurchase(StaticItems.SwapPick);
-            if (GUILayout.Button($"Swap Song (Random) {ExtraAPFunctionalityHelper.FormatLargeNumber(ExtraAPFunctionalityHelper.PriceDict[StaticItems.LowerDifficulty])}", GUILayout.Height(40)))
+            if (GUILayout.Button($"Lower Difficulty {ExtraAPFunctionalityHelper.FormatLargeNumber(ExtraAPFunctionalityHelper.PriceDict[StaticItems.LowerDifficulty])}", GUILayout.Height(40)))
                 PerformPurchase(StaticItems.LowerDifficulty);
 
             GUILayout.Space(10);

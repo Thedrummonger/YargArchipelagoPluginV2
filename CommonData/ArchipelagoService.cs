@@ -260,6 +260,8 @@ namespace YargArchipelagoPlugin
 
         public bool ShowMissingInstruments = false;
 
+        public bool ShowAPMenu = false;
+
         public bool InGameAPChat = true;
 
         public ItemLog InGameItemLog = ItemLog.ToMe;

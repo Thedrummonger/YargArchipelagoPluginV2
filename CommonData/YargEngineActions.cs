@@ -87,68 +87,109 @@ namespace YargArchipelagoPlugin
             return insertIndex;
         }
 
-        public static void InsertAPListViewSongs(APConnectionContainer container, MusicLibraryMenu menu, List<ViewType> listView, IEnumerable<(SongEntry song, SongAPData APData)> entries)
+        public static void InsertAPListViewSongs(APConnectionContainer container, MusicLibraryMenu menu, List<ViewType> listView, IEnumerable<(SongEntry song, SongAPData APData)> toPrint)
         {
             int insertIndex = GetListViewIndex(listView, "Menu.MusicLibrary.AllSongs");
             if (insertIndex < 0) 
                 return;
 
-            var allSongs = entries.Select(e => e.song).ToArray();
-            listView.Insert(insertIndex++, new CategoryViewType("ARCHIPELAGO", allSongs.Length, allSongs, menu.RefreshAndReselect));
+            var HasInstrument = new List<(SongEntry song, SongAPData APData)>();
+            var MissingInstrument = new List<(SongEntry song, SongAPData APData)>();
+            foreach (var song in toPrint)
+                if (container.ReceivedInstruments.ContainsKey(song.APData.GetPool(container.SlotData).instrument))
+                    HasInstrument.Add(song);
+                else
+                    MissingInstrument.Add(song);
+
+            var HasInstrumentSongEntrys = HasInstrument.Select(x => x.song).ToArray();
+            var MissingInstrumentSongEntrys = MissingInstrument.Select(x => x.song).ToArray();
 
             var AllActionItems = container.GetAllAquiredActionItems();
-            //var AllActionItems = container.ApItemsRecieved;
             var SwapSongs = AllActionItems.Where(x => x.Type == StaticItems.SwapPick && !container.seedConfig.ApItemsUsed.Contains(x));
             var SwapSongRand = AllActionItems.Where(x => x.Type == StaticItems.SwapRandom && !container.seedConfig.ApItemsUsed.Contains(x));
             var LowerDifficulty = AllActionItems.Where(x => x.Type == StaticItems.LowerDifficulty && !container.seedConfig.ApItemsUsed.Contains(x));
 
-            if (container.SlotData.SetlistNeededForGoal > 0)
-            {
-                var current = container.ApItemsRecieved.Count(x => x.Type == StaticItems.SongCompletion);
-                listView.Insert(insertIndex++, new CategoryViewType($"- SETLIST GOAL {current}/{container.SlotData.SetlistNeededForGoal}", current, new SongEntry[0], menu.RefreshAndReselect));
-            }
-            if (container.SlotData.FamePointsForGoal > 0)
-            {
-                var current = container.ApItemsRecieved.Count(x => x.Type == StaticItems.FamePoint);
-                listView.Insert(insertIndex++, new CategoryViewType($"- FAME GOAL {current}/{container.SlotData.FamePointsForGoal}", current, new SongEntry[0], menu.RefreshAndReselect));
-            }
-            if (container.GoalItemInPool(out var GoalItemRecieved, out var recieveInfo))
-                listView.Insert(insertIndex++, new CategoryViewType($"- FOUND GOAL ITEM [{GoalItemRecieved}]", GoalItemRecieved ? 1 : 0, new SongEntry[0], () => ShowGoalRecieveMessage(container, GoalItemRecieved, recieveInfo)));
-
-            if (SwapSongs.Any() && allSongs.Any())
-                listView.Insert(insertIndex++, new CategoryViewType($"- USE SWAP SONG (Pick)", SwapSongs.Count(), new SongEntry[0], () => SwapSongMenu.ShowMenu(container, SwapSongs.First())));
-
-            if (SwapSongRand.Any() && allSongs.Any())
-                listView.Insert(insertIndex++, new CategoryViewType($"- USE SWAP SONG (Random)", SwapSongRand.Count(), new SongEntry[0], () => SwapSongMenu.ShowMenu(container, SwapSongRand.First())));
-
-            if (LowerDifficulty.Any() && allSongs.Any())
-                listView.Insert(insertIndex++, new CategoryViewType($"- USE LOWER DIFFICULTY", LowerDifficulty.Count(), new SongEntry[0], () => LowerDifficultyMenu.ShowMenu(container, LowerDifficulty.First())));
-
-            if (container.seedConfig.EnergyLinkMode > EnergyLinkType.disabled || true)
-                listView.Insert(insertIndex++, new CategoryViewType($"- OPEN ENERGY LINK SHOP", (int)container.seedConfig.EnergyLinkMode, new SongEntry[0], () => EnergyLinkShop.ShowMenu(container)));
+            listView.Insert(insertIndex++, new CategoryViewType("ARCHIPELAGO SONGS", HasInstrumentSongEntrys.Length, HasInstrumentSongEntrys, menu.RefreshAndReselect));
 
             if (container.SlotData.GoalData.IsSongUnlocked(container) && container.SlotData.GoalData.HadYargSongEntry(container, out var GoalSong) && container.SlotData.GoalData.HasAvailableLocations(container))
             {
                 var Pool = container.SlotData.GoalData.PoolName;
-                listView.Insert(insertIndex++, new CategoryViewType($"GOAL SONG: {Pool.ToUpper()}", 1, new SongEntry[] { GoalSong }, () => ShowPoolData(container, Pool)));
+                listView.Insert(insertIndex++, new CategoryViewType($"- GOAL SONG: {Pool.ToUpper()}", 1, new SongEntry[] { GoalSong }, () => ShowPoolData(container, Pool)));
                 listView.Insert(insertIndex++, new SongViewType(menu, GoalSong));
             }
 
-            foreach (var pool in entries
+            insertIndex = PrintSongsList(container, menu, listView, HasInstrument, insertIndex);
+
+
+            string MissingInstText = container.seedConfig.ShowMissingInstruments ? "HIDE MISSING INSTRUMENTS" : "SHOW MISSING INSTRUMENTS";
+            if (MissingInstrument.Any())
+                listView.Insert(insertIndex++, new CategoryViewType(MissingInstText, MissingInstrument.Count(), MissingInstrumentSongEntrys, () =>
+                {
+                    container.seedConfig.ShowMissingInstruments = !container.seedConfig.ShowMissingInstruments;
+                    container.seedConfig.Save();
+                    menu.RefreshAndReselect();
+                }));
+
+            if (container.seedConfig.ShowMissingInstruments)
+                insertIndex = PrintSongsList(container, menu, listView, MissingInstrument, insertIndex, "#FF4040");
+
+
+            string MenuToggleText = container.seedConfig.ShowAPMenu ? "HIDE ARCHIPELAGO MENU" : "SHOW ARCHIPELAGO MENU";
+            listView.Insert(insertIndex++, new CategoryViewType(MenuToggleText, 0, Array.Empty<SongEntry>(), () =>
+            {
+                container.seedConfig.ShowAPMenu = !container.seedConfig.ShowAPMenu;
+                container.seedConfig.Save();
+                menu.RefreshAndReselect();
+            }));
+
+            if (container.seedConfig.ShowAPMenu)
+            {
+                if (container.SlotData.SetlistNeededForGoal > 0)
+                {
+                    var current = container.ApItemsRecieved.Count(x => x.Type == StaticItems.SongCompletion);
+                    listView.Insert(insertIndex++, new CategoryViewType($"- SETLIST GOAL {current}/{container.SlotData.SetlistNeededForGoal}", current, Array.Empty<SongEntry>(), menu.RefreshAndReselect));
+                }
+                if (container.SlotData.FamePointsForGoal > 0)
+                {
+                    var current = container.ApItemsRecieved.Count(x => x.Type == StaticItems.FamePoint);
+                    listView.Insert(insertIndex++, new CategoryViewType($"- FAME GOAL {current}/{container.SlotData.FamePointsForGoal}", current, Array.Empty<SongEntry>(), menu.RefreshAndReselect));
+                }
+                if (container.GoalItemInPool(out var GoalItemRecieved, out var recieveInfo))
+                    listView.Insert(insertIndex++, new CategoryViewType($"- FOUND GOAL ITEM [{GoalItemRecieved}]", GoalItemRecieved ? 1 : 0, Array.Empty<SongEntry>(), () => ShowGoalRecieveMessage(container, GoalItemRecieved, recieveInfo)));
+
+                if (SwapSongs.Any() && HasInstrumentSongEntrys.Any())
+                    listView.Insert(insertIndex++, new CategoryViewType($"- USE SWAP SONG (Pick)", SwapSongs.Count(), Array.Empty<SongEntry>(), () => SwapSongMenu.ShowMenu(container, SwapSongs.First())));
+
+                if (SwapSongRand.Any() && HasInstrumentSongEntrys.Any())
+                    listView.Insert(insertIndex++, new CategoryViewType($"- USE SWAP SONG (Random)", SwapSongRand.Count(), Array.Empty<SongEntry>(), () => SwapSongMenu.ShowMenu(container, SwapSongRand.First())));
+
+                if (LowerDifficulty.Any() && HasInstrumentSongEntrys.Any())
+                    listView.Insert(insertIndex++, new CategoryViewType($"- USE LOWER DIFFICULTY", LowerDifficulty.Count(), Array.Empty<SongEntry>(), () => LowerDifficultyMenu.ShowMenu(container, LowerDifficulty.First())));
+
+                if (container.seedConfig.EnergyLinkMode > EnergyLinkType.disabled || true)
+                    listView.Insert(insertIndex++, new CategoryViewType($"- OPEN ENERGY LINK SHOP", (int)container.seedConfig.EnergyLinkMode, Array.Empty<SongEntry>(), () => EnergyLinkShop.ShowMenu(container)));
+            }
+        }
+
+        public static int PrintSongsList(APConnectionContainer container, MusicLibraryMenu menu, List<ViewType> listView, IEnumerable<(SongEntry song, SongAPData APData)> toPrint, int CurIndex, string Color = null)
+        {
+            int insertIndex = CurIndex;
+            foreach (var pool in toPrint
                 .OrderBy(e => e.APData.GetPool(container.SlotData).instrument.GetDescription(), StringComparer.OrdinalIgnoreCase)
                 .ThenBy(e => e.APData.PoolName, StringComparer.OrdinalIgnoreCase)
                 .GroupBy(e => e.APData.PoolName))
             {
                 string PoolName = pool.Key.ToUpper();
-                if (container.seedConfig.ShowMissingInstruments && !container.ReceivedInstruments.ContainsKey(container.SlotData.Pools[pool.Key].instrument))
-                    PoolName = $"<color=#FF4040>{PoolName}</color>";
+                if (Color != null)
+                    PoolName = $"<color={Color}>{PoolName}</color>";
 
                 var poolSongs = pool.Select(e => e.song).OrderBy(s => s.Name, StringComparer.OrdinalIgnoreCase).ToArray();
-                listView.Insert(insertIndex++, new CategoryViewType($"AP: {PoolName}", poolSongs.Length, poolSongs, () => ShowPoolData(container, pool.Key)));
+                listView.Insert(insertIndex++, new CategoryViewType($"- AP: {PoolName}", poolSongs.Length, poolSongs, () => ShowPoolData(container, pool.Key)));
 
                 foreach (var song in poolSongs)
                     listView.Insert(insertIndex++, new SongViewType(menu, song));
             }
+            return insertIndex;
         }
 
         public static void ShowGoalRecieveMessage(APConnectionContainer container, bool Recieved, BaseYargAPItem recieveInfo)
