@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Timers;
 using YARG.Core;
+using YARG.Core.Engine;
 using YARG.Core.IO;
 using YARG.Core.Song;
 using YARG.Gameplay;
@@ -198,6 +199,28 @@ namespace YargArchipelagoPlugin
             if (!parent.HasActiveSession) return;
             if (parent.seedConfig.DeathLinkMode <= DeathLinkType.disabled) return;
             YargEngineActions.ApplyDeathLink(parent, deathLink);
+        }
+
+        internal void TryUseSongFailPrevent(EngineManager engineManager)
+        {
+            if (!parent.IsSessionConnected || !parent.IsInSong(out var gameManager, out _)) return;
+
+            if (engineManager.GetAverageHappiness() < 0.0f && !gameManager.PlayerHasFailed)
+            {
+                if (!parent.IsPlayingCheckableSong(out _))
+                    return;
+                var Pending = parent.ApItemsRecieved
+                    .Where(x => x.Type == StaticItems.FailPrevention && !parent.seedConfig.ApItemsUsed.Contains(x)).ToList();
+                if (Pending.Count <= 0)
+                    return;
+                YargEngineActions.PreventSongFail(engineManager);
+                var ToUse = Pending.First();
+                var Player = ToUse.GetPlayerInfo(parent);
+                ToastManager.ToastSuccess($"{Player.Name} cheered you on!");
+                parent.seedConfig.ApItemsUsed.Add(ToUse);
+                parent.seedConfig.Save();
+            }
+            
         }
     }
 

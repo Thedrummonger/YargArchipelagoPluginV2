@@ -151,6 +151,7 @@ namespace YargArchipelagoPlugin
             APPatches.OnRecordScore += eventManager.TryCheckSongLocations;
             APPatches.OnRecordScore += eventManager.TryCheckSongGoalSong;
             APPatches.OnSongFail += eventManager.FailedSong;
+            APPatches.OnUpdateHappiness += eventManager.TryUseSongFailPrevent;
             _Listening = true;
         }
 
@@ -174,6 +175,7 @@ namespace YargArchipelagoPlugin
             APPatches.OnRecordScore -= eventManager.TryCheckSongLocations;
             APPatches.OnRecordScore -= eventManager.TryCheckSongGoalSong;
             APPatches.OnSongFail -= eventManager.FailedSong;
+            APPatches.OnUpdateHappiness -= eventManager.TryUseSongFailPrevent;
             _Listening = false;
         }
 
@@ -245,6 +247,14 @@ namespace YargArchipelagoPlugin
                 }
             }
             return SongEntries;
+        }
+
+        public bool IsPlayingCheckableSong(out IEnumerable<SongAPData> Songs)
+        {
+            Songs = new List<SongAPData>();
+            if (!IsInSong(out var song, out _)) return false;
+            Songs = SlotData.Songs.Where(x => x.WasActiveSongInGame(this, song) && x.HasAvailableLocations(this) && x.IsSongUnlocked(this));
+            return Songs.Any();
         }
 
     }

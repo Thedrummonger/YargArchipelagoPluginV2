@@ -1,4 +1,5 @@
 ﻿//Don't Let visual studios lie to me these are needed
+using Archipelago.MultiClient.Net.Helpers;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
@@ -153,6 +154,9 @@ namespace YargArchipelagoCommon
             public int SendingPlayerSlot;
             public long SendingPlayerLocation;
             public string SendingPlayerGame;
+
+            public PlayerInfo GetPlayerInfo(APConnectionContainer container) => 
+                container.IsSessionConnected ? container.GetSession().Players.GetPlayerInfo(SendingPlayerSlot) : null;
         }
 
         public class StaticYargAPItem : BaseYargAPItem

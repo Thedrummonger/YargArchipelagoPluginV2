@@ -33,6 +33,7 @@ namespace YargArchipelagoPlugin
         public static event Action OnSongEnded;
         public static event Action<GameManager> OnRecordScore;
         public static event Action<GameManager> OnSongFail;
+        public static event Action<EngineManager> OnUpdateHappiness;
         public static bool HasAvailableAPSongUpdate = false;
         public static bool IgnoreScoreForNextSong = false;
         private static bool FirstAwake = true;
@@ -68,12 +69,7 @@ namespace YargArchipelagoPlugin
 
         [HarmonyPatch(typeof(EngineManager), "UpdateHappiness", MethodType.Normal)]
         [HarmonyPrefix]
-        public static void EngineManager_UpdateHappiness(EngineManager __instance)
-        {
-            // Check if We have a Fail Prevention item to use
-            //if (__instance.GetAverageHappiness() < 0.0f)
-            //    __instance.PreventSongFail();
-        }
+        public static void EngineManager_UpdateHappiness(EngineManager __instance) => OnUpdateHappiness?.Invoke(__instance);
 
         [HarmonyPatch(typeof(SongContainer), "FillContainers")]
         [HarmonyPostfix]

@@ -74,6 +74,10 @@
             this.label25 = new System.Windows.Forms.Label();
             this.nudStarPower = new System.Windows.Forms.NumericUpDown();
             this.label28 = new System.Windows.Forms.Label();
+            this.label1 = new System.Windows.Forms.Label();
+            this.nudFailPrevention = new System.Windows.Forms.NumericUpDown();
+            this.label30 = new System.Windows.Forms.Label();
+            this.nudNothingItem = new System.Windows.Forms.NumericUpDown();
             this.groupBox9 = new System.Windows.Forms.GroupBox();
             this.tableLayoutPanel12 = new System.Windows.Forms.TableLayoutPanel();
             this.chkGoalSongPlando = new System.Windows.Forms.CheckBox();
@@ -135,10 +139,6 @@
             this.label29 = new System.Windows.Forms.Label();
             this.btnGenYaml = new System.Windows.Forms.Button();
             this.YamlTT = new System.Windows.Forms.ToolTip(this.components);
-            this.label1 = new System.Windows.Forms.Label();
-            this.nudFailPrevention = new System.Windows.Forms.NumericUpDown();
-            this.label30 = new System.Windows.Forms.Label();
-            this.nudNothingItem = new System.Windows.Forms.NumericUpDown();
             this.TabControlMain.SuspendLayout();
             this.SettingsTab.SuspendLayout();
             this.tableLayoutPanel11.SuspendLayout();
@@ -164,6 +164,8 @@
             ((System.ComponentModel.ISupportInitialize)(this.nudSwapPick)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.nudSwapRandom)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.nudStarPower)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.nudFailPrevention)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.nudNothingItem)).BeginInit();
             this.groupBox9.SuspendLayout();
             this.tableLayoutPanel12.SuspendLayout();
             this.SongPoolTab.SuspendLayout();
@@ -187,8 +189,6 @@
             this.tableLayoutPanel1.SuspendLayout();
             this.panel1.SuspendLayout();
             this.tableLayoutPanel16.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.nudFailPrevention)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.nudNothingItem)).BeginInit();
             this.SuspendLayout();
             // 
             // TabControlMain
@@ -828,6 +828,42 @@
             this.label28.TabIndex = 6;
             this.label28.Text = "Lower Difficulty";
             this.label28.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            // 
+            // label1
+            // 
+            this.label1.AutoSize = true;
+            this.label1.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.label1.Location = new System.Drawing.Point(315, 0);
+            this.label1.Name = "label1";
+            this.label1.Size = new System.Drawing.Size(101, 34);
+            this.label1.TabIndex = 12;
+            this.label1.Text = "Fail Prevention";
+            this.label1.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            // 
+            // nudFailPrevention
+            // 
+            this.nudFailPrevention.Location = new System.Drawing.Point(315, 37);
+            this.nudFailPrevention.Name = "nudFailPrevention";
+            this.nudFailPrevention.Size = new System.Drawing.Size(101, 20);
+            this.nudFailPrevention.TabIndex = 13;
+            // 
+            // label30
+            // 
+            this.label30.AutoSize = true;
+            this.label30.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.label30.Location = new System.Drawing.Point(315, 68);
+            this.label30.Name = "label30";
+            this.label30.Size = new System.Drawing.Size(101, 34);
+            this.label30.TabIndex = 14;
+            this.label30.Text = "Nothing";
+            this.label30.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            // 
+            // nudNothingItem
+            // 
+            this.nudNothingItem.Location = new System.Drawing.Point(315, 105);
+            this.nudNothingItem.Name = "nudNothingItem";
+            this.nudNothingItem.Size = new System.Drawing.Size(101, 20);
+            this.nudNothingItem.TabIndex = 15;
             // 
             // groupBox9
             // 
@@ -1627,42 +1663,6 @@
             this.YamlTT.InitialDelay = 500;
             this.YamlTT.ReshowDelay = 100;
             // 
-            // label1
-            // 
-            this.label1.AutoSize = true;
-            this.label1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.label1.Location = new System.Drawing.Point(315, 0);
-            this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(101, 34);
-            this.label1.TabIndex = 12;
-            this.label1.Text = "Fail Prevention";
-            this.label1.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
-            // 
-            // nudFailPrevention
-            // 
-            this.nudFailPrevention.Location = new System.Drawing.Point(315, 37);
-            this.nudFailPrevention.Name = "nudFailPrevention";
-            this.nudFailPrevention.Size = new System.Drawing.Size(101, 20);
-            this.nudFailPrevention.TabIndex = 13;
-            // 
-            // label30
-            // 
-            this.label30.AutoSize = true;
-            this.label30.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.label30.Location = new System.Drawing.Point(315, 68);
-            this.label30.Name = "label30";
-            this.label30.Size = new System.Drawing.Size(101, 34);
-            this.label30.TabIndex = 14;
-            this.label30.Text = "Nothing";
-            this.label30.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
-            // 
-            // nudNothingItem
-            // 
-            this.nudNothingItem.Location = new System.Drawing.Point(315, 105);
-            this.nudNothingItem.Name = "nudNothingItem";
-            this.nudNothingItem.Size = new System.Drawing.Size(101, 20);
-            this.nudNothingItem.TabIndex = 15;
-            // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -1704,6 +1704,8 @@
             ((System.ComponentModel.ISupportInitialize)(this.nudSwapPick)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.nudSwapRandom)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.nudStarPower)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.nudFailPrevention)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.nudNothingItem)).EndInit();
             this.groupBox9.ResumeLayout(false);
             this.tableLayoutPanel12.ResumeLayout(false);
             this.tableLayoutPanel12.PerformLayout();
@@ -1735,8 +1737,6 @@
             this.panel1.ResumeLayout(false);
             this.tableLayoutPanel16.ResumeLayout(false);
             this.tableLayoutPanel16.PerformLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.nudFailPrevention)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.nudNothingItem)).EndInit();
             this.ResumeLayout(false);
 
         }
