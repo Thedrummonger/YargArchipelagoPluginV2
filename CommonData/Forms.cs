@@ -18,24 +18,23 @@ namespace YargArchipelagoPlugin
     public static class GUIStyles
     {
         private static GUIStyle _opaqueWindow;
-
+        private static Texture2D _bgTexture;
         public static GUIStyle OpaqueWindow()
         {
-            if (_opaqueWindow == null)
-            {
-                _opaqueWindow = new GUIStyle(GUI.skin.window);
-                Texture2D bgTexture = new Texture2D(1, 1);
-                bgTexture.SetPixel(0, 0, new Color(0.2f, 0.2f, 0.2f, 1f)); // Darker grey
-                bgTexture.Apply();
-                _opaqueWindow.normal.background = bgTexture;
-                _opaqueWindow.onNormal.background = bgTexture;
-                _opaqueWindow.hover.background = bgTexture;
-                _opaqueWindow.onHover.background = bgTexture;
-                _opaqueWindow.normal.textColor = Color.white;
-                _opaqueWindow.hover.textColor = Color.white;
-                _opaqueWindow.onNormal.textColor = Color.white;
-                _opaqueWindow.onHover.textColor = Color.white;
-            }
+            if (_opaqueWindow != null)
+                return _opaqueWindow;
+            _opaqueWindow = new GUIStyle(GUI.skin.window);
+
+            _bgTexture = new Texture2D(1, 1);
+            _bgTexture.SetPixel(0, 0, new Color(0.1f, 0.1f, 0.1f, 1f));
+            _bgTexture.Apply();
+            UnityEngine.Object.DontDestroyOnLoad(_bgTexture);
+
+            _opaqueWindow.normal.background = _bgTexture;
+            _opaqueWindow.onNormal.background = _bgTexture;
+            _opaqueWindow.hover.background = _bgTexture;
+            _opaqueWindow.onHover.background = _bgTexture;
+
             return _opaqueWindow;
         }
     }
@@ -163,15 +162,7 @@ namespace YargArchipelagoPlugin
             GUILayout.BeginVertical();
             int startIndex = Mathf.Max(0, ChatHistory.Count - 500);
             for (int i = startIndex; i < ChatHistory.Count; i++)
-            {
-                string coloredText = "";
-                foreach (var part in ChatHistory[i].Parts)
-                {
-                    string colorHex = ColorUtility.ToHtmlStringRGB(new Color(part.Color.R, part.Color.G, part.Color.B));
-                    coloredText += $"<color=#{colorHex}>{part.Text}</color>";
-                }
-                GUILayout.Label(coloredText, richTextStyle);
-            }
+                GUILayout.Label(ChatHistory[i].ToYargColoredString(), richTextStyle);
             GUILayout.EndVertical();
 
             if (Event.current.type == EventType.Repaint)
