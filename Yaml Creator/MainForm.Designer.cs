@@ -139,6 +139,7 @@
             this.label29 = new System.Windows.Forms.Label();
             this.btnGenYaml = new System.Windows.Forms.Button();
             this.YamlTT = new System.Windows.Forms.ToolTip(this.components);
+            this.btnListValidSongs = new System.Windows.Forms.Button();
             this.TabControlMain.SuspendLayout();
             this.SettingsTab.SuspendLayout();
             this.tableLayoutPanel11.SuspendLayout();
@@ -1051,6 +1052,7 @@
             this.tableLayoutPanel2.Controls.Add(this.label6, 0, 4);
             this.tableLayoutPanel2.Controls.Add(this.label5, 0, 2);
             this.tableLayoutPanel2.Controls.Add(this.nudPoolMinDifficulty, 0, 3);
+            this.tableLayoutPanel2.Controls.Add(this.btnListValidSongs, 1, 1);
             this.tableLayoutPanel2.Dock = System.Windows.Forms.DockStyle.Fill;
             this.tableLayoutPanel2.Location = new System.Drawing.Point(3, 17);
             this.tableLayoutPanel2.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
@@ -1659,6 +1661,16 @@
             this.YamlTT.InitialDelay = 500;
             this.YamlTT.ReshowDelay = 100;
             // 
+            // btnListValidSongs
+            // 
+            this.btnListValidSongs.Dock = System.Windows.Forms.DockStyle.Left;
+            this.btnListValidSongs.Location = new System.Drawing.Point(138, 30);
+            this.btnListValidSongs.Name = "btnListValidSongs";
+            this.btnListValidSongs.Size = new System.Drawing.Size(23, 25);
+            this.btnListValidSongs.TabIndex = 8;
+            this.btnListValidSongs.Text = "?";
+            this.btnListValidSongs.UseVisualStyleBackColor = true;
+            // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
@@ -1848,6 +1860,7 @@
         private System.Windows.Forms.NumericUpDown nudFailPrevention;
         private System.Windows.Forms.Label label30;
         private System.Windows.Forms.NumericUpDown nudNothingItem;
+        private System.Windows.Forms.Button btnListValidSongs;
     }
 }
 

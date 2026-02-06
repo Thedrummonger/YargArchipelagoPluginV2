@@ -225,6 +225,8 @@ namespace Yaml_Creator
             cmbReward1Score.SelectedIndexChanged += (s, e) => SavePoolValues();
             cmbReward2Score.SelectedIndexChanged += (s, e) => SavePoolValues();
 
+            btnListValidSongs.Click += ListValidSongs;
+
             lbSongPoolList.DataSource = YAML.YAYARG.song_pools.Select(x => new SongPoolContainer(x.Key, x.Value)).ToArray();
             lbSongPoolList.SelectedIndexChanged += (s, e) => 
             { 
@@ -250,6 +252,15 @@ namespace Yaml_Creator
             };
 
             btnGenYaml.Click += SaveYaml;
+        }
+
+        private void ListValidSongs(object sender, EventArgs e)
+        {
+            if (IsLoadingNewSongPool || SelectedSongPool == null)
+                return;
+            var Form = new ValueSelectForm($"Valid Songs for Pool {SelectedSongPool.Name}", false);
+            Form.SetItems(ExportFile.Where(x => x.core.ValidForPool(SelectedSongPool.Pool)).OrderBy(x => x.ToString()), x => x.ToString());
+            Form.ShowDialog();
         }
 
         private void LbActiveSongs_MouseDown(object sender, MouseEventArgs e)

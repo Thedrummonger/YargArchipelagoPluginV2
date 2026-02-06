@@ -14,17 +14,47 @@ namespace Yaml_Creator
     public partial class ValueSelectForm : Form
     {
         public object SelectedValue { get; private set; }
+        private ListBox AltDisplay;
 
-        public ValueSelectForm(string Title)
+        public ValueSelectForm(string Title, bool selectable = true)
         {
             InitializeComponent(); 
             btnConfirm.DialogResult = DialogResult.OK;
             btnCancel.DialogResult = DialogResult.Cancel;
             lblTitle.Text = Title;
+
+            if (!selectable)
+            {
+                AltDisplay = new ListBox
+                {
+                    Dock = DockStyle.Fill,
+                    Name = "lbDisplay"
+                };
+                tableLayoutPanel1.Controls.Remove(btnCancel);
+                tableLayoutPanel1.Controls.Remove(clbDisplay);
+                tableLayoutPanel1.Controls.Add(AltDisplay, 0, 1);
+                tableLayoutPanel1.SetColumnSpan(AltDisplay, 2);
+                tableLayoutPanel1.SetColumnSpan(btnConfirm, 2);
+                btnConfirm.Text = "Close";
+            }
+
+        }
+
+        private bool SetDisplayAlt<T>(IEnumerable<T> items)
+        {
+            if (AltDisplay == null)
+                return false;
+            AltDisplay.Items.Clear();
+            foreach (var item in items)
+                AltDisplay.Items.Add(item);
+            return true;
         }
 
         public void SetItems<T>(IEnumerable<DisplayItem<T>> items, IEnumerable<T> preSelected = null)
         {
+            if (SetDisplayAlt(items)) 
+                return;
+
             clbDisplay.Items.Clear();
 
             var preSelectedSet = preSelected != null ? new HashSet<T>(preSelected) : new HashSet<T>();
@@ -36,6 +66,9 @@ namespace Yaml_Creator
         }
         public void SetItems<T>(IEnumerable<T> items, Func<T, string> displaySelector, IEnumerable<T> preSelected = null)
         {
+            if (SetDisplayAlt(items))
+                return;
+
             clbDisplay.Items.Clear();
 
             var preSelectedSet = preSelected != null ? new HashSet<T>(preSelected) : new HashSet<T>();
@@ -49,6 +82,9 @@ namespace Yaml_Creator
 
         public List<T> GetSelectedValues<T>()
         {
+            if (AltDisplay != null)
+                throw new Exception("Form was set to display only mode");
+
             var selected = new List<T>();
             foreach (DisplayItem<T> item in clbDisplay.CheckedItems)
             {
