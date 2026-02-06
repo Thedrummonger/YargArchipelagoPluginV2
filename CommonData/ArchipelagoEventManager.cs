@@ -121,9 +121,9 @@ namespace YargArchipelagoPlugin
         public void RelayChatToYARG(LogMessage message)
         {
             if (message is ItemSendLogMessage ItemLog && ShouldRelayItemSend(ItemLog))
-                ToastManager.ToastMessage(message.ToString());
+                ToastManager.ToastMessage(message.ToYargColoredString());
             else if ((message is PlayerSpecificLogMessage || message is ServerChatLogMessage) && parent.seedConfig.InGameAPChat)
-                ToastManager.ToastMessage(message.ToString());
+                ToastManager.ToastMessage(message.ToYargColoredString());
 
             bool ShouldRelayItemSend(ItemSendLogMessage IL)
             {

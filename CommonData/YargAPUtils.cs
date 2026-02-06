@@ -1,7 +1,9 @@
-﻿using System;
+﻿using Archipelago.MultiClient.Net.MessageLog.Messages;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
+using System.Text;
 using YARG.Core;
 using YARG.Core.Game;
 using YARG.Core.Song;
@@ -21,6 +23,16 @@ namespace YargArchipelagoPlugin
             int currentIndex = Array.IndexOf(values, currentValue);
             int nextIndex = (currentIndex + 1) % values.Length;
             return values[nextIndex];
+        }
+        public static string ToYargColoredString(this LogMessage message)
+        {
+            var result = new StringBuilder();
+            foreach (var i in message.Parts)
+            {
+                var hexColor = $"#{i.Color.R:X2}{i.Color.G:X2}{i.Color.B:X2}";
+                result.Append($"<color={hexColor}>{i.Text}</color>");
+            }
+            return result.ToString();
         }
         public static bool IsSupportedInstrument(Instrument source, out CommonData.SupportedInstrument? target)
         {
