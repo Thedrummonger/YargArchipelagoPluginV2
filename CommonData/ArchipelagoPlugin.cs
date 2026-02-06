@@ -9,7 +9,7 @@ namespace YargArchipelagoPlugin
     public class ArchipelagoPlugin : BaseUnityPlugin
     {
         public const string pluginGuid = "thedrummonger.yarg.archipelago";
-        public const string pluginVersion = "0.2.1.0";
+        public const string pluginVersion = "0.2.2.0";
 #if NIGHTLY
         public const string pluginName = "YARG Nightly Archipelago Plugin";
 #else
