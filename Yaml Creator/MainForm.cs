@@ -66,6 +66,7 @@ namespace Yaml_Creator
         private void LoadSongPool()
         {
             IsLoadingNewSongPool = true;
+            UpdatePoolCount();
             if (SelectedSongPool == null)
             {
                 gbSelectedPool.Enabled = false;
@@ -95,6 +96,17 @@ namespace Yaml_Creator
             return;
         }
 
+        private void UpdatePoolCount()
+        {
+            if (SelectedSongPool == null)
+            {
+                gbSelectedPool.Text = "N/A";
+                return;
+            }
+            var MaxSongs = ExportFile.Count(x => x.core.ValidForPool(SelectedSongPool.Pool));
+            gbSelectedPool.Text = $"{SelectedSongPool.Name}: {MaxSongs} Valid Songs";
+        }
+
         private void SavePoolValues()
         {
             if (IsLoadingNewSongPool || SelectedSongPool == null)
@@ -107,6 +119,8 @@ namespace Yaml_Creator
             SelectedSongPool.Pool.completion_requirements.reward2_diff = cmbReward2Diff.SelectedItem is DisplayItem<SupportedDifficulty> item2 ? item2.Value : SupportedDifficulty.Expert;
             SelectedSongPool.Pool.completion_requirements.reward1_req = cmbReward1Score.SelectedItem is DisplayItem<CompletionReq> item3 ? item3.Value : CompletionReq.Clear;
             SelectedSongPool.Pool.completion_requirements.reward2_req = cmbReward2Score.SelectedItem is DisplayItem<CompletionReq> item4 ? item4.Value : CompletionReq.Clear;
+
+            UpdatePoolCount();
         }
 
         bool PrintingSongs = false;
