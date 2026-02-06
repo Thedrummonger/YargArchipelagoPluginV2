@@ -161,13 +161,9 @@ namespace YargArchipelagoPlugin
 
         public void ApplyPendingTrapsFiller()
         {
-            if (!parent.IsSessionConnected) return;
-            if (!PendingTrapsFiller) return;
-            if (!parent.IsInSong(out _, out var buffer)) return;
-            if (buffer == null || buffer < TimeSpan.FromSeconds(5)) return;
+            if (!parent.IsSessionConnected || !PendingTrapsFiller || !parent.IsPlayingCheckableSong(out _, out var buffer) || buffer < TimeSpan.FromSeconds(5)) return;
 
-            var Pending = parent.ApItemsRecieved
-                .Where(x => CommonData.IsActionable(x.Type) && !parent.seedConfig.ApItemsUsed.Contains(x)).ToList();
+            var Pending = parent.ApItemsRecieved.Where(x => x.Type.IsActionable() && !parent.seedConfig.ApItemsUsed.Contains(x)).ToList();
 
             if (Pending.Count == 0)
             {
@@ -176,7 +172,7 @@ namespace YargArchipelagoPlugin
             }
 
             var Item = Pending[0];
-            var FromPlayer = parent.GetSession().Players.GetPlayerInfo(Item.SendingPlayerSlot);
+            var FromPlayer = Item.GetPlayerInfo(parent);
             switch (Item.Type)
             {
                 case StaticItems.StarPower:
@@ -209,7 +205,7 @@ namespace YargArchipelagoPlugin
 
             if (engineManager.GetAverageHappiness() < 0.0f && !gameManager.PlayerHasFailed)
             {
-                if (!parent.IsPlayingCheckableSong(out _))
+                if (!parent.IsPlayingCheckableSong(out _, out _))
                     return;
                 var Pending = parent.ApItemsRecieved
                     .Where(x => x.Type == StaticItems.FailPrevention && !parent.seedConfig.ApItemsUsed.Contains(x)).ToList();
@@ -261,8 +257,8 @@ namespace YargArchipelagoPlugin
     }
     public static partial class ExtraAPFunctionalityHelper
     {
-        public const long minEnergyLinkScale = 50000;
-        public const long maxEnergyLinkScale = 100000;
+        public const long minEnergyLinkScale = 20000;
+        public const long maxEnergyLinkScale = 1000000;
         public static Dictionary<StaticItems, long> PriceDict = new Dictionary<StaticItems, long>
         {
             { StaticItems.SwapRandom, 30_000_000_000 },
@@ -273,7 +269,6 @@ namespace YargArchipelagoPlugin
         public static string EnergyLinkKey(ArchipelagoSession session) => $"EnergyLink{session.Players.ActivePlayer.Team}";
         public static bool TryPurchaseItem(APConnectionContainer container, StaticItems Type)
         {
-            var CurrentEnergy = GetEnergy(container);
             if (!PriceDict.TryGetValue(Type, out var Price))
                 return false;
             if (!TryUseEnergy(container, Price))

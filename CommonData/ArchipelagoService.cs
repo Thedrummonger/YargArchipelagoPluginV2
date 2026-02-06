@@ -204,10 +204,8 @@ namespace YargArchipelagoPlugin
                     ReceivedInstruments[instrument] = new BaseYargAPItem(i.ItemId, i.Player.Slot, i.LocationId, i.LocationGame);
                 else if (SlotData.SongUnlockIds.Contains(i.ItemId))
                     ReceivedSongUnlockItems[i.ItemId] = new BaseYargAPItem(i.ItemId, i.Player.Slot, i.LocationId, i.LocationGame);
-                else if (i.ItemName.ToLower().StartsWith("song pack"))
-                    ReceivedSongUnlockItems[i.ItemId] = new BaseYargAPItem(i.ItemId, i.Player.Slot, i.LocationId, i.LocationGame);
                 else
-                    throw new Exception($"Error, received unknown item {i.ItemName} [{i.ItemId}]");
+                    logger.LogWarning($"Received unknown item {i.ItemName} [{i.ItemId}]");
             }
         }
 
@@ -249,12 +247,13 @@ namespace YargArchipelagoPlugin
             return SongEntries;
         }
 
-        public bool IsPlayingCheckableSong(out IEnumerable<SongAPData> Songs)
+        public bool IsPlayingCheckableSong(out IEnumerable<SongAPData> APSongEntries, out TimeSpan buffer)
         {
-            Songs = new List<SongAPData>();
-            if (!IsInSong(out var song, out _)) return false;
-            Songs = SlotData.Songs.Where(x => x.WasActiveSongInGame(this, song) && x.HasAvailableLocations(this) && x.IsSongUnlocked(this));
-            return Songs.Any();
+            APSongEntries = new List<SongAPData>();
+            buffer = TimeSpan.Zero;
+            if (!IsInSong(out var song, out buffer)) return false;
+            APSongEntries = SlotData.Songs.Where(x => x.WasActiveSongInGame(this, song) && x.HasAvailableLocations(this) && x.IsSongUnlocked(this));
+            return APSongEntries.Any();
         }
 
     }
