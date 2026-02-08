@@ -487,10 +487,14 @@ namespace Yaml_Creator
                     {
                         if (!YAML.YAYARG.song_pools.TryGetValue(pool, out var poolData))
                             InvalidPools.Add(pool);
-                        else if (!Song.core.ValidForPool(poolData))
+                        else if (!Song.core.TryGetDifficulty(poolData.instrument, out _))
                             InvalidPools.Add(pool);
                     }
-                    Target[hash] = Target[hash].Where(x => !InvalidPools.Contains(x)).ToArray();
+                    var NewValues = Target[hash].Where(x => !InvalidPools.Contains(x)).ToArray();
+                    if (!NewValues.Any())
+                        Target.Remove(hash);
+                    else
+                        Target[hash] = NewValues;
                 }
             }
         }
