@@ -259,7 +259,7 @@ namespace YargArchipelagoPlugin
                 if (GUILayout.Button(deathLinkText, GUILayout.Height(20)))
                     if (isConnected)
                     {
-                        connectionContainer.seedConfig.DeathLinkMode = CycleEnum(connectionContainer.seedConfig.DeathLinkMode);
+                        connectionContainer.seedConfig.DeathLinkMode = YargAPUtils.CycleEnum(connectionContainer.seedConfig.DeathLinkMode);
                         connectionContainer.seedConfig.Save();
                     }
                 GUILayout.EndVertical();
@@ -272,7 +272,7 @@ namespace YargArchipelagoPlugin
                 if (GUILayout.Button(energyLinkText, GUILayout.Height(20)))
                     if (isConnected)
                     {
-                        connectionContainer.seedConfig.EnergyLinkMode = CycleEnum(connectionContainer.seedConfig.EnergyLinkMode);
+                        connectionContainer.seedConfig.EnergyLinkMode = YargAPUtils.CycleEnum(connectionContainer.seedConfig.EnergyLinkMode);
                         connectionContainer.seedConfig.Save();
                     }
                 GUILayout.EndVertical();
@@ -287,7 +287,7 @@ namespace YargArchipelagoPlugin
                 if (GUILayout.Button(itemLogText, GUILayout.Height(20)))
                     if (isConnected)
                     {
-                        connectionContainer.seedConfig.InGameItemLog = CycleEnum(connectionContainer.seedConfig.InGameItemLog);
+                        connectionContainer.seedConfig.InGameItemLog = YargAPUtils.CycleEnum(connectionContainer.seedConfig.InGameItemLog);
                         connectionContainer.seedConfig.Save();
                     }
                 GUILayout.EndVertical();
@@ -305,14 +305,6 @@ namespace YargArchipelagoPlugin
 
                 GUILayout.EndHorizontal();
             }
-        }
-
-        private T CycleEnum<T>(T currentValue) where T : System.Enum
-        {
-            var values = (T[])System.Enum.GetValues(typeof(T));
-            int currentIndex = System.Array.IndexOf(values, currentValue);
-            int nextIndex = (currentIndex + 1) % values.Length;
-            return values[nextIndex];
         }
 
         private readonly struct GUIEnabledScope : System.IDisposable
