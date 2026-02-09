@@ -68,6 +68,7 @@ namespace YargArchipelagoPlugin
         public void Initialize(APConnectionContainer container)
         {
             connectionContainer = container;
+            connectionDetails = new ConnectionDetails();
         }
 
         private void Awake()
@@ -80,8 +81,6 @@ namespace YargArchipelagoPlugin
 
             Instance = this;
             DontDestroyOnLoad(gameObject);
-
-            connectionDetails = new ConnectionDetails();
         }
 
         private void OnGUI()

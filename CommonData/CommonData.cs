@@ -222,8 +222,8 @@ namespace YargArchipelagoCommon
 
         public class ConnectionDetails
         {
-            public string Address { get; set; } = "localhost";//"Archipleago.gg:38281";
-            public string SlotName { get; set; } = "TDMYarg";//string.Empty;
+            public string Address { get; set; } = "Archipleago.gg:38281";
+            public string SlotName { get; set; } = string.Empty;
             public string Password { get; set; } = string.Empty;
         }
 

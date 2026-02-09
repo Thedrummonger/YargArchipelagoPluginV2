@@ -46,7 +46,7 @@ namespace YargArchipelagoPlugin
                 return;
 
             if (parent.seedConfig.DeathLinkMode > DeathLinkType.disabled)
-                parent.DeathLinkService?.SendDeathLink(new DeathLink(parent.LastUsedConnectionInfo?.SlotName, $"Failed Song {gameManager.Song.Name} by {gameManager.Song.Artist}"));
+                parent.DeathLinkService?.SendDeathLink(new DeathLink(parent.GetSession().Players.ActivePlayer.Name, $"Failed Song {gameManager.Song.Name} by {gameManager.Song.Artist}"));
         }
 
         public void TryCheckSongLocations(GameManager gameManager)
@@ -93,7 +93,7 @@ namespace YargArchipelagoPlugin
 
             if (DoDeathlink && (parent.seedConfig?.DeathLinkMode ?? DeathLinkType.disabled) > DeathLinkType.disabled)
                 parent.DeathLinkService?.SendDeathLink(
-                    new DeathLink(parent.LastUsedConnectionInfo?.SlotName,
+                    new DeathLink(parent.GetSession().Players.ActivePlayer.Name,
                     $"Failed to meet the requirements playing {gameManager.Song.Name} by {gameManager.Song.Artist}"));
         }
         internal void TryCheckSongGoalSong(GameManager manager)
@@ -114,7 +114,7 @@ namespace YargArchipelagoPlugin
 
             if ((deathLinkExtra || deathLinkStandard) && (parent.seedConfig?.DeathLinkMode ?? DeathLinkType.disabled) > DeathLinkType.disabled)
                 parent.DeathLinkService?.SendDeathLink(
-                    new DeathLink(parent.LastUsedConnectionInfo?.SlotName,
+                    new DeathLink(parent.GetSession().Players.ActivePlayer.Name,
                     $"Failed to meet the requirements playing {manager.Song.Name} by {manager.Song.Artist}"));
         }
 

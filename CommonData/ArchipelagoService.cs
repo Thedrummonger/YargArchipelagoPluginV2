@@ -21,7 +21,6 @@ namespace YargArchipelagoPlugin
 {
     public class APConnectionContainer
     {
-        public ConnectionDetails LastUsedConnectionInfo { get; private set; } = null;
         public ArchipelagoSession GetSession() => Session;
         private ArchipelagoSession Session;
         public BepInEx.Logging.ManualLogSource logger;
@@ -99,7 +98,6 @@ namespace YargArchipelagoPlugin
                 return false;
             }
             Session = tempSession;
-            LastUsedConnectionInfo = connectionDetails;
             SlotData = YargSlotData.Parse(Session.DataStorage.GetSlotData());
             seedConfig = PersistantData.Load(this);
             DeathLinkService = Session.CreateDeathLinkService();
