@@ -361,8 +361,12 @@ namespace YargArchipelagoCommon
                     SongName = $"[{PoolName}] {SongName}";
                 return SongName;
             }
-
-            public abstract bool IsSongUnlocked(APConnectionContainer connectionContainer);
+            public virtual bool IsSongUnlocked(APConnectionContainer connectionContainer)
+            {
+                var HasUnlockItem = connectionContainer.ReceivedSongUnlockItems.ContainsKey(UnlockItemID);
+                var HasInstrument = connectionContainer.ReceivedInstruments.ContainsKey(GetPool(connectionContainer.SlotData).instrument);
+                return HasUnlockItem && HasInstrument;
+            }
             public abstract bool HasAvailableLocations(APConnectionContainer connectionContainer);
         }
 
@@ -370,12 +374,6 @@ namespace YargArchipelagoCommon
         {
             public long ExtraLocationID { get; set; }
             public long CompletionLocationID { get; set; }
-            public override bool IsSongUnlocked(APConnectionContainer connectionContainer)
-            {
-                var pool = GetPool(connectionContainer.SlotData);
-                return connectionContainer.ReceivedInstruments.ContainsKey(pool.instrument) &&
-                    connectionContainer.ReceivedSongUnlockItems.ContainsKey(UnlockItemID);
-            }
             public override bool HasAvailableLocations(APConnectionContainer connectionContainer)
             {
                 if (!connectionContainer.GetSession().Locations.AllLocationsChecked.Contains(MainLocationID))
@@ -418,12 +416,15 @@ namespace YargArchipelagoCommon
 
             public override bool IsSongUnlocked(APConnectionContainer connectionContainer)
             {
-                var HasUnlockItem = connectionContainer.ReceivedSongUnlockItems.ContainsKey(UnlockItemID);
+                if (!base.IsSongUnlocked(connectionContainer))
+                    return false;
+
                 var CurrentSongCompletions = connectionContainer.ApItemsRecieved.Count(x => x.Type == StaticItems.SongCompletion);
                 var HasEnoughCompletions = CurrentSongCompletions >= connectionContainer.SlotData.SetlistNeededForGoal;
                 var CurrentFamePoints = connectionContainer.ApItemsRecieved.Count(x => x.Type == StaticItems.FamePoint);
                 var HasEnoughFame = CurrentFamePoints >= connectionContainer.SlotData.FamePointsForGoal;
-                return HasUnlockItem && HasEnoughFame && HasEnoughCompletions;
+
+                return HasEnoughFame && HasEnoughCompletions;
             }
         }
 
