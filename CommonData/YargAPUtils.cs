@@ -17,12 +17,37 @@ namespace YargArchipelagoPlugin
 {
     public static class YargAPUtils
     {
+        private static string[] Colors = new[]
+        {
+            "#C97682",
+            "#75C275",
+            "#CA94C2",
+            "#D9A07D",
+            "#767EBD",
+            "#EEE391"
+        };
         public static T CycleEnum<T>(T currentValue) where T : System.Enum
         {
             var values = (T[])Enum.GetValues(typeof(T));
             int currentIndex = Array.IndexOf(values, currentValue);
             int nextIndex = (currentIndex + 1) % values.Length;
             return values[nextIndex];
+        }
+        public static string ToRainbowString(this string input)
+        {
+            var result = new StringBuilder();
+            int colorIndex = 0;
+            foreach (char c in input)
+            {
+                if (char.IsWhiteSpace(c)) 
+                    result.Append(c);
+                else
+                {
+                    result.Append($"<color={Colors[colorIndex]}>{c}</color>");
+                    colorIndex = colorIndex + 1 >= Colors.Length ? 0 : colorIndex + 1;
+                }
+            }
+            return result.ToString();
         }
         public static string ToYargColoredString(this LogMessage message)
         {

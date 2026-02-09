@@ -109,7 +109,7 @@ namespace YargArchipelagoPlugin
             var SwapSongRand = AllActionItems.Where(x => x.Type == StaticItems.SwapRandom && !container.seedConfig.ApItemsUsed.Contains(x));
             var LowerDifficulty = AllActionItems.Where(x => x.Type == StaticItems.LowerDifficulty && !container.seedConfig.ApItemsUsed.Contains(x));
 
-            listView.Insert(insertIndex++, new CategoryViewType("ARCHIPELAGO SONGS", HasInstrumentSongEntrys.Length, HasInstrumentSongEntrys, menu.RefreshAndReselect));
+            listView.Insert(insertIndex++, new CategoryViewType("ARCHIPELAGO".ToRainbowString() + " SONGS", HasInstrumentSongEntrys.Length, HasInstrumentSongEntrys, menu.RefreshAndReselect));
 
             if (container.SlotData.GoalData.IsSongUnlocked(container) && container.SlotData.GoalData.HadYargSongEntry(container, out var GoalSong) && container.SlotData.GoalData.HasAvailableLocations(container))
             {
@@ -134,7 +134,7 @@ namespace YargArchipelagoPlugin
                 insertIndex = PrintSongsList(container, menu, listView, MissingInstrument, insertIndex, "#FF4040");
 
 
-            string MenuToggleText = container.seedConfig.ShowAPMenu ? "HIDE ARCHIPELAGO MENU" : "SHOW ARCHIPELAGO MENU";
+            string MenuToggleText = container.seedConfig.ShowAPMenu ? "HIDE " + "ARCHIPELAGO".ToRainbowString() + " MENU" : "SHOW " + "ARCHIPELAGO".ToRainbowString() + " MENU";
             listView.Insert(insertIndex++, new CategoryViewType(MenuToggleText, 0, Array.Empty<SongEntry>(), () =>
             {
                 container.seedConfig.ShowAPMenu = !container.seedConfig.ShowAPMenu;
