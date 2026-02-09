@@ -1,4 +1,5 @@
 ﻿using Archipelago.MultiClient.Net.MessageLog.Messages;
+using HarmonyLib;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -9,6 +10,7 @@ using YARG.Core.Game;
 using YARG.Core.Song;
 using YARG.Core.Utility;
 using YARG.Gameplay;
+using YARG.Menu.Persistent;
 using YARG.Scores;
 using YargArchipelagoCommon;
 using static YargArchipelagoCommon.CommonData;
@@ -115,6 +117,27 @@ namespace YargArchipelagoPlugin
             }
             DeathLink = HadValidPlayer;
             return false;
+        }
+
+        public static (UnityEngine.Color color, UnityEngine.Sprite icon) ResolveToastVisuals(ToastManager manager, int typeValue)
+        {
+            // For some reason YARG has to make everything private so we have to hack out the type value of the original toast.
+            string typeName;
+            switch (typeValue)
+            {
+                case 0: typeName = "General"; break;
+                case 1: typeName = "Information"; break;
+                case 2: typeName = "Success"; break;
+                case 3: typeName = "Warning"; break;
+                case 4: typeName = "Error"; break;
+                default: typeName = "General"; break;
+            }
+            var colorField = AccessTools.Field(typeof(ToastManager), "_" + typeName.ToLower() + "Color");
+            var iconField = AccessTools.Field(typeof(ToastManager), "_icon" + typeName);
+            var color = (UnityEngine.Color)colorField.GetValue(manager);
+            var icon = (UnityEngine.Sprite)iconField.GetValue(manager);
+
+            return (color, icon);
         }
     }
 }

@@ -34,6 +34,7 @@ namespace YargArchipelagoPlugin
         public static event Action<GameManager> OnRecordScore;
         public static event Action<GameManager> OnSongFail;
         public static event Action<EngineManager> OnUpdateHappiness;
+        public static event Func<ToastManager, object, string, Action, bool> OnShowToastPrefix;
         public static bool HasAvailableAPSongUpdate = false;
         public static bool IgnoreScoreForNextSong = false;
         private static bool FirstAwake = true;
@@ -122,5 +123,10 @@ namespace YargArchipelagoPlugin
             if (!string.IsNullOrEmpty(currentText))
                 textProperty.SetValue(watermarkText, $"{currentText}\nYarg Archipelago plugin V{ArchipelagoPlugin.pluginVersion}. Press F10 to connect!");
         }
+
+        [HarmonyPatch(typeof(ToastManager), "ShowToast")]
+        [HarmonyPrefix]
+        public static bool ToastManager_ShowToast(ToastManager __instance, object type, string body, Action onClick) =>
+            !(OnShowToastPrefix?.Invoke(__instance, type, body, onClick) ?? false);
     }
 }

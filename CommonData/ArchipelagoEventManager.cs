@@ -220,6 +220,23 @@ namespace YargArchipelagoPlugin
             }
             
         }
+        public bool HandleToastPrefix(ToastManager manager, object type, string body, Action onClick)
+        {
+            if (!parent.IsSessionConnected || body == null || !body.StartsWith("[AP]", StringComparison.OrdinalIgnoreCase))
+                return false;
+            try
+            {
+                body = body.Substring(4).TrimStart();
+                int typeValue = Convert.ToInt32(type);
+                var (color, icon) = YargAPUtils.ResolveToastVisuals(manager, typeValue);
+                var prefab = (Toast)AccessTools.Field(typeof(ToastManager), "_toastPrefab").GetValue(manager);
+                UnityEngine.Object.Instantiate(prefab, manager.transform).Initialize("Archipelago", body, icon, color, onClick);
+                return true;
+            }
+            catch (Exception ex) { parent.logger.LogError($"Failed to create custom toast\n{ex}"); }
+            return false;
+        }
+
     }
 
     public class SyncTimer
