@@ -109,6 +109,7 @@ namespace YargArchipelagoPlugin
 
             ToastManager.ToastInformation($"Connected Archipelago!\n{connectionDetails.SlotName}@{connectionDetails.Address}");
             File.WriteAllText(Path.Combine(CommonData.DataFolder, "Debug.json"), JsonConvert.SerializeObject(SlotData, Formatting.Indented));
+            connectionDetails.Save();
             return true;
         }
 

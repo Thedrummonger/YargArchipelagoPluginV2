@@ -225,6 +225,27 @@ namespace YargArchipelagoCommon
             public string Address { get; set; } = "Archipleago.gg:38281";
             public string SlotName { get; set; } = string.Empty;
             public string Password { get; set; } = string.Empty;
+
+            public void Save()
+            {
+                Directory.CreateDirectory(DataFolder);
+                File.WriteAllText(ConnectionCachePath, Newtonsoft.Json.JsonConvert.SerializeObject(this, Newtonsoft.Json.Formatting.Indented));
+            }
+            public static ConnectionDetails Load()
+            {
+                Directory.CreateDirectory(DataFolder);
+                if (File.Exists(ConnectionCachePath))
+                {
+                    try
+                    {
+                        var Cache = Newtonsoft.Json.JsonConvert.DeserializeObject<ConnectionDetails>(File.ReadAllText(ConnectionCachePath));
+                        if (Cache != null)
+                            return Cache;
+                    }
+                    catch { }
+                }
+                return new ConnectionDetails();
+            }
         }
 
         public class SongExportData

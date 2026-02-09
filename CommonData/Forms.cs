@@ -68,7 +68,7 @@ namespace YargArchipelagoPlugin
         public void Initialize(APConnectionContainer container)
         {
             connectionContainer = container;
-            connectionDetails = new ConnectionDetails();
+            connectionDetails = ConnectionDetails.Load();
         }
 
         private void Awake()
