@@ -107,5 +107,19 @@
   <ItemGroup>
     <None Include="packages.config" />
   </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="..\Assets\black-icon.png">
+      <Link>Assets\black-icon.png</Link>
+    </EmbeddedResource>
+    <EmbeddedResource Include="..\Assets\blue-icon.png">
+      <Link>Assets\blue-icon.png</Link>
+    </EmbeddedResource>
+    <EmbeddedResource Include="..\Assets\color-icon.png">
+      <Link>Assets\color-icon.png</Link>
+    </EmbeddedResource>
+    <EmbeddedResource Include="..\Assets\white-icon.png">
+      <Link>Assets\white-icon.png</Link>
+    </EmbeddedResource>
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

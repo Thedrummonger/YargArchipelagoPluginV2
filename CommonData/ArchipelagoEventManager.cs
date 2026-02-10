@@ -125,7 +125,7 @@ namespace YargArchipelagoPlugin
             else if (message is ItemSendLogMessage ItemLog && ShouldRelayItemSend(ItemLog)) Relay = true;
             else if ((message is PlayerSpecificLogMessage || message is ServerChatLogMessage) && parent.seedConfig.InGameAPChat) Relay = true;
 
-            if (Relay) ToastManager.ToastMessage(message.ToYargColoredString());
+            if (Relay) ToastManager.ToastMessage(YargAPUtils.APToastFlag + message.ToYargColoredString());
 
             bool ShouldRelayItemSend(ItemSendLogMessage IL)
             {
@@ -143,7 +143,7 @@ namespace YargArchipelagoPlugin
                 return;
             if (!parent.GetSession().Socket.Connected)
             {
-                ToastManager.ToastWarning("Lost Connection to Archipelago");
+                ToastManager.ToastWarning($"{YargAPUtils.APToastFlag}Lost Connection to Archipelago");
                 parent.Disconnect();
             }
         }
@@ -176,15 +176,15 @@ namespace YargArchipelagoPlugin
             switch (Item.Type)
             {
                 case StaticItems.StarPower:
-                    ToastManager.ToastInformation($"{FromPlayer.Name} sent you Star Power!");
+                    ToastManager.ToastInformation($"{YargAPUtils.APToastFlag}{FromPlayer.Name} sent you Star Power!");
                     YargEngineActions.ApplyStarPowerItem(parent);
                     break;
                 case StaticItems.TrapRestart:
-                    ToastManager.ToastWarning($"{FromPlayer.Name} sent you a Restart Trap!");
+                    ToastManager.ToastWarning($"{YargAPUtils.APToastFlag}{FromPlayer.Name} sent you a Restart Trap!");
                     YargEngineActions.ForceRestartSong(parent);
                     break;
                 case StaticItems.TrapRockMeter:
-                    ToastManager.ToastWarning($"{FromPlayer.Name} sent you a Rock Meter Trap!");
+                    ToastManager.ToastWarning($"{YargAPUtils.APToastFlag}{FromPlayer.Name} sent you a Rock Meter Trap!");
                     YargEngineActions.ApplyRockMetertrapItem(parent);
                     break;
             }
@@ -214,27 +214,11 @@ namespace YargArchipelagoPlugin
                 YargEngineActions.PreventSongFail(engineManager);
                 var ToUse = Pending.First();
                 var Player = ToUse.GetPlayerInfo(parent);
-                ToastManager.ToastSuccess($"{Player.Name} cheered you on!");
+                ToastManager.ToastSuccess($"{YargAPUtils.APToastFlag}{Player.Name} cheered you on!");
                 parent.seedConfig.ApItemsUsed.Add(ToUse);
                 parent.seedConfig.Save();
             }
             
-        }
-        public bool HandleToastPrefix(ToastManager manager, object type, string body, Action onClick)
-        {
-            if (!parent.IsSessionConnected || body == null || !body.StartsWith("[AP]", StringComparison.OrdinalIgnoreCase))
-                return false;
-            try
-            {
-                body = body.Substring(4).TrimStart();
-                int typeValue = Convert.ToInt32(type);
-                var (color, icon) = YargAPUtils.ResolveToastVisuals(manager, typeValue);
-                var prefab = (Toast)AccessTools.Field(typeof(ToastManager), "_toastPrefab").GetValue(manager);
-                UnityEngine.Object.Instantiate(prefab, manager.transform).Initialize("Archipelago", body, icon, color, onClick);
-                return true;
-            }
-            catch (Exception ex) { parent.logger.LogError($"Failed to create custom toast\n{ex}"); }
-            return false;
         }
 
     }

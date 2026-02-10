@@ -196,7 +196,7 @@ namespace YargArchipelagoPlugin
         {
             if (!Recieved)
             {
-                ToastManager.ToastError($"Your goal song unlock item has not been found!");
+                ToastManager.ToastError($"{YargAPUtils.APToastFlag}Your goal song unlock item has not been found!");
                 return;
             }
             var Team = container.GetSession().Players.ActivePlayer.Team;
@@ -294,7 +294,7 @@ namespace YargArchipelagoPlugin
                     default:
                         return;
                 }
-                ToastManager.ToastInformation($"DeathLink Received!\n\n{deathLink.Source} {deathLink.Cause}");
+                ToastManager.ToastInformation($"{YargAPUtils.APToastFlag}DeathLink Received!\n\n{deathLink.Source} {deathLink.Cause}");
             }
             catch (Exception e)
             {

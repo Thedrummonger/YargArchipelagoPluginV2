@@ -3,8 +3,12 @@ using HarmonyLib;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.IO;
+using System.IO.Compression;
 using System.Linq;
+using System.Reflection;
 using System.Text;
+using UnityEngine;
 using YARG.Core;
 using YARG.Core.Game;
 using YARG.Core.Song;
@@ -138,6 +142,79 @@ namespace YargArchipelagoPlugin
             var icon = (UnityEngine.Sprite)iconField.GetValue(manager);
 
             return (color, icon);
+        }
+
+        public const string APToastFlag = "[AP]";
+        public static bool HandleAPToasts(ToastManager manager, object type, string body, Action onClick)
+        {
+            if (body == null || !body.StartsWith(APToastFlag, StringComparison.OrdinalIgnoreCase))
+                return false;
+            try
+            {
+                body = body.Substring(4).TrimStart();
+                int typeValue = Convert.ToInt32(type);
+                var (color, icon) = YargAPUtils.ResolveToastVisuals(manager, typeValue);
+                var prefab = (Toast)AccessTools.Field(typeof(ToastManager), "_toastPrefab").GetValue(manager);
+                UnityEngine.Object.Instantiate(prefab, manager.transform).Initialize("Archipelago", body, APAssets.Get(APAssets.APIcon.Color), color, onClick);
+                return true;
+            }
+            catch (Exception ex) { Debug.LogError($"Failed to create custom toast\n{ex}"); }
+            return false;
+        }
+    }
+
+    public static class APAssets
+    {
+        public enum APIcon
+        {
+            Black,
+            Blue,
+            Color,
+            White
+        }
+
+        static Sprite _black, _blue, _color, _white;
+
+        public static Sprite Get(APIcon icon)
+        {
+            switch (icon)
+            {
+                case APIcon.Black: return _black ?? (_black = Load("black-icon.png"));
+                case APIcon.Blue: return _blue ?? (_blue = Load("blue-icon.png"));
+                case APIcon.Color: return _color ?? (_color = Load("color-icon.png"));
+                case APIcon.White: return _white ?? (_white = Load("white-icon.png"));
+                default: return null;
+            }
+        }
+        static MethodInfo _loadImage;
+        static Sprite Load(string suffix)
+        {
+            var asm = Assembly.GetExecutingAssembly();
+            var name = asm.GetManifestResourceNames()
+                          .First(n => n.EndsWith(suffix, StringComparison.OrdinalIgnoreCase));
+
+            byte[] data;
+
+            using (var s = asm.GetManifestResourceStream(name))
+            using (var ms = new MemoryStream())
+            {
+                s.CopyTo(ms);
+                data = ms.ToArray();
+            }
+
+            var tex = new Texture2D(2, 2, TextureFormat.RGBA32, false);
+
+            (_loadImage ?? (_loadImage = GetLoadImageMI())).Invoke(null, new object[] { tex, data, false });
+
+            return Sprite.Create(tex, new Rect(0, 0, tex.width, tex.height), new Vector2(.5f, .5f), 100f);
+        }
+
+        static MethodInfo GetLoadImageMI()
+        {
+            var t = Type.GetType("UnityEngine.ImageConversion, UnityEngine.ImageConversionModule")
+                 ?? Type.GetType("UnityEngine.ImageConversion, UnityEngine");
+
+            return t.GetMethod("LoadImage", BindingFlags.Public | BindingFlags.Static, null, new[] { typeof(Texture2D), typeof(byte[]), typeof(bool) }, null);
         }
     }
 }

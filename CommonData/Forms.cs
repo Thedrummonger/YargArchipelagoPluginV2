@@ -139,11 +139,11 @@ namespace YargArchipelagoPlugin
             if (connectionContainer.IsSessionConnected)
             {
                 connectionContainer.Disconnect();
-                ToastManager.ToastInformation($"Disconnected from AP");
+                ToastManager.ToastInformation($"{YargAPUtils.APToastFlag}Disconnected from AP");
             }
             else
             {
-                ToastManager.ToastInformation($"Connecting to {connectionDetails.SlotName}@{connectionDetails.Address}");
+                ToastManager.ToastInformation($"{YargAPUtils.APToastFlag}Connecting to {connectionDetails.SlotName}@{connectionDetails.Address}");
                 connectionContainer.Connect(connectionDetails);
             }
         }
@@ -472,7 +472,7 @@ namespace YargArchipelagoPlugin
         {
             if (FormHelpers.GetAvailableSongs(container).Length == 0)
             {
-                ToastManager.ToastError("No Available Songs!");
+                ToastManager.ToastError($"{YargAPUtils.APToastFlag}No Available Songs!");
                 return;
             }
             if (CurrentInstance != null)
@@ -551,7 +551,7 @@ namespace YargArchipelagoPlugin
             var CanLower2Req = CurrentReqs.reward2_req > CompletionReq.Clear;
             if (!CanLower1Diff && !CanLower2Diff && !CanLower1Req && !CanLower2Req)
             {
-                ToastManager.ToastError($"Unable to lower the requirements of this song any further!");
+                ToastManager.ToastError($"{YargAPUtils.APToastFlag}Unable to lower the requirements of this song any further!");
                 return;
             }
             SelectedSong = data;
@@ -577,7 +577,7 @@ namespace YargArchipelagoPlugin
         {
             if (FormHelpers.GetAvailableSongs(container).Length == 0)
             {
-                ToastManager.ToastError("No Available Songs!");
+                ToastManager.ToastError($"{YargAPUtils.APToastFlag}No Available Songs!");
                 return;
             }
             if (CurrentInstance != null)
@@ -616,7 +616,7 @@ namespace YargArchipelagoPlugin
 
             if (validReplacements.Length == 0)
             {
-                ToastManager.ToastError("There are no valid replacement songs available for this selection.");
+                ToastManager.ToastError($"{YargAPUtils.APToastFlag}There are no valid replacement songs available for this selection.");
                 return;
             }
             selectedSongToReplace = song;
@@ -730,10 +730,10 @@ namespace YargArchipelagoPlugin
             var Success = ExtraAPFunctionalityHelper.TryPurchaseItem(container, Item);
             if (!Success)
             {
-                ToastManager.ToastError($"Not enough energy to purchase a {Item.GetDescription()}!");
+                ToastManager.ToastError($"{YargAPUtils.APToastFlag}Not enough energy to purchase a {Item.GetDescription()}!");
                 return;
             }
-            ToastManager.ToastSuccess($"Purchased one {Item.GetDescription()}");
+            ToastManager.ToastSuccess($"{YargAPUtils.APToastFlag}Purchased one {Item.GetDescription()}");
             YargEngineActions.UpdateRecommendedSongsMenu();
         }
     }

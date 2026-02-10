@@ -334,7 +334,7 @@ namespace YargArchipelagoCommon
             {
                 var songObj = SongContainer.Songs.FirstOrDefault(x => Convert.ToBase64String(x.Hash.HashBytes) == GetActiveHash(container));
                 if (songObj == null)
-                    ToastManager.ToastError($"Song Hash {GetActiveHash(container)} was not a valid song in yarg!");
+                    ToastManager.ToastError($"{YargAPUtils.APToastFlag}Song Hash {GetActiveHash(container)} was not a valid song in yarg!");
                 return songObj;
             }
             public bool HadYargSongEntry(APConnectionContainer container, out SongEntry entry)
