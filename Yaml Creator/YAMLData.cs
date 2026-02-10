@@ -17,7 +17,7 @@ namespace Yaml_Creator
         public int progression_balancing = 50;
         public string accessibility = "full";
         public string songList = "";
-        public Dictionary<string, SongPool> song_pools = new Dictionary<string, SongPool>();
+        public Dictionary<string, YAMLSongPool> song_pools = new Dictionary<string, YAMLSongPool>();
         public HashSet<string> song_exclusion_list = new HashSet<string>();
         public Dictionary<string, string[]> exclusions_per_pool = new Dictionary<string, string[]>();
         public Dictionary<string, string[]> inclusions_per_pool = new Dictionary<string, string[]>();
@@ -38,9 +38,14 @@ namespace Yaml_Creator
         public int lower_difficulty = 1;
         public int restart_trap = 0;
         public int rock_meter_trap = 2;
-        public int nothing = 0;
+        public int nothing_item = 0;
         public int fail_prevention = 0;
         public DeathLinkType death_link = DeathLinkType.disabled;
         public EnergyLinkType energy_link = EnergyLinkType.any_song;
+    }
+
+    public class YAMLSongPool : SongPool
+    {
+        public int random_variance = 0;
     }
 }

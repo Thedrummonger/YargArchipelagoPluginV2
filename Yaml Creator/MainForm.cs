@@ -73,6 +73,7 @@ namespace Yaml_Creator
                 foreach(Control i in gbSelectedPool.Controls)
                     i.Enabled = false;
                 nudAmountInPool.Value = 0;
+                nudPoolRandomVariance.Value = 0;
                 nudPoolMinDifficulty .Value = 0;
                 nudPoolMaxDifficulty .Value = 0;
                 cmbReward1Diff.SelectedItem = null;
@@ -86,6 +87,7 @@ namespace Yaml_Creator
             foreach (Control i in gbSelectedPool.Controls)
                 i.Enabled = true;
             nudAmountInPool.Value = SelectedSongPool.Pool.amount_in_pool;
+            nudPoolRandomVariance.Value = SelectedSongPool.Pool.random_variance;
             nudPoolMinDifficulty.Value = SelectedSongPool.Pool.min_difficulty;
             nudPoolMaxDifficulty.Value = SelectedSongPool.Pool.max_difficulty;
             cmbReward1Diff.SelectedItem = cmbReward1Diff.Items.Cast<DisplayItem<SupportedDifficulty>>().FirstOrDefault(x => x.Value == SelectedSongPool.Pool.completion_requirements.reward1_diff);
@@ -113,6 +115,7 @@ namespace Yaml_Creator
                 return;
 
             SelectedSongPool.Pool.amount_in_pool = (int)nudAmountInPool.Value;
+            SelectedSongPool.Pool.random_variance = (int)nudPoolRandomVariance.Value;
             SelectedSongPool.Pool.min_difficulty = (int)nudPoolMinDifficulty.Value;
             SelectedSongPool.Pool.max_difficulty = (int)nudPoolMaxDifficulty.Value;
             SelectedSongPool.Pool.completion_requirements.reward1_diff = cmbReward1Diff.SelectedItem is DisplayItem<SupportedDifficulty> item1 ? item1.Value : SupportedDifficulty.Expert;
@@ -209,7 +212,7 @@ namespace Yaml_Creator
             nudLowerDiff.ValueChanged += (s, e) => YAML.YAYARG.lower_difficulty = (int)nudLowerDiff.Value;
             nudRestartTrap.ValueChanged += (s, e) => YAML.YAYARG.restart_trap = (int)nudRestartTrap.Value;
             nudRockTrap.ValueChanged += (s, e) => YAML.YAYARG.rock_meter_trap = (int)nudRockTrap.Value;
-            nudNothingItem.ValueChanged += (s, e) => YAML.YAYARG.nothing = (int)nudNothingItem.Value;
+            nudNothingItem.ValueChanged += (s, e) => YAML.YAYARG.nothing_item = (int)nudNothingItem.Value;
             nudFailPrevention.ValueChanged += (s, e) => YAML.YAYARG.fail_prevention = (int)nudFailPrevention.Value;
             //Song Pools
             cmbReward1Diff.DataSource = Utility.GetEnumDataSource<SupportedDifficulty>();
@@ -218,6 +221,7 @@ namespace Yaml_Creator
             cmbReward2Score.DataSource = Utility.GetEnumDataSource<CompletionReq>();
             // Song Pool controls
             nudAmountInPool.ValueChanged += (s, e) => SavePoolValues();
+            nudPoolRandomVariance.ValueChanged += (s, e) => SavePoolValues();
             nudPoolMinDifficulty.ValueChanged += (s, e) => SavePoolValues();
             nudPoolMaxDifficulty.ValueChanged += (s, e) => SavePoolValues();
             cmbReward1Diff.SelectedIndexChanged += (s, e) => SavePoolValues();
@@ -374,9 +378,9 @@ namespace Yaml_Creator
 
         public class SongPoolContainer
         {
-            public SongPoolContainer(string name, SongPool pool) { Name = name; Pool = pool; }
+            public SongPoolContainer(string name, YAMLSongPool pool) { Name = name; Pool = pool; }
             public string Name;
-            public SongPool Pool;
+            public YAMLSongPool Pool;
             public override string ToString()
             {
                 return $"{Name} [{Pool.instrument.GetDescription()}]";
@@ -464,7 +468,7 @@ namespace Yaml_Creator
             nudLowerDiff.Value = YAML.YAYARG.lower_difficulty;
             nudRestartTrap.Value = YAML.YAYARG.restart_trap;
             nudRockTrap.Value = YAML.YAYARG.rock_meter_trap;
-            nudNothingItem.Value = YAML.YAYARG.nothing;
+            nudNothingItem.Value = YAML.YAYARG.nothing_item;
             nudFailPrevention.Value = YAML.YAYARG.fail_prevention;
         }
 

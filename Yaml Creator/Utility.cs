@@ -49,12 +49,13 @@ namespace Yaml_Creator
             .ToList();
         }
 
-        public static SongPool NewSongPool(SupportedInstrument i, int a = 0, int min = 3, int max = 5)
+        public static YAMLSongPool NewSongPool(SupportedInstrument i, int a = 0, int min = 3, int max = 5)
         {
-            return new SongPool
+            return new YAMLSongPool
             {
                 instrument = i,
                 amount_in_pool = a,
+                random_variance = 0,
                 max_difficulty = max,
                 min_difficulty = min,
                 completion_requirements = new CompletionRequirements()
