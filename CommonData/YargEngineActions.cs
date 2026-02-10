@@ -441,15 +441,6 @@ namespace YargArchipelagoPlugin
             _updateHappinessMethod?.Invoke(engineManager, null);
         }
         /// <summary>
-        /// Gets the average happiness across all players in the engine manager.
-        /// </summary>
-        public static float GetAverageHappiness(this EngineManager engineManager)
-        {
-            if (_getAverageHappinessMethod == null) 
-                _getAverageHappinessMethod = typeof(EngineManager).GetMethod("GetAverageHappiness", BindingFlags.NonPublic | BindingFlags.Instance);
-            return (float)_getAverageHappinessMethod?.Invoke(engineManager, null);
-        }
-        /// <summary>
         /// Finds and returns the engine container with the lowest happiness value.
         /// </summary>
         public static EngineManager.EngineContainer GetLowestHappiness(this EngineManager engineManager)
@@ -477,7 +468,7 @@ namespace YargArchipelagoPlugin
             const float HAPPINESS_PER_NOTE_HIT = 1f / 168f;
             const float TARGET_HAPPINESS = 0.25f;
 
-            while (engineManager.GetAverageHappiness() < TARGET_HAPPINESS)
+            while (engineManager.Happiness < TARGET_HAPPINESS)
             {
                 EngineManager.EngineContainer lowestContainer = GetLowestHappiness(engineManager);
 

@@ -203,7 +203,7 @@ namespace YargArchipelagoPlugin
         {
             if (!parent.IsSessionConnected || !parent.IsInSong(out var gameManager, out _)) return;
 
-            if (engineManager.GetAverageHappiness() < 0.0f && !gameManager.PlayerHasFailed)
+            if (engineManager.Happiness < 0.0f && !gameManager.PlayerHasFailed)
             {
                 if (!parent.IsPlayingCheckableSong(out _, out _))
                     return;
