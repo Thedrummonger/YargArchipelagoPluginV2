@@ -120,6 +120,16 @@
   <metadata name="YamlTT.TrayLocation" type="System.Drawing.Point, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
     <value>132, 17</value>
   </metadata>
+  <data name="nudPoolRandomVariance.ToolTip" xml:space="preserve">
+    <value>Adds randomness to the pool size. When set greater than zero, amount_in_pool 
+is replaced with a randomly selected value between 
+(amount − variance) and (amount + variance) 
+during generation
+Example: Amount 10 with Variance 3 results in 7–13 songs.</value>
+  </data>
+  <metadata name="YamlTT.TrayLocation" type="System.Drawing.Point, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
+    <value>132, 17</value>
+  </metadata>
   <data name="nudSongPack.ToolTip" xml:space="preserve">
     <value>Determines how many songs an unlock item will unlock at once.
 If this is set to 1, you will find individual songs in the pool.
@@ -164,12 +174,5 @@ Multiple potential "Goal Pools" can be defined with 0 songs, then this option ca
 random one of those pools using Archipelago’s built-in option randomization; the selected 
 pool will be set to 1 automatically.
 </value>
-  </data>
-  <data name="nudPoolRandomVariance.ToolTip" xml:space="preserve">
-    <value>Adds randomness to the pool size. When set greater than zero, amount_in_pool 
-is replaced with a randomly selected value between 
-(amount − variance) and (amount + variance) 
-during generation
-Example: Amount 10 with Variance 3 results in 7–13 songs.</value>
   </data>
 </root>

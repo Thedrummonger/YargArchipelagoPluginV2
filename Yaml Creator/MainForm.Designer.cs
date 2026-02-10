@@ -1263,9 +1263,9 @@
             this.label6.Dock = System.Windows.Forms.DockStyle.Left;
             this.label6.Location = new System.Drawing.Point(3, 165);
             this.label6.Name = "label6";
-            this.label6.Size = new System.Drawing.Size(118, 24);
+            this.label6.Size = new System.Drawing.Size(122, 24);
             this.label6.TabIndex = 4;
-            this.label6.Text = "Min Difficulty Value";
+            this.label6.Text = "Max Difficulty Value";
             this.label6.TextAlign = System.Drawing.ContentAlignment.BottomLeft;
             // 
             // label5
@@ -1275,9 +1275,9 @@
             this.label5.Dock = System.Windows.Forms.DockStyle.Left;
             this.label5.Location = new System.Drawing.Point(3, 110);
             this.label5.Name = "label5";
-            this.label5.Size = new System.Drawing.Size(122, 24);
+            this.label5.Size = new System.Drawing.Size(118, 24);
             this.label5.TabIndex = 2;
-            this.label5.Text = "Max Difficulty Value";
+            this.label5.Text = "Min Difficulty Value";
             this.label5.TextAlign = System.Drawing.ContentAlignment.BottomLeft;
             // 
             // nudPoolMinDifficulty
