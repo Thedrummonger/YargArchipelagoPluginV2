@@ -121,11 +121,17 @@ namespace YargArchipelagoPlugin
         public void RelayChatToYARG(LogMessage message)
         {
             bool Relay = false;
+            string ToastFlag = YargAPUtils.APToastFlag;
             if (parent.seedConfig.InGameItemLog == CommonData.ItemLog.All && parent.seedConfig.InGameAPChat) Relay = true;
-            else if (message is ItemSendLogMessage ItemLog && ShouldRelayItemSend(ItemLog)) Relay = true;
+            else if (message is ItemSendLogMessage ItemLog && ShouldRelayItemSend(ItemLog))
+            {
+                Relay = true;
+                ToastFlag = ItemLog.Item.Flags.HasFlag(Archipelago.MultiClient.Net.Enums.ItemFlags.Advancement) ?
+                    YargAPUtils.APToastFlags.Progressive.GetDescription() : YargAPUtils.APToastFlags.Usefull.GetDescription();
+            }
             else if ((message is PlayerSpecificLogMessage || message is ServerChatLogMessage) && parent.seedConfig.InGameAPChat) Relay = true;
 
-            if (Relay) ToastManager.ToastMessage(YargAPUtils.APToastFlag + message.ToYargColoredString());
+            if (Relay) ToastManager.ToastMessage(ToastFlag + message.ToYargColoredString());
 
             bool ShouldRelayItemSend(ItemSendLogMessage IL)
             {

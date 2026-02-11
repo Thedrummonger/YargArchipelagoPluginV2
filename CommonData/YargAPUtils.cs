@@ -18,6 +18,7 @@ using YARG.Menu.Persistent;
 using YARG.Scores;
 using YargArchipelagoCommon;
 using static YargArchipelagoCommon.CommonData;
+using static YargArchipelagoPlugin.YargAPUtils;
 
 namespace YargArchipelagoPlugin
 {
@@ -144,18 +145,31 @@ namespace YargArchipelagoPlugin
             return (color, icon);
         }
 
-        public const string APToastFlag = "[AP]";
+        public enum APToastFlags
+        {
+            [Description("[AP]"), APAssets.APIcon(APAssets.APIcon.White)]
+            Standard,
+            [Description("[APP]"), APAssets.APIcon(APAssets.APIcon.Color)]
+            Progressive,
+            [Description("[APU]"), APAssets.APIcon(APAssets.APIcon.Blue)]
+            Usefull,
+        }
+        public static readonly string APToastFlag = APToastFlags.Standard.GetDescription();
+        private static readonly Dictionary<string, APToastFlags> ToastPrefixes = Enum.GetValues(typeof(APToastFlags))
+            .Cast<APToastFlags>().ToDictionary(x => x.GetDescription(),x => x,StringComparer.OrdinalIgnoreCase);
         public static bool HandleAPToasts(ToastManager manager, object type, string body, Action onClick)
         {
-            if (body == null || !body.StartsWith(APToastFlag, StringComparison.OrdinalIgnoreCase))
-                return false;
+            var match = ToastPrefixes.FirstOrDefault(x => body.StartsWith(x.Key, StringComparison.OrdinalIgnoreCase));
+            if (match.Key == null) return false;
+            var flag = match.Value;
+
             try
             {
                 body = body.Substring(4).TrimStart();
                 int typeValue = Convert.ToInt32(type);
                 var (color, icon) = YargAPUtils.ResolveToastVisuals(manager, typeValue);
                 var prefab = (Toast)AccessTools.Field(typeof(ToastManager), "_toastPrefab").GetValue(manager);
-                UnityEngine.Object.Instantiate(prefab, manager.transform).Initialize("Archipelago", body, APAssets.Get(APAssets.APIcon.Color), color, onClick);
+                UnityEngine.Object.Instantiate(prefab, manager.transform).Initialize("Archipelago", body, APAssets.Get(flag.GetIcon()), color, onClick);
                 return true;
             }
             catch (Exception ex) { Debug.LogError($"Failed to create custom toast\n{ex}"); }
@@ -171,6 +185,18 @@ namespace YargArchipelagoPlugin
             Blue,
             Color,
             White
+        }
+
+        [AttributeUsage(AttributeTargets.Field)]
+        public sealed class APIconAttribute : Attribute
+        {
+            public APIcon Icon { get; }
+            public APIconAttribute(APIcon icon) { Icon = icon; }
+        }
+        public static APIcon GetIcon(this APToastFlags value)
+        {
+            return value.GetType()?.GetField(value.ToString())?.GetCustomAttributes(typeof(APIconAttribute), false)?
+                .Cast<APIconAttribute>()?.FirstOrDefault()?.Icon?? APIcon.White;
         }
 
         static Sprite _black, _blue, _color, _white;

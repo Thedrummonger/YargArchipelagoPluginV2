@@ -109,19 +109,23 @@ namespace YargArchipelagoPlugin
             var SwapSongRand = AllActionItems.Where(x => x.Type == StaticItems.SwapRandom && !container.seedConfig.ApItemsUsed.Contains(x));
             var LowerDifficulty = AllActionItems.Where(x => x.Type == StaticItems.LowerDifficulty && !container.seedConfig.ApItemsUsed.Contains(x));
 
-            listView.Insert(insertIndex++, new CategoryViewType("ARCHIPELAGO".ToRainbowString() + " SONGS", HasInstrumentSongEntrys.Length, HasInstrumentSongEntrys, menu.RefreshAndReselect));
+            listView.Insert(insertIndex++, new CategoryViewType("ARCHIPELAGO".ToRainbowString() + " SONGS", HasInstrumentSongEntrys.Length, 
+                HasInstrumentSongEntrys, menu.RefreshAndReselect));
 
-            if (container.SlotData.GoalData.IsSongUnlocked(container) && container.SlotData.GoalData.HadYargSongEntry(container, out var GoalSong) && container.SlotData.GoalData.HasAvailableLocations(container))
+            if (container.SlotData.GoalData.IsSongUnlocked(container) && 
+                container.SlotData.GoalData.HadYargSongEntry(container, out var GoalSong) && 
+                container.SlotData.GoalData.HasAvailableLocations(container))
             {
                 var Pool = container.SlotData.GoalData.PoolName;
-                listView.Insert(insertIndex++, new CategoryViewType($"- GOAL SONG: {Pool.ToUpper()}", 1, new SongEntry[] { GoalSong }, () => ShowPoolData(container, Pool)));
+                listView.Insert(insertIndex++, new CategoryViewType($"- GOAL SONG: {Pool.ToUpper()}", 1, 
+                    new SongEntry[] { GoalSong }, () => ShowPoolData(container, Pool)));
                 listView.Insert(insertIndex++, new SongViewType(menu, GoalSong));
             }
 
             insertIndex = PrintSongsList(container, menu, listView, HasInstrument, insertIndex);
 
 
-            string MissingInstText = container.seedConfig.ShowMissingInstruments ? "HIDE MISSING INSTRUMENTS" : "SHOW MISSING INSTRUMENTS";
+            string MissingInstText = (container.seedConfig.ShowMissingInstruments ? "HIDE " : "SHOW") + " MISSING INSTRUMENTS";
             if (MissingInstrument.Any())
                 listView.Insert(insertIndex++, new CategoryViewType(MissingInstText, MissingInstrument.Count(), MissingInstrumentSongEntrys, () =>
                 {
@@ -134,7 +138,7 @@ namespace YargArchipelagoPlugin
                 insertIndex = PrintSongsList(container, menu, listView, MissingInstrument, insertIndex, "#FF4040");
 
 
-            string MenuToggleText = container.seedConfig.ShowAPMenu ? "HIDE " + "ARCHIPELAGO".ToRainbowString() + " MENU" : "SHOW " + "ARCHIPELAGO".ToRainbowString() + " MENU";
+            string MenuToggleText = (container.seedConfig.ShowAPMenu ? "HIDE " : "SHOW ") + "ARCHIPELAGO".ToRainbowString() + " MENU";
             listView.Insert(insertIndex++, new CategoryViewType(MenuToggleText, 0, Array.Empty<SongEntry>(), () =>
             {
                 container.seedConfig.ShowAPMenu = !container.seedConfig.ShowAPMenu;
@@ -147,27 +151,34 @@ namespace YargArchipelagoPlugin
                 if (container.SlotData.SetlistNeededForGoal > 0)
                 {
                     var current = container.ApItemsRecieved.Count(x => x.Type == StaticItems.SongCompletion);
-                    listView.Insert(insertIndex++, new CategoryViewType($"- SETLIST GOAL {current}/{container.SlotData.SetlistNeededForGoal}", current, Array.Empty<SongEntry>(), menu.RefreshAndReselect));
+                    listView.Insert(insertIndex++, new CategoryViewType($"- SETLIST GOAL {current}/{container.SlotData.SetlistNeededForGoal}", current, 
+                        Array.Empty<SongEntry>(), () => ShowMacGuffinStatus(current, container.SlotData.SetlistNeededForGoal, "Setlist")));
                 }
                 if (container.SlotData.FamePointsForGoal > 0)
                 {
                     var current = container.ApItemsRecieved.Count(x => x.Type == StaticItems.FamePoint);
-                    listView.Insert(insertIndex++, new CategoryViewType($"- FAME GOAL {current}/{container.SlotData.FamePointsForGoal}", current, Array.Empty<SongEntry>(), menu.RefreshAndReselect));
+                    listView.Insert(insertIndex++, new CategoryViewType($"- FAME GOAL {current}/{container.SlotData.FamePointsForGoal}", current, 
+                        Array.Empty<SongEntry>(), () => ShowMacGuffinStatus(current, container.SlotData.SetlistNeededForGoal, "Fame")));
                 }
                 if (container.GoalItemInPool(out var GoalItemRecieved, out var recieveInfo))
-                    listView.Insert(insertIndex++, new CategoryViewType($"- FOUND GOAL ITEM [{GoalItemRecieved}]", GoalItemRecieved ? 1 : 0, Array.Empty<SongEntry>(), () => ShowGoalRecieveMessage(container, GoalItemRecieved, recieveInfo)));
+                    listView.Insert(insertIndex++, new CategoryViewType($"- FOUND GOAL ITEM [{GoalItemRecieved}]", GoalItemRecieved ? 1 : 0, 
+                        Array.Empty<SongEntry>(), () => ShowGoalRecieveMessage(container, GoalItemRecieved, recieveInfo)));
 
                 if (SwapSongs.Any() && HasInstrumentSongEntrys.Any())
-                    listView.Insert(insertIndex++, new CategoryViewType($"- USE SWAP SONG (Pick)", SwapSongs.Count(), Array.Empty<SongEntry>(), () => SwapSongMenu.ShowMenu(container, SwapSongs.First())));
+                    listView.Insert(insertIndex++, new CategoryViewType($"- USE SWAP SONG (Pick)", SwapSongs.Count(), 
+                        Array.Empty<SongEntry>(), () => SwapSongMenu.ShowMenu(container, SwapSongs.First())));
 
                 if (SwapSongRand.Any() && HasInstrumentSongEntrys.Any())
-                    listView.Insert(insertIndex++, new CategoryViewType($"- USE SWAP SONG (Random)", SwapSongRand.Count(), Array.Empty<SongEntry>(), () => SwapSongMenu.ShowMenu(container, SwapSongRand.First())));
+                    listView.Insert(insertIndex++, new CategoryViewType($"- USE SWAP SONG (Random)", SwapSongRand.Count(), 
+                        Array.Empty<SongEntry>(), () => SwapSongMenu.ShowMenu(container, SwapSongRand.First())));
 
                 if (LowerDifficulty.Any() && HasInstrumentSongEntrys.Any())
-                    listView.Insert(insertIndex++, new CategoryViewType($"- USE LOWER DIFFICULTY", LowerDifficulty.Count(), Array.Empty<SongEntry>(), () => LowerDifficultyMenu.ShowMenu(container, LowerDifficulty.First())));
+                    listView.Insert(insertIndex++, new CategoryViewType($"- USE LOWER DIFFICULTY", LowerDifficulty.Count(), 
+                        Array.Empty<SongEntry>(), () => LowerDifficultyMenu.ShowMenu(container, LowerDifficulty.First())));
 
                 if (container.seedConfig.EnergyLinkMode > EnergyLinkType.disabled || true)
-                    listView.Insert(insertIndex++, new CategoryViewType($"- OPEN ENERGY LINK SHOP", (int)container.seedConfig.EnergyLinkMode, Array.Empty<SongEntry>(), () => EnergyLinkShop.ShowMenu(container)));
+                    listView.Insert(insertIndex++, new CategoryViewType($"- OPEN ENERGY LINK SHOP", (int)container.seedConfig.EnergyLinkMode, 
+                        Array.Empty<SongEntry>(), () => EnergyLinkShop.ShowMenu(container)));
             }
         }
 
@@ -190,6 +201,14 @@ namespace YargArchipelagoPlugin
                     listView.Insert(insertIndex++, new SongViewType(menu, song));
             }
             return insertIndex;
+        }
+
+        public static void ShowMacGuffinStatus(int Current, int Need, string Title)
+        {
+            if (Current < Need)
+                ToastManager.ToastError($"{YargAPUtils.APToastFlag}{Title} goal not met!\nHas: {Current}\nNeed:{Need}");
+            else
+                ToastManager.ToastSuccess($"{YargAPUtils.APToastFlag}{Title} goal met!\nHas: {Current}\nNeed:{Need}");
         }
 
         public static void ShowGoalRecieveMessage(APConnectionContainer container, bool Recieved, BaseYargAPItem recieveInfo)
@@ -365,7 +384,6 @@ namespace YargArchipelagoPlugin
         private static PropertyInfo _happinessProperty;
         private static MethodInfo _updateHappinessMethod;
         private static FieldInfo _engineContainerField;
-        private static MethodInfo _getAverageHappinessMethod;
         private static FieldInfo _allEnginesField; private static FieldInfo _containerEngineManagerField;
 
         /// <summary>
