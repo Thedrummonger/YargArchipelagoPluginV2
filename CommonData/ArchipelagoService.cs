@@ -254,7 +254,7 @@ namespace YargArchipelagoPlugin
                 {
                     if (!ReceivedSongUnlockItems.ContainsKey(song.UnlockItemID)) continue;
                     if (!song.HasAvailableLocations(this)) continue;
-                    if (!song.IsSongInYarg(this, out _)) continue;
+                    if (!song.HadYargSongEntry(this, out _)) continue;
                     AllAvailable.Add(song);
                     if (HasInstrument) SongEntries.Add(song);
                     else MissingInstrument.Add(song);

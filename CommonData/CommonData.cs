@@ -333,11 +333,6 @@ namespace YargArchipelagoCommon
 
             public SongEntry GetYargSongEntry(APConnectionContainer container) =>
                 container.SongHashLookup.TryGetValue(GetActiveHash(container), out var entry) ? entry : null;
-            public bool IsSongInYarg(APConnectionContainer container, out SongEntry Entry)
-            {
-                Entry = GetYargSongEntry(container);
-                return Entry != null;
-            }
             public bool HadYargSongEntry(APConnectionContainer container, out SongEntry entry)
             {
                 entry = GetYargSongEntry(container);
