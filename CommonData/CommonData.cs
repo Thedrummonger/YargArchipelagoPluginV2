@@ -332,12 +332,9 @@ namespace YargArchipelagoCommon
             public bool HasProxy(APConnectionContainer container, out string proxyHash) => container.seedConfig.SongProxies.TryGetValue(UniqueKey, out proxyHash);
 
             public SongEntry GetYargSongEntry(APConnectionContainer container) =>
-                container.SongHashLookup.TryGetValue(GetActiveHash(container), out var entry) ? entry : null;
-            public bool HadYargSongEntry(APConnectionContainer container, out SongEntry entry)
-            {
-                entry = GetYargSongEntry(container);
-                return entry is SongEntry;
-            }
+                HadYargSongEntry(container, out var entry) ? entry : null;
+            public bool HadYargSongEntry(APConnectionContainer container, out SongEntry entry) =>
+                container.SongHashLookup.TryGetValue(GetActiveHash(container), out entry);
             public bool WasActiveSongInGame(APConnectionContainer container, GameManager gameManager)
             {
                 var SongHash = Convert.ToBase64String(gameManager.Song.Hash.HashBytes);
@@ -351,8 +348,7 @@ namespace YargArchipelagoCommon
             }
             public string GetDisplayName(APConnectionContainer container, bool IncludePool)
             {
-                SongEntry YArgEntry = GetYargSongEntry(container);
-                var SongName = YArgEntry is null ? $"{GetActiveHash(container)}" : $"{YArgEntry.Name} by {YArgEntry.Artist}";
+                var SongName = HadYargSongEntry(container, out var E) ? $"{GetActiveHash(container)}" : $"{E.Name} by {E.Artist}";
                 if (IncludePool)
                     SongName = $"[{PoolName}] {SongName}";
                 return SongName;
