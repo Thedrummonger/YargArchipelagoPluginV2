@@ -104,11 +104,6 @@ namespace YargArchipelagoPlugin
             var HasInstrumentSongEntrys = HasInstrument.Select(x => x.song).ToArray();
             var MissingInstrumentSongEntrys = MissingInstrument.Select(x => x.song).ToArray();
 
-            var AllActionItems = container.GetAllAquiredActionItems();
-            var SwapSongs = AllActionItems.Where(x => x.Type == StaticItems.SwapPick && !container.seedConfig.ApItemsUsed.Contains(x));
-            var SwapSongRand = AllActionItems.Where(x => x.Type == StaticItems.SwapRandom && !container.seedConfig.ApItemsUsed.Contains(x));
-            var LowerDifficulty = AllActionItems.Where(x => x.Type == StaticItems.LowerDifficulty && !container.seedConfig.ApItemsUsed.Contains(x));
-
             listView.Insert(insertIndex++, new CategoryViewType("ARCHIPELAGO".ToRainbowString() + " SONGS", HasInstrumentSongEntrys.Length, 
                 HasInstrumentSongEntrys, menu.RefreshAndReselect));
 
@@ -148,6 +143,10 @@ namespace YargArchipelagoPlugin
 
             if (container.seedConfig.ShowAPMenu)
             {
+                var AllActionItems = container.GetAllAquiredActionItems();
+                var SwapSongs = AllActionItems.Where(x => x.Type == StaticItems.SwapPick && !container.seedConfig.ApItemsUsed.Contains(x));
+                var SwapSongRand = AllActionItems.Where(x => x.Type == StaticItems.SwapRandom && !container.seedConfig.ApItemsUsed.Contains(x));
+                var LowerDifficulty = AllActionItems.Where(x => x.Type == StaticItems.LowerDifficulty && !container.seedConfig.ApItemsUsed.Contains(x));
                 if (container.SlotData.SetlistNeededForGoal > 0)
                 {
                     var current = container.ApItemsRecieved.Count(x => x.Type == StaticItems.SongCompletion);
@@ -255,8 +254,7 @@ namespace YargArchipelagoPlugin
         {
 
             StringBuilder Result = new StringBuilder()
-                .AppendLine($"REQUIRED INSTRUMENT:")
-                .AppendLine($"{SongPool.instrument.GetDescription()}")
+                .AppendLine($"REQUIRED INSTRUMENT: {SongPool.instrument.GetDescription()}")
                 .AppendLine()
                 .AppendLine($"REWARD 1 REQUIREMENTS:")
                 .AppendLine($"Minimum Difficulty: {SongPool.completion_requirements.reward1_diff.GetDescription()}")
@@ -265,6 +263,16 @@ namespace YargArchipelagoPlugin
                 .AppendLine($"REWARD 2 REQUIREMENTS:")
                 .AppendLine($"Minimum Difficulty: {SongPool.completion_requirements.reward2_diff.GetDescription()}")
                 .AppendLine($"Minimum Score: {SongPool.completion_requirements.reward2_req.GetDescription()}");
+            if (container.ReceivedInstruments.TryGetValue(SongPool.instrument, out var info))
+            {
+                var Player = info.GetPlayerInfo(container);
+                Result.AppendLine().AppendLine($"{SongPool.instrument.GetDescription()} Recieved from").Append(Player.Name);
+                if (Player.Slot > 0)
+                {
+                    var location = container.GetSession().Locations.GetLocationNameFromId(info.SendingPlayerLocation, Player.Game);
+                    Result.AppendLine($" Playing {Player.Game}").AppendLine($"at {location}");
+                }
+            }
             DialogManager.Instance.ShowMessage(Title, Result.ToString());
         }
         /// <summary>
