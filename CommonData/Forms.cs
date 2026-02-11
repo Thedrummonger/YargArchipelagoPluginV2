@@ -672,7 +672,7 @@ namespace YargArchipelagoPlugin
                     UsedSongs.Add(proxyHash);
 
             }
-            var AllYargSongs =  YargEngineActions.GetYargSongExportData(SongContainer.Instruments);
+            var AllYargSongs =  YargEngineActions.GetYargSongExportData();
             var ValidReplcements = AllYargSongs.Where(x => x.Value.TryGetDifficulty(Pool.instrument, out var difficulty) && DifficultyInRange(difficulty) && !UsedSongs.Contains(x.Key));
             ValidEntryCache[song] = ValidReplcements.Select(x => x.Value.YargSongEntry).ToArray();
             return ValidReplcements.Select(x => x.Value.YargSongEntry).ToArray();

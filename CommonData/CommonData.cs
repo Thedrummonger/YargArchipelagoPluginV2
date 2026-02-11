@@ -91,6 +91,7 @@ namespace YargArchipelagoCommon
             [Description("Harmony")]
             Harmony
         }
+        public static readonly IEnumerable<Instrument> AllYargInstruments = Enum.GetValues(typeof(Instrument)).Cast<Instrument>();
 
         //This must be set to the same value in the data_register file in the APWorld
         private static int _itemIDOffsetCounter = 100;
@@ -264,7 +265,7 @@ namespace YargArchipelagoCommon
             public bool ValidForPool(SongPool pool) => TryGetDifficulty(pool.instrument, out var diff) && diff <= pool.max_difficulty && diff >= pool.min_difficulty;
             public static SongExportData FromSongEntry(SongEntry song)
             {
-                return new SongExportData()
+                var Entry = new SongExportData()
                 {
                     Artist = RichTextUtils.StripRichTextTags(song.Artist),
                     Name = RichTextUtils.StripRichTextTags(song.Name),
@@ -274,7 +275,16 @@ namespace YargArchipelagoCommon
                     Album = song.Album,
                     Genre = song.Genre,
                     Charter = song.Charter,
+                    YargSongEntry = song
+
                 };
+                foreach (var instrument in AllYargInstruments)
+                {
+                    if (!song.HasInstrument(instrument) || !YargAPUtils.IsSupportedInstrument(instrument, out var supportedInstrument))
+                        continue;
+                    Entry.Difficulties[supportedInstrument.Value] = song[instrument].Intensity;
+                }
+                return Entry;
             }
         }
 

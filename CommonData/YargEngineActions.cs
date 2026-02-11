@@ -34,30 +34,17 @@ namespace YargArchipelagoPlugin
     {
         public static void DumpAvailableSongs()
         {
-            var SongData = GetYargSongExportData(SongContainer.Instruments);
-            if (!Directory.Exists(CommonData.DataFolder)) Directory.CreateDirectory(CommonData.DataFolder);
-            File.WriteAllText(CommonData.SongExportFile, JsonConvert.SerializeObject(SongData.Values.ToArray(), Formatting.Indented));
+            var SongData = GetYargSongExportData();
+            if (!Directory.Exists(DataFolder)) Directory.CreateDirectory(DataFolder);
+            File.WriteAllText(SongExportFile, JsonConvert.SerializeObject(SongData.Values.ToArray(), Formatting.Indented));
         }
-
-        public static Dictionary<string, SongExportData> GetYargSongExportData(IReadOnlyDictionary<Instrument, SortedDictionary<int, List<SongEntry>>> SongsByInstrument)
+        public static Dictionary<string, SongExportData> GetYargSongExportData()
         {
             Dictionary<string, SongExportData> SongData = new Dictionary<string, SongExportData>();
-
-            foreach (var instrument in SongsByInstrument)
+            foreach(var song in SongContainer.Songs)
             {
-                if (!YargAPUtils.IsSupportedInstrument(instrument.Key, out var supportedInstrument)) continue;
-                foreach (var Difficulty in instrument.Value)
-                {
-                    if (Difficulty.Key < 0) continue;
-                    foreach (var song in Difficulty.Value)
-                    {
-                        var Hash = Convert.ToBase64String(song.Hash.HashBytes);
-                        if (!SongData.ContainsKey(Hash))
-                            SongData[Hash] = SongExportData.FromSongEntry(song);
-                        SongData[Hash].Difficulties[supportedInstrument.Value] = Difficulty.Key;
-                        SongData[Hash].YargSongEntry = song;
-                    }
-                }
+                var Hash = Convert.ToBase64String(song.Hash.HashBytes);
+                SongData[Hash] = SongExportData.FromSongEntry(song);
             }
             return SongData;
         }
