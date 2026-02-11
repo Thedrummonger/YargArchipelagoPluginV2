@@ -56,6 +56,8 @@ namespace YargArchipelagoPlugin
             return true;
         }
 
+        public Dictionary<string, SongEntry> SongHashLookup { get; private set; } = new Dictionary<string, SongEntry>();
+
         private readonly ArchipelagoEventManager eventManager;
 
         public PersistantData seedConfig { get; private set; } = null;
@@ -106,6 +108,7 @@ namespace YargArchipelagoPlugin
             AddListeners();
             eventManager.UpdateAPData();
             UpdateDeathLinkTags();
+            BuildSongLookup();
 
             ToastManager.ToastSuccess($"{YargAPUtils.APToastFlags.Standard}Connected Archipelago!\n{connectionDetails.SlotName}@{connectionDetails.Address}");
             File.WriteAllText(Path.Combine(CommonData.DataFolder, "Debug.json"), JsonConvert.SerializeObject(SlotData, Formatting.Indented));
@@ -151,6 +154,7 @@ namespace YargArchipelagoPlugin
             APPatches.OnRecordScore += eventManager.TryCheckSongGoalSong;
             APPatches.OnSongFail += eventManager.FailedSong;
             APPatches.OnUpdateHappiness += eventManager.TryUseSongFailPrevent;
+            APPatches.OnSongContainersUpdated += BuildSongLookup;
             _Listening = true;
         }
 
@@ -175,7 +179,14 @@ namespace YargArchipelagoPlugin
             APPatches.OnRecordScore -= eventManager.TryCheckSongGoalSong;
             APPatches.OnSongFail -= eventManager.FailedSong;
             APPatches.OnUpdateHappiness -= eventManager.TryUseSongFailPrevent;
+            APPatches.OnSongContainersUpdated -= BuildSongLookup;
             _Listening = false;
+        }
+
+        public void BuildSongLookup()
+        {
+            foreach(var song in SongContainer.Songs)
+                SongHashLookup[Convert.ToBase64String(song.Hash.HashBytes)] = song;
         }
 
         public void UpdateCheckedLocations()
@@ -230,17 +241,23 @@ namespace YargArchipelagoPlugin
                 DeathLinkService.DisableDeathLink();
         }
 
-        public List<SongAPData> GetAvailableSongs(bool IgnoreInstrument)
+        public List<SongAPData> GetAvailableSongs() => GetAvailableSongs(out _, out _);
+        public List<SongAPData> GetAvailableSongs(out List<SongAPData> MissingInstrument, out List<SongAPData> AllAvailable)
         {
+            MissingInstrument = new List<SongAPData>();
+            AllAvailable = new List<SongAPData>();
             List<SongAPData> SongEntries = new List<SongAPData>();
             foreach (var i in SlotData.SongsByInstrument)
             {
-                if (!IgnoreInstrument && !ReceivedInstruments.ContainsKey(i.Key)) continue;
+                var HasInstrument = ReceivedInstruments.ContainsKey(i.Key);
                 foreach (var song in i.Value)
                 {
                     if (!ReceivedSongUnlockItems.ContainsKey(song.UnlockItemID)) continue;
                     if (!song.HasAvailableLocations(this)) continue;
-                    SongEntries.Add(song);
+                    if (!song.IsSongInYarg(this, out _)) continue;
+                    AllAvailable.Add(song);
+                    if (HasInstrument) SongEntries.Add(song);
+                    else MissingInstrument.Add(song);
                 }
             }
             return SongEntries;

@@ -34,6 +34,7 @@ namespace YargArchipelagoPlugin
         public static event Action<GameManager> OnRecordScore;
         public static event Action<GameManager> OnSongFail;
         public static event Action<EngineManager> OnUpdateHappiness;
+        public static event Action OnSongContainersUpdated;
         public static bool HasAvailableAPSongUpdate = false;
         public static bool IgnoreScoreForNextSong = false;
         private static bool FirstAwake = true;
@@ -73,7 +74,11 @@ namespace YargArchipelagoPlugin
 
         [HarmonyPatch(typeof(SongContainer), "FillContainers")]
         [HarmonyPostfix]
-        public static void SongContainer_FillContainers(SongCache ____songCache) => YargEngineActions.DumpAvailableSongs(____songCache);
+        public static void SongContainer_FillContainers()
+        {
+            YargEngineActions.DumpAvailableSongs();
+            OnSongContainersUpdated?.Invoke();
+        }
 
 
         [HarmonyPatch(typeof(MusicLibraryMenu), "OnEnable")]

@@ -28,14 +28,8 @@ namespace YargArchipelagoPlugin
             parent.APSyncTimer.FlagUpdate();
         public void Locations_CheckedLocationsUpdated(System.Collections.ObjectModel.ReadOnlyCollection<long> _) => 
             parent.APSyncTimer.FlagUpdate();
-        public void InsertAPSongs(MusicLibraryMenu __instance, List<ViewType> __result)
-        {
-            if (!parent.IsSessionConnected)
-                return;
-            var Available = parent.GetAvailableSongs(true);
-            var SongEntries = Available.Select(x => (x.GetYargSongEntry(parent), x)).Where(x => x.Item1 != null);
-            YargEngineActions.InsertAPListViewSongs(parent, __instance, __result, SongEntries);
-        }
+        public void InsertAPSongs(MusicLibraryMenu __instance, List<ViewType> __result) =>
+            YargEngineActions.InsertAPListViewSongs(parent, __instance, __result);
 
         public void SetSong(GameManager gameManager) => parent.SetCurrentSong(gameManager);
         public void SetSong() => parent.ClearCurrentSong();

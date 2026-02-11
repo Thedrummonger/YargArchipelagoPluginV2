@@ -390,11 +390,29 @@ namespace YargArchipelagoPlugin
 
         public static SongAPData[] GetAvailableSongs(APConnectionContainer container)
         {
-            var Valid = container.SlotData.Songs.Where(x =>
-                x.HasAvailableLocations(container) &&
-                x.IsSongUnlocked(container)
-            ).ToHashSet();
-            return Valid.ToArray();
+            container.GetAvailableSongs(out _, out var AllAvailable);
+            return AllAvailable.ToArray();
+        }
+
+        /// <summary>
+        /// Creates an invisible blocking dialog used to prevent UI interaction while custom BepInEx menus are displayed.
+        /// Must be closed manually.
+        /// </summary>
+        public static MessageDialog ShowBlockerDialog()
+        {
+            var dialog = DialogManager.Instance.ShowMessage("", "");
+            dialog.ClearButtons();
+
+            foreach (var graphic in dialog.GetComponentsInChildren<UnityEngine.Component>())
+            {   // Keep the "Tint" image, thats what actually blocks the UI 
+                if (graphic.GetType().Name == "Image" && graphic.gameObject.name != "Tint")
+                {
+                    var enabled = graphic.GetType().GetProperty("enabled");
+                    enabled?.SetValue(graphic, false);
+                }
+            }
+
+            return dialog;
         }
     }
 
@@ -420,7 +438,7 @@ namespace YargArchipelagoPlugin
         protected virtual void Initialize(APConnectionContainer container, Rect size, bool Center = true)
         {
             FormHelpers.ClearFilters();
-            BlockerDialog = YargEngineActions.ShowBlockerDialog();
+            BlockerDialog = FormHelpers.ShowBlockerDialog();
             this.container = container;
             CurrentInstance = (T)this;
             windowRect = size;

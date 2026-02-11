@@ -330,12 +330,13 @@ namespace YargArchipelagoCommon
             public SongPool GetPool(YargSlotData slotData) => slotData.Pools[PoolName];
             public string GetActiveHash(APConnectionContainer container) => HasProxy(container, out var ProxyHash) ? ProxyHash : Hash;
             public bool HasProxy(APConnectionContainer container, out string proxyHash) => container.seedConfig.SongProxies.TryGetValue(UniqueKey, out proxyHash);
-            public SongEntry GetYargSongEntry(APConnectionContainer container)
+
+            public SongEntry GetYargSongEntry(APConnectionContainer container) =>
+                container.SongHashLookup.TryGetValue(GetActiveHash(container), out var entry) ? entry : null;
+            public bool IsSongInYarg(APConnectionContainer container, out SongEntry Entry)
             {
-                var songObj = SongContainer.Songs.FirstOrDefault(x => Convert.ToBase64String(x.Hash.HashBytes) == GetActiveHash(container));
-                if (songObj == null)
-                    ToastManager.ToastError($"{YargAPUtils.APToastFlags.Standard}Song Hash {GetActiveHash(container)} was not a valid song in yarg!");
-                return songObj;
+                Entry = GetYargSongEntry(container);
+                return Entry != null;
             }
             public bool HadYargSongEntry(APConnectionContainer container, out SongEntry entry)
             {
