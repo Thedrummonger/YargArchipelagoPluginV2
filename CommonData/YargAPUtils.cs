@@ -148,13 +148,13 @@ namespace YargArchipelagoPlugin
         public enum APToastFlags
         {
             [Description("[AP]"), APAssets.APIcon(APAssets.APIcon.White)]
-            Standard,
+            Message,
             [Description("[APP]"), APAssets.APIcon(APAssets.APIcon.Color)]
-            Progressive,
+            GoodItem,
             [Description("[APU]"), APAssets.APIcon(APAssets.APIcon.Blue)]
-            Usefull,
+            JunkItem,
         }
-        public static readonly string APToastFlag = APToastFlags.Standard.GetDescription();
+        public static readonly string APToastFlag = APToastFlags.Message.GetDescription();
         private static readonly Dictionary<string, APToastFlags> ToastPrefixes = Enum.GetValues(typeof(APToastFlags))
             .Cast<APToastFlags>().ToDictionary(x => x.GetDescription(),x => x,StringComparer.OrdinalIgnoreCase);
 

@@ -119,7 +119,11 @@ namespace YargArchipelagoPlugin
             else if (message is ItemSendLogMessage ItemLog && ShouldRelayItemSend(ItemLog)) Relay = true;
             else if ((message is PlayerSpecificLogMessage || message is ServerChatLogMessage) && parent.seedConfig.InGameAPChat) Relay = true;
 
-            if (Relay) ToastManager.ToastMessage(GetMessageToastFlag(message) + message.ToYargColoredString());
+            var Flag = GetMessageToastFlag(message, out var wasProgressive);
+            if (Relay && wasProgressive)
+                ToastManager.ToastSuccess(Flag + message.ToYargColoredString());
+            else if (Relay) 
+                ToastManager.ToastMessage(Flag + message.ToYargColoredString());
 
             bool ShouldRelayItemSend(ItemSendLogMessage IL)
             {
@@ -129,13 +133,15 @@ namespace YargArchipelagoPlugin
             }
         }
 
-        public string GetMessageToastFlag(LogMessage message)
+        private string GetMessageToastFlag(LogMessage message, out bool WasProgressive)
         {
+            WasProgressive = false;
             if (message is ItemSendLogMessage itemSendLog)
             {
-                if (itemSendLog.Item.Flags.HasFlag(Archipelago.MultiClient.Net.Enums.ItemFlags.Advancement))
-                    return YargAPUtils.APToastFlags.Progressive.GetDescription();
-                return YargAPUtils.APToastFlags.Usefull.GetDescription();
+                WasProgressive = itemSendLog.Item.Flags.HasFlag(Archipelago.MultiClient.Net.Enums.ItemFlags.Advancement);
+                if (WasProgressive || itemSendLog.Item.Flags.HasFlag(Archipelago.MultiClient.Net.Enums.ItemFlags.NeverExclude))
+                    return YargAPUtils.APToastFlags.GoodItem.GetDescription();
+                return YargAPUtils.APToastFlags.JunkItem.GetDescription();
             }
             return YargAPUtils.APToastFlag;
         }
