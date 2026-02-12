@@ -96,7 +96,7 @@ namespace YargArchipelagoPlugin
                 Archipelago.MultiClient.Net.Enums.ItemsHandlingFlags.AllItems, new Version(0,6,1), password: connectionDetails.Password);
             if (Result is LoginFailure failure)
             {
-                ToastManager.ToastError($"{YargAPUtils.APToastFlags.Standard}Failed to connect!\n{connectionDetails.SlotName}@{connectionDetails.Address}:\n{string.Join("\n", failure.Errors)}");
+                ToastManager.ToastError($"{YargAPUtils.APToastFlag}Failed to connect!\n{connectionDetails.SlotName}@{connectionDetails.Address}:\n{string.Join("\n", failure.Errors)}");
                 return false;
             }
             Session = tempSession;
@@ -110,7 +110,7 @@ namespace YargArchipelagoPlugin
             UpdateDeathLinkTags();
             BuildSongLookup();
 
-            ToastManager.ToastSuccess($"{YargAPUtils.APToastFlags.Standard}Connected Archipelago!\n{connectionDetails.SlotName}@{connectionDetails.Address}");
+            ToastManager.ToastSuccess($"{YargAPUtils.APToastFlag}Connected Archipelago!\n{connectionDetails.SlotName}@{connectionDetails.Address}");
             File.WriteAllText(Path.Combine(CommonData.DataFolder, "Debug.json"), JsonConvert.SerializeObject(SlotData, Formatting.Indented));
             connectionDetails.Save();
             return true;

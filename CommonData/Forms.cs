@@ -139,11 +139,11 @@ namespace YargArchipelagoPlugin
             if (connectionContainer.IsSessionConnected)
             {
                 connectionContainer.Disconnect();
-                ToastManager.ToastInformation($"{YargAPUtils.APToastFlags.Standard}Disconnected from AP");
+                ToastManager.ToastInformation($"{YargAPUtils.APToastFlag}Disconnected from AP");
             }
             else
             {
-                ToastManager.ToastInformation($"{YargAPUtils.APToastFlags.Standard}Connecting to {connectionDetails.SlotName}@{connectionDetails.Address}");
+                ToastManager.ToastInformation($"{YargAPUtils.APToastFlag}Connecting to {connectionDetails.SlotName}@{connectionDetails.Address}");
                 connectionContainer.Connect(connectionDetails);
             }
         }

@@ -124,7 +124,7 @@ namespace YargArchipelagoPlugin
                 insertIndex = AddMacGuffinEntry(StaticItems.FamePoint, "Fame", container.SlotData.FamePointsForGoal, listView, container, insertIndex);
 
                 if (container.GoalItemInPool(out var GoalItemRecieved, out var recieveInfo))
-                    listView.Insert(insertIndex++, new CategoryViewType($"- FOUND GOAL ITEM [{GoalItemRecieved}]", GoalItemRecieved ? 1 : 0, 
+                    listView.Insert(insertIndex++, new CategoryViewType($"- Goal Unlock {(GoalItemRecieved ? "Found" : "Missing")}", GoalItemRecieved ? 1 : 0, 
                         Array.Empty<SongEntry>(), () => ShowGoalRecieveMessage(container, GoalItemRecieved, recieveInfo)));
 
                 insertIndex = AddUseMenu(StaticItems.SwapPick, AnyPlayable, listView, container, insertIndex, SwapSongMenu.ShowMenu);
@@ -132,7 +132,7 @@ namespace YargArchipelagoPlugin
                 insertIndex = AddUseMenu(StaticItems.LowerDifficulty, AnyPlayable, listView, container, insertIndex, LowerDifficultyMenu.ShowMenu);
 
                 if (container.seedConfig.EnergyLinkMode > EnergyLinkType.disabled || true)
-                    listView.Insert(insertIndex++, new CategoryViewType($"- OPEN ENERGY LINK SHOP", (int)container.seedConfig.EnergyLinkMode, 
+                    listView.Insert(insertIndex++, new CategoryViewType($"- Open Energy Shop", (int)container.seedConfig.EnergyLinkMode, 
                         Array.Empty<SongEntry>(), () => EnergyLinkShop.ShowMenu(container)));
             }
         }
@@ -149,7 +149,7 @@ namespace YargArchipelagoPlugin
             if (Needed <= 0) return I;
             var insertIndex = I;
             var current = C.ApItemsRecieved.Count(x => x.Type == Type);
-            L.Insert(insertIndex++, new CategoryViewType($"- {Name.ToUpper()} GOAL {current}/{Needed}", current,
+            L.Insert(insertIndex++, new CategoryViewType($"- {Name} Goal {current}/{Needed}", current,
                 Array.Empty<SongEntry>(), () => ShowMacGuffinStatus(current, Needed, Name)));
             return insertIndex;
         }
@@ -161,7 +161,7 @@ namespace YargArchipelagoPlugin
             if (Items.Any() && HasPlayable)
             {
                 var ToUse = Items.First();
-                L.Insert(insertIndex++, new CategoryViewType($"- USE {Type.ToString().ToUpper()}", Items.Count(), 
+                L.Insert(insertIndex++, new CategoryViewType($"- Use {Type.GetDescription()}", Items.Count(), 
                     Array.Empty<SongEntry>(), () => Show(C, ToUse)));
             }
             return insertIndex;

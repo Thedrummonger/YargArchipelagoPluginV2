@@ -358,7 +358,7 @@ namespace YargArchipelagoCommon
             }
             public string GetDisplayName(APConnectionContainer container, bool IncludePool)
             {
-                var SongName = HadYargSongEntry(container, out var E) ? $"{GetActiveHash(container)}" : $"{E.Name} by {E.Artist}";
+                var SongName = HadYargSongEntry(container, out var E) ? $"{E.Name} by {E.Artist}" : $"{GetActiveHash(container)}";
                 if (IncludePool)
                     SongName = $"[{PoolName}] {SongName}";
                 return SongName;

@@ -157,6 +157,20 @@ namespace YargArchipelagoPlugin
         public static readonly string APToastFlag = APToastFlags.Standard.GetDescription();
         private static readonly Dictionary<string, APToastFlags> ToastPrefixes = Enum.GetValues(typeof(APToastFlags))
             .Cast<APToastFlags>().ToDictionary(x => x.GetDescription(),x => x,StringComparer.OrdinalIgnoreCase);
+
+        public static void TestFlags()
+        {
+            var Flags = Enum.GetValues(typeof(APToastFlags)).Cast<APToastFlags>();
+            foreach(var Flag in Flags)
+            {
+                ToastManager.ToastMessage(Flag.GetDescription() + "General");
+                ToastManager.ToastInformation(Flag.GetDescription() + "Information");
+                ToastManager.ToastSuccess(Flag.GetDescription() + "Success");
+                ToastManager.ToastWarning(Flag.GetDescription() + "Warning");
+                ToastManager.ToastError(Flag.GetDescription() + "Error");
+            }
+        }
+
         public static bool HandleAPToasts(ToastManager manager, object type, string body, Action onClick)
         {
             var match = ToastPrefixes.FirstOrDefault(x => body.StartsWith(x.Key, StringComparison.OrdinalIgnoreCase));
@@ -165,7 +179,7 @@ namespace YargArchipelagoPlugin
 
             try
             {
-                body = body.Substring(4).TrimStart();
+                body = body.Substring(flag.GetDescription().Length).TrimStart();
                 int typeValue = Convert.ToInt32(type);
                 var (color, icon) = YargAPUtils.ResolveToastVisuals(manager, typeValue);
                 var prefab = (Toast)AccessTools.Field(typeof(ToastManager), "_toastPrefab").GetValue(manager);
