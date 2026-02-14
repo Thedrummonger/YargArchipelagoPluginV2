@@ -263,15 +263,6 @@ namespace YargArchipelagoPlugin
             return SongEntries;
         }
 
-        public bool IsPlayingCheckableSong(out IEnumerable<SongAPData> APSongEntries, out TimeSpan buffer)
-        {
-            APSongEntries = new List<SongAPData>();
-            buffer = TimeSpan.Zero;
-            if (!IsInSong(out var song, out buffer)) return false;
-            APSongEntries = SlotData.Songs.Where(x => x.WasActiveSongInGame(this, song) && x.HasAvailableLocations(this) && x.IsSongUnlocked(this));
-            return APSongEntries.Any();
-        }
-
     }
 
     public class PersistantData

@@ -169,10 +169,15 @@ namespace YargArchipelagoPlugin
         }
 
         public bool PendingTrapsFiller = false;
+        private static readonly TimeSpan fillerBuffer = TimeSpan.FromSeconds(5);
 
         public void ApplyPendingTrapsFiller()
         {
-            if (!parent.IsSessionConnected || !PendingTrapsFiller || !parent.IsPlayingCheckableSong(out _, out var buffer) || buffer < TimeSpan.FromSeconds(5)) return;
+            if (!PendingTrapsFiller || !parent.IsSessionConnected) 
+                return;
+
+            if (!parent.IsInSong(out var Song, out var buffer) || !Song.CouldProductLocationCheck(parent, out _) || buffer < fillerBuffer)
+                return;
 
             var Pending = parent.ApItemsRecieved.Where(x => x.Type.IsActionable() && !parent.seedConfig.ApItemsUsed.Contains(x)).ToList();
 
@@ -210,24 +215,25 @@ namespace YargArchipelagoPlugin
             YargEngineActions.ApplyDeathLink(parent, deathLink);
         }
 
+        private bool IsPreventingSongFail = false;
         internal void TryUseSongFailPrevent(EngineManager engineManager)
         {
-            if (!parent.IsSessionConnected || !parent.IsInSong(out var gameManager, out _)) return;
+            if (IsPreventingSongFail || !parent.IsSessionConnected || !parent.IsInSong(out var gameManager, out _)) return;
 
-            if (engineManager.Happiness < 0.0f && !gameManager.PlayerHasFailed)
+            if (engineManager.Happiness < 0.0f && !gameManager.PlayerHasFailed && gameManager.CouldProductLocationCheck(parent, out _))
             {
-                if (!parent.IsPlayingCheckableSong(out _, out _))
-                    return;
                 var Pending = parent.ApItemsRecieved
                     .Where(x => x.Type == StaticItems.FailPrevention && !parent.seedConfig.ApItemsUsed.Contains(x)).ToList();
                 if (Pending.Count <= 0)
                     return;
+                IsPreventingSongFail = true;
                 YargEngineActions.PreventSongFail(engineManager);
                 var ToUse = Pending.First();
                 var Player = ToUse.GetPlayerInfo(parent);
                 ToastManager.ToastSuccess($"{YargAPUtils.APToastFlag}{Player.Name} cheered you on!");
                 parent.seedConfig.ApItemsUsed.Add(ToUse);
                 parent.seedConfig.Save();
+                IsPreventingSongFail = false;
             }
             
         }

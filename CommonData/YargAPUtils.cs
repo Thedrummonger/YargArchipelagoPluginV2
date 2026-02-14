@@ -189,6 +189,15 @@ namespace YargArchipelagoPlugin
             catch (Exception ex) { Debug.LogError($"Failed to create custom toast\n{ex}"); }
             return false;
         }
+
+        public static bool CouldProductLocationCheck(this GameManager song, APConnectionContainer container, out IEnumerable<SongAPData> APSongEntries)
+        {
+            APSongEntries = container.SlotData.Songs.Where(x => 
+                x.WasActiveSongInGame(container, song) && 
+                x.HasAvailableLocations(container) && 
+                x.IsSongUnlocked(container));
+            return APSongEntries.Any();
+        }
     }
 
     public static class APAssets
