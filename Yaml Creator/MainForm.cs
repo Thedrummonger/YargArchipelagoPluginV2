@@ -51,7 +51,9 @@ namespace Yaml_Creator
                 this.Close();
                 return;
             }
+            
             ExportFile = datas.Select(x => new SongExportExtendedData(x)).ToArray();
+            SanitizeExportFile();
             YAML.YAYARG.songList = SongDataConverter.ConvertSongDataToBase64(ExportFile);
             PrintActiveSongs(sender, e);
             SongPoolListUpdated();
@@ -61,6 +63,16 @@ namespace Yaml_Creator
             LoadSongPool();
             cmbGoalPoolPlando.Enabled = chkGoalPoolPlando.Checked;
             cmbGoalSongPlando.Enabled = chkGoalSongPlando.Checked;
+        }
+
+        private void SanitizeExportFile()
+        {
+            for (var i = 0; i < ExportFile.Length; i++)
+            {
+                var diffs = ExportFile[i].core.Difficulties;
+                foreach (var intensity in diffs.Keys.ToList())
+                    diffs[intensity] = Utility.Clamp(diffs[intensity], 0, int.MaxValue);
+            }
         }
 
         private void LoadSongPool()
