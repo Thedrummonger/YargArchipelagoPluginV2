@@ -111,6 +111,8 @@
             this.label5 = new System.Windows.Forms.Label();
             this.nudPoolMinDifficulty = new System.Windows.Forms.NumericUpDown();
             this.btnListValidSongs = new System.Windows.Forms.Button();
+            this.nudPoolRandomVariance = new System.Windows.Forms.NumericUpDown();
+            this.label31 = new System.Windows.Forms.Label();
             this.groupBox1 = new System.Windows.Forms.GroupBox();
             this.tableLayoutPanel6 = new System.Windows.Forms.TableLayoutPanel();
             this.btnAddPool = new System.Windows.Forms.Button();
@@ -140,8 +142,6 @@
             this.label29 = new System.Windows.Forms.Label();
             this.btnGenYaml = new System.Windows.Forms.Button();
             this.YamlTT = new System.Windows.Forms.ToolTip(this.components);
-            this.nudPoolRandomVariance = new System.Windows.Forms.NumericUpDown();
-            this.label31 = new System.Windows.Forms.Label();
             this.TabControlMain.SuspendLayout();
             this.SettingsTab.SuspendLayout();
             this.tableLayoutPanel11.SuspendLayout();
@@ -184,6 +184,7 @@
             this.tableLayoutPanel3.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.nudAmountInPool)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.nudPoolMinDifficulty)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.nudPoolRandomVariance)).BeginInit();
             this.groupBox1.SuspendLayout();
             this.tableLayoutPanel6.SuspendLayout();
             this.SongListTab.SuspendLayout();
@@ -192,7 +193,6 @@
             this.tableLayoutPanel1.SuspendLayout();
             this.panel1.SuspendLayout();
             this.tableLayoutPanel16.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.nudPoolRandomVariance)).BeginInit();
             this.SuspendLayout();
             // 
             // TabControlMain
@@ -767,7 +767,7 @@
             this.label24.Name = "label24";
             this.label24.Size = new System.Drawing.Size(133, 44);
             this.label24.TabIndex = 4;
-            this.label24.Text = "Swamp Song Random";
+            this.label24.Text = "Swap Song Random";
             this.label24.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             // 
             // nudSwapRandom
@@ -1299,6 +1299,27 @@
             this.btnListValidSongs.Text = "?";
             this.btnListValidSongs.UseVisualStyleBackColor = true;
             // 
+            // nudPoolRandomVariance
+            // 
+            this.nudPoolRandomVariance.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.nudPoolRandomVariance.Location = new System.Drawing.Point(3, 82);
+            this.nudPoolRandomVariance.Name = "nudPoolRandomVariance";
+            this.nudPoolRandomVariance.Size = new System.Drawing.Size(129, 22);
+            this.nudPoolRandomVariance.TabIndex = 10;
+            this.YamlTT.SetToolTip(this.nudPoolRandomVariance, resources.GetString("nudPoolRandomVariance.ToolTip"));
+            // 
+            // label31
+            // 
+            this.label31.AutoSize = true;
+            this.tableLayoutPanel2.SetColumnSpan(this.label31, 2);
+            this.label31.Dock = System.Windows.Forms.DockStyle.Left;
+            this.label31.Location = new System.Drawing.Point(3, 55);
+            this.label31.Name = "label31";
+            this.label31.Size = new System.Drawing.Size(116, 24);
+            this.label31.TabIndex = 11;
+            this.label31.Text = "Random Variance";
+            this.label31.TextAlign = System.Drawing.ContentAlignment.BottomLeft;
+            // 
             // groupBox1
             // 
             this.groupBox1.Controls.Add(this.tableLayoutPanel6);
@@ -1479,7 +1500,7 @@
             this.tableLayoutPanel17.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 50F));
             this.tableLayoutPanel17.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 40F));
             this.tableLayoutPanel17.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 50F));
-            this.tableLayoutPanel17.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 42F));
+            this.tableLayoutPanel17.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 43F));
             this.tableLayoutPanel17.Controls.Add(this.btnEditIncludePools, 3, 0);
             this.tableLayoutPanel17.Controls.Add(this.label12, 0, 0);
             this.tableLayoutPanel17.Controls.Add(this.btnEditExcludePools, 1, 0);
@@ -1678,27 +1699,6 @@
             this.YamlTT.InitialDelay = 500;
             this.YamlTT.ReshowDelay = 100;
             // 
-            // nudPoolRandomVariance
-            // 
-            this.nudPoolRandomVariance.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.nudPoolRandomVariance.Location = new System.Drawing.Point(3, 82);
-            this.nudPoolRandomVariance.Name = "nudPoolRandomVariance";
-            this.nudPoolRandomVariance.Size = new System.Drawing.Size(129, 22);
-            this.nudPoolRandomVariance.TabIndex = 10;
-            this.YamlTT.SetToolTip(this.nudPoolRandomVariance, resources.GetString("nudPoolRandomVariance.ToolTip"));
-            // 
-            // label31
-            // 
-            this.label31.AutoSize = true;
-            this.tableLayoutPanel2.SetColumnSpan(this.label31, 2);
-            this.label31.Dock = System.Windows.Forms.DockStyle.Left;
-            this.label31.Location = new System.Drawing.Point(3, 55);
-            this.label31.Name = "label31";
-            this.label31.Size = new System.Drawing.Size(116, 24);
-            this.label31.TabIndex = 11;
-            this.label31.Text = "Random Variance";
-            this.label31.TextAlign = System.Drawing.ContentAlignment.BottomLeft;
-            // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
@@ -1761,6 +1761,7 @@
             this.tableLayoutPanel3.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.nudAmountInPool)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.nudPoolMinDifficulty)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.nudPoolRandomVariance)).EndInit();
             this.groupBox1.ResumeLayout(false);
             this.tableLayoutPanel6.ResumeLayout(false);
             this.tableLayoutPanel6.PerformLayout();
@@ -1773,7 +1774,6 @@
             this.panel1.ResumeLayout(false);
             this.tableLayoutPanel16.ResumeLayout(false);
             this.tableLayoutPanel16.PerformLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.nudPoolRandomVariance)).EndInit();
             this.ResumeLayout(false);
 
         }
