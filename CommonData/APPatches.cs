@@ -31,6 +31,7 @@ namespace YargArchipelagoPlugin
         public static event Action<MusicLibraryMenu, List<ViewType>> OnCreateNormalView;
         public static event Action<GameManager> OnSongStarted;
         public static event Action OnSongEnded;
+        public static event Action<GameManager> OnGameManagerUpdateThrottled;
         public static event Action<GameManager> OnRecordScore;
         public static event Action<GameManager> OnSongFail;
         public static event Action<EngineManager> OnUpdateHappiness;
@@ -96,10 +97,16 @@ namespace YargArchipelagoPlugin
             OnCreateNormalView?.Invoke(__instance, __result);
         }
 
+        private static float _nextTrapCheckTime = 0f;
         [HarmonyPatch(typeof(GameManager), "Update")]
         [HarmonyPostfix]
         public static void GameManager_Update_Postfix(GameManager __instance)
         {
+            if (Time.unscaledTime >= _nextTrapCheckTime)
+            {
+                OnGameManagerUpdateThrottled?.Invoke(__instance);
+                _nextTrapCheckTime = Time.unscaledTime + 0.2f;
+            }
             if (Keyboard.current.ctrlKey.isPressed && Keyboard.current.qKey.wasPressedThisFrame)
             {
                 var songRunner = AccessTools.Field(typeof(GameManager), "_songRunner").GetValue(__instance) as SongRunner;
@@ -109,6 +116,14 @@ namespace YargArchipelagoPlugin
                 IgnoreScoreForNextSong = true;
                 endSongMethod?.Invoke(__instance, new object[] { });
             }
+            if (Keyboard.current.ctrlKey.isPressed && Keyboard.current.rKey.wasPressedThisFrame)
+                YargEngineActions.ForceRestartSong(ArchipelagoPlugin.APcontainer);
+            if (Keyboard.current.ctrlKey.isPressed && Keyboard.current.sKey.wasPressedThisFrame)
+                YargEngineActions.ApplyStarPowerItem(ArchipelagoPlugin.APcontainer);
+            if (Keyboard.current.ctrlKey.isPressed && Keyboard.current.mKey.wasPressedThisFrame)
+                YargEngineActions.ApplyRockMetertrapItem(ArchipelagoPlugin.APcontainer);
+            if (Keyboard.current.ctrlKey.isPressed && Keyboard.current.dKey.wasPressedThisFrame)
+                YargEngineActions.ApplyDeathLink(ArchipelagoPlugin.APcontainer, null);
         }
         [HarmonyPatch(typeof(DevWatermark), "Start")]
         [HarmonyPostfix]

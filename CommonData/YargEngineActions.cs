@@ -9,6 +9,7 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 using UnityEngine;
+using YARG;
 using YARG.Core;
 using YARG.Core.Audio;
 //Don't Let visual studios lie to me these are needed
@@ -286,7 +287,7 @@ namespace YargArchipelagoPlugin
                     default:
                         return;
                 }
-                ToastManager.ToastInformation($"{YargAPUtils.APToastFlag}DeathLink Received!\n\n{deathLink.Source} {deathLink.Cause}");
+                ToastManager.ToastInformation($"{YargAPUtils.APToastFlag}DeathLink Received!\n\n{deathLink?.Source??"Debug"} {deathLink?.Cause ?? "Command"}");
             }
             catch (Exception e)
             {
@@ -302,16 +303,7 @@ namespace YargArchipelagoPlugin
                 return;
             try
             {
-                var field = AccessTools.Field(typeof(GameManager), "_pauseMenu");
-                object pauseMenuObj = field.GetValue(current);
-                if (pauseMenuObj is PauseMenuManager pm && !current.IsPractice && !MonoSingleton<DialogManager>.Instance.IsDialogShowing)
-                {
-                    //TODO: This works but YARG spits out a bunch of errors. I thinks it because I don't give the pause menu enough time to load before restarting.
-                    if (!pm.IsOpen)
-                        current.Pause(true);
-                    if (pm.IsOpen)
-                        pm.Restart();
-                }
+                MonoSingleton<GlobalVariables>.Instance.LoadScene(SceneIndex.Gameplay);
             }
             catch (Exception e)
             {

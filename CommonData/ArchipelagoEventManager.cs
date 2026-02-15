@@ -171,7 +171,7 @@ namespace YargArchipelagoPlugin
         public bool PendingTrapsFiller = false;
         private static readonly TimeSpan fillerBuffer = TimeSpan.FromSeconds(5);
 
-        public void ApplyPendingTrapsFiller()
+        public void ApplyPendingTrapsFiller(GameManager gm)
         {
             if (!PendingTrapsFiller || !parent.IsSessionConnected) 
                 return;
@@ -198,6 +198,7 @@ namespace YargArchipelagoPlugin
                 case StaticItems.TrapRestart:
                     ToastManager.ToastWarning($"{YargAPUtils.APToastFlag}{FromPlayer.Name} sent you a Restart Trap!");
                     YargEngineActions.ForceRestartSong(parent);
+                    parent.ResetBuffer();
                     break;
                 case StaticItems.TrapRockMeter:
                     ToastManager.ToastWarning($"{YargAPUtils.APToastFlag}{FromPlayer.Name} sent you a Rock Meter Trap!");

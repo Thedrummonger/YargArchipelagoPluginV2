@@ -44,6 +44,7 @@ namespace YargArchipelagoPlugin
             CurrentSongStartTime = DateTime.Now;
             CurrentlyPlaying = game;
         }
+        public void ResetBuffer() => CurrentSongStartTime = DateTime.Now;
         public void ClearCurrentSong() => CurrentlyPlaying = null;
         public bool IsInSong(out GameManager song, out TimeSpan buffer)
         {
@@ -137,7 +138,6 @@ namespace YargArchipelagoPlugin
         {
             if (_Listening) return;
             APSyncTimer.ConstantCallback += eventManager.VerifyServerConnection;
-            APSyncTimer.ConstantCallback += eventManager.ApplyPendingTrapsFiller;
             APSyncTimer.OnUpdateCallback += eventManager.UpdateAPData;
 
             Session.Items.ItemReceived += eventManager.Items_ItemReceived;
@@ -155,6 +155,7 @@ namespace YargArchipelagoPlugin
             APPatches.OnSongFail += eventManager.FailedSong;
             APPatches.OnUpdateHappiness += eventManager.TryUseSongFailPrevent;
             APPatches.OnSongContainersUpdated += BuildSongLookup;
+            APPatches.OnGameManagerUpdateThrottled += eventManager.ApplyPendingTrapsFiller;
             _Listening = true;
         }
 
@@ -162,7 +163,6 @@ namespace YargArchipelagoPlugin
         {
             if (!_Listening) return;
             APSyncTimer.ConstantCallback -= eventManager.VerifyServerConnection;
-            APSyncTimer.ConstantCallback -= eventManager.ApplyPendingTrapsFiller;
             APSyncTimer.OnUpdateCallback -= eventManager.UpdateAPData;
 
             Session.Items.ItemReceived -= eventManager.Items_ItemReceived;
@@ -180,6 +180,7 @@ namespace YargArchipelagoPlugin
             APPatches.OnSongFail -= eventManager.FailedSong;
             APPatches.OnUpdateHappiness -= eventManager.TryUseSongFailPrevent;
             APPatches.OnSongContainersUpdated -= BuildSongLookup;
+            APPatches.OnGameManagerUpdateThrottled -= eventManager.ApplyPendingTrapsFiller;
             _Listening = false;
         }
 
