@@ -179,15 +179,29 @@ namespace YargArchipelagoPlugin
             if (!parent.IsInSong(out var Song, out var buffer) || !Song.CouldProductLocationCheck(parent, out _) || buffer < fillerBuffer)
                 return;
 
-            var Pending = parent.ApItemsRecieved.Where(x => x.Type.IsActionable() && !parent.seedConfig.ApItemsUsed.Contains(x)).ToList();
+            StaticYargAPItem[] Pending;
+            try 
+            {
+                var UsedItems = parent.seedConfig.ApItemsUsed.ToHashSet();
+                Pending = parent.ApItemsRecieved.ToArray();
+                Pending = Pending.Where(x => x.Type.IsActionable() && !UsedItems.Contains(x)).ToArray();
+            }
+            catch (Exception ex)
+            {
+                parent.logger.LogWarning($" Failed to snapshot received items {ex}");
+                return;
+            }
 
-            if (Pending.Count == 0)
+            if (Pending.Length == 0)
             {
                 PendingTrapsFiller = false;
                 return;
             }
-
             var Item = Pending[0];
+
+            parent.seedConfig.ApItemsUsed.Add(Item);
+            parent.seedConfig.Save();
+
             var FromPlayer = Item.GetPlayerInfo(parent);
             switch (Item.Type)
             {
@@ -196,17 +210,15 @@ namespace YargArchipelagoPlugin
                     YargEngineActions.ApplyStarPowerItem(parent);
                     break;
                 case StaticItems.TrapRestart:
+                    parent.ResetBuffer();
                     ToastManager.ToastWarning($"{YargAPUtils.APToastFlag}{FromPlayer.Name} sent you a Restart Trap!");
                     YargEngineActions.ForceRestartSong(parent);
-                    parent.ResetBuffer();
                     break;
                 case StaticItems.TrapRockMeter:
                     ToastManager.ToastWarning($"{YargAPUtils.APToastFlag}{FromPlayer.Name} sent you a Rock Meter Trap!");
                     YargEngineActions.ApplyRockMetertrapItem(parent);
                     break;
             }
-            parent.seedConfig.ApItemsUsed.Add(Item);
-            parent.seedConfig.Save();
         }
 
         internal void OnDeathLinkReceived(DeathLink deathLink)
