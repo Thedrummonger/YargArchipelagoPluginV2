@@ -62,25 +62,42 @@ namespace YargArchipelagoPlugin
 
         private static int GetListViewIndex(List<ViewType> listView, string Key)
         {
-            string allSongsKey = Localize.Key(Key);
+#if STABLE
             var primaryField = AccessTools.Field(typeof(CategoryViewType), "_primary");
             int insertIndex = -1;
             for (int i = 0; i < listView.Count; i++)
             {
-                if (listView[i] is CategoryViewType cat && (string)primaryField.GetValue(cat) == allSongsKey)
+                if (listView[i] is CategoryViewType cat && (string)primaryField.GetValue(cat) == Key)
                 {
                     insertIndex = i;
                     break;
                 }
             }
             return insertIndex;
+#else
+            var primaryField = AccessTools.Field(typeof(ButtonViewType), "_text");
+            int insertIndex = -1;
+            for (int i = 0; i < listView.Count; i++)
+            {
+                if (listView[i] is ButtonViewType button && (string)primaryField.GetValue(button) == Key)
+                {
+                    insertIndex = i+1;
+                    break;
+                }
+            }
+            return insertIndex;
+#endif
         }
 
         public static void InsertAPListViewSongs(APConnectionContainer container, MusicLibraryMenu menu, List<ViewType> listView)
         {
             if (!container.IsSessionConnected) 
                 return;
-            int insertIndex = GetListViewIndex(listView, "Menu.MusicLibrary.AllSongs");
+#if STABLE
+            int insertIndex = GetListViewIndex(listView, Localize.Key("Menu.MusicLibrary.AllSongs"));
+#else
+            int insertIndex = GetListViewIndex(listView, Localize.Key("Menu.MusicLibrary.Playlists"));
+#endif
             if (insertIndex < 0) 
                 return;
 
@@ -115,7 +132,7 @@ namespace YargArchipelagoPlugin
             {
                 container.seedConfig.ShowAPMenu = !container.seedConfig.ShowAPMenu;
                 container.seedConfig.Save();
-                menu.RefreshAndReselect();
+                menu.RefreshAndReselectIndexOnly();
             }));
 
             if (container.seedConfig.ShowAPMenu)
@@ -142,7 +159,7 @@ namespace YargArchipelagoPlugin
         {
             container.seedConfig.ShowMissingInstruments = !container.seedConfig.ShowMissingInstruments;
             container.seedConfig.Save();
-            menu.RefreshAndReselect();
+            menu.RefreshAndReselectIndexOnly();
         }
 
         private static int AddMacGuffinEntry(StaticItems Type, string Name, int Needed, List<ViewType> L, APConnectionContainer C, int I)
@@ -479,6 +496,33 @@ namespace YargArchipelagoPlugin
                 handler.logger.LogInfo($"Failed to force exit song\n{e}");
             }
         }
-        
+
+        private static readonly Type MenuType = typeof(MusicLibraryMenu);
+
+        private static readonly Action<MusicLibraryMenu> _refresh =
+            AccessTools.MethodDelegate<Action<MusicLibraryMenu>>(
+                AccessTools.Method(MenuType, "Refresh")
+            );
+
+        private static readonly Func<MusicLibraryMenu, int> _getSelectedIndex =
+            AccessTools.MethodDelegate<Func<MusicLibraryMenu, int>>(
+                AccessTools.PropertyGetter(MenuType, "SelectedIndex")
+            );
+
+        private static readonly Action<MusicLibraryMenu, int> _setSelectedIndex =
+            AccessTools.MethodDelegate<Action<MusicLibraryMenu, int>>(
+                AccessTools.PropertySetter(MenuType, "SelectedIndex")
+            );
+        public static void RefreshAndReselectIndexOnly(this MusicLibraryMenu menu)
+        {
+#if STABLE
+            menu.RefreshAndReselect();
+#else
+            int selectedIndex = _getSelectedIndex(menu);
+            _refresh(menu);
+            _setSelectedIndex(menu, selectedIndex);
+#endif
+        }
+
     }
 }
