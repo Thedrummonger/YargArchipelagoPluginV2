@@ -107,7 +107,12 @@ namespace YargArchipelagoPlugin
                 OnGameManagerUpdateThrottled?.Invoke(__instance);
                 _nextTrapCheckTime = Time.unscaledTime + 0.2f;
             }
-            if (Keyboard.current.ctrlKey.isPressed && Keyboard.current.qKey.wasPressedThisFrame)
+            var Modifiers = Keyboard.current != null &&
+                Keyboard.current.ctrlKey.isPressed &&
+                Keyboard.current.shiftKey.isPressed &&
+                Keyboard.current.altKey.isPressed;
+
+            if (Modifiers && Keyboard.current.qKey.wasPressedThisFrame)
             {
                 var songRunner = AccessTools.Field(typeof(GameManager), "_songRunner").GetValue(__instance) as SongRunner;
                 songRunner.SetSongTime(__instance.SongLength + 3.0, 0.0);
@@ -116,13 +121,13 @@ namespace YargArchipelagoPlugin
                 IgnoreScoreForNextSong = true;
                 endSongMethod?.Invoke(__instance, new object[] { });
             }
-            if (Keyboard.current.ctrlKey.isPressed && Keyboard.current.rKey.wasPressedThisFrame)
+            if (Modifiers && Keyboard.current.rKey.wasPressedThisFrame)
                 YargEngineActions.ForceRestartSong(ArchipelagoPlugin.APcontainer);
-            if (Keyboard.current.ctrlKey.isPressed && Keyboard.current.sKey.wasPressedThisFrame)
+            if (Modifiers && Keyboard.current.sKey.wasPressedThisFrame)
                 YargEngineActions.ApplyStarPowerItem(ArchipelagoPlugin.APcontainer);
-            if (Keyboard.current.ctrlKey.isPressed && Keyboard.current.mKey.wasPressedThisFrame)
+            if (Modifiers && Keyboard.current.mKey.wasPressedThisFrame)
                 YargEngineActions.ApplyRockMetertrapItem(ArchipelagoPlugin.APcontainer);
-            if (Keyboard.current.ctrlKey.isPressed && Keyboard.current.dKey.wasPressedThisFrame)
+            if (Modifiers && Keyboard.current.dKey.wasPressedThisFrame)
                 YargEngineActions.ApplyDeathLink(ArchipelagoPlugin.APcontainer, null);
         }
         [HarmonyPatch(typeof(DevWatermark), "Start")]
