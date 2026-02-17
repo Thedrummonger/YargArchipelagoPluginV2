@@ -121,14 +121,36 @@
     <value>132, 17</value>
   </metadata>
   <data name="nudSongPack.ToolTip" xml:space="preserve">
-    <value>Determines how many songs an unlock item will unlock at once.
-If this is set to 1, you will find individual songs in the pool.
-Otherwise, you will find "Song Pack" items that unlock multiple songs at once.</value>
+    <value>    Determines how many songs are unlocked by each Song Pack item.
+
+    This option only has an effect if "Song Pack Percentage" is greater than 0.
+    When Song Packs are enabled, each Song Pack item will unlock this many songs
+    at once instead of unlocking songs individually.</value>
   </data>
   <data name="chkInstrumentShuffle.ToolTip" xml:space="preserve">
     <value>You will need to collect an instruments item before you can play songs requiring that instrument.
 You start with one random instrument unlocked.
 Requires at least two song pools with different instruments.</value>
+  </data>
+  <data name="nudSongPackPercentage.ToolTip" xml:space="preserve">
+    <value>    Controls how many songs are grouped into Song Packs instead of being
+    unlocked individually.
+
+    0%  = All songs unlock individually.
+    &gt;0% = That percentage of songs will be placed into Song Pack items.
+
+    Each Song Pack unlocks a number of songs equal to "Song Pack Amount".
+    Songs not selected for Song Packs will appear as individual unlocks.</value>
+  </data>
+  <data name="nudUnlockExtra.ToolTip" xml:space="preserve">
+    <value>    Adds duplicate Song Unlock items to the item pool.
+
+    This percentage of Song Unlock items — including both individual song
+    unlocks and Song Pack unlocks — will have an additional copy added to
+    the pool.
+
+    Extra copies are only added if there is available space remaining in
+    the item pool.</value>
   </data>
   <data name="cmbDeathLink.ToolTip" xml:space="preserve">
     <value>Failing a song will send a DeathLink to others. 

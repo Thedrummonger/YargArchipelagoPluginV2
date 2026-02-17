@@ -24,7 +24,9 @@ namespace Yaml_Creator
         public string goal_pool_plando = string.Empty;
         public string goal_song_plando = string.Empty;
         public int song_check_extra = 100;
-        public int song_pack_size = 1;
+        public int song_pack_percentage = 0;
+        public int song_pack_size = 3;
+        public int extra_song_unlock = 0;
         public bool instrument_shuffle = false;
         public bool reuse_songs = false;
         public int starting_songs = 3;

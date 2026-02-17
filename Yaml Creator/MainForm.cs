@@ -184,6 +184,12 @@ namespace Yaml_Creator
             nudStartingSongs.ValueChanged += (s, e) => YAML.YAYARG.starting_songs = (int)nudStartingSongs.Value;
             chkReuseSongs.CheckedChanged += (s, e) => YAML.YAYARG.reuse_songs = chkReuseSongs.Checked;
             chkInstrumentShuffle.CheckedChanged += (s, e) => YAML.YAYARG.instrument_shuffle = chkInstrumentShuffle.Checked;
+            nudSongPackPercentage.ValueChanged += (s, e) =>
+            {
+                YAML.YAYARG.song_pack_percentage = (int)nudSongPackPercentage.Value;
+                nudSongPack.Enabled = YAML.YAYARG.song_pack_percentage > 0;
+            };
+            nudUnlockExtra.ValueChanged += (s, e) => YAML.YAYARG.extra_song_unlock = (int)nudUnlockExtra.Value;
             //Goal Song Settings
             nudGoalFame.ValueChanged += (s, e) => YAML.YAYARG.fame_point_needed = (int)nudGoalFame.Value;
             nudGoalSetlist.ValueChanged += (s, e) => YAML.YAYARG.setlist_needed = (int)nudGoalSetlist.Value;
@@ -458,8 +464,11 @@ namespace Yaml_Creator
 
             // Song Check Settings
             nudSongExtra.Value = YAML.YAYARG.song_check_extra;
-            nudSongPack.Value = YAML.YAYARG.song_pack_size;
+            nudSongPack.Value = Utility.Clamp(YAML.YAYARG.song_pack_size, 2, 999) ;
+            nudSongPackPercentage.Value = YAML.YAYARG.song_pack_percentage;
+            nudSongPack.Enabled = YAML.YAYARG.song_pack_percentage > 0;
             nudStartingSongs.Value = YAML.YAYARG.starting_songs;
+            nudUnlockExtra.Value = YAML.YAYARG.extra_song_unlock;
             chkReuseSongs.Checked = YAML.YAYARG.reuse_songs;
             chkInstrumentShuffle.Checked = YAML.YAYARG.instrument_shuffle;
 
