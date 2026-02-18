@@ -1,6 +1,7 @@
 ﻿using Archipelago.MultiClient.Net;
 using Archipelago.MultiClient.Net.BounceFeatures.DeathLink;
 using BepInEx.Logging;
+using Cysharp.Threading.Tasks;
 using HarmonyLib;
 using Newtonsoft.Json;
 using System;
@@ -64,7 +65,8 @@ namespace YargArchipelagoPlugin
         public PersistantData seedConfig { get; private set; } = null;
 
         public bool HasActiveSession => Session != null;
-        public bool IsSessionConnected => HasActiveSession && Session.Socket.Connected;
+        public bool IsSessionConnected => !IsConnecting && HasActiveSession && Session.Socket.Connected;
+        public bool IsConnecting { get; private set; } = false;
 
         public YargSlotData SlotData { get; private set; }
 
@@ -85,26 +87,51 @@ namespace YargArchipelagoPlugin
                 return BitConverter.ToInt32(hash, 0);
             }
         }
-
-        public bool Connect(ConnectionDetails connectionDetails)
+        public void Connect(ConnectionDetails connectionDetails)
         {
+            if (IsConnecting) return;
             var (Ip, Port) = YargAPUtils.ParseIpAddress(connectionDetails.Address);
-            if (Ip is null)
-                return false;
+            if (Ip is null) return;
             var tempSession = ArchipelagoSessionFactory.CreateSession(Ip, Port);
 
+            UniTask.RunOnThreadPool(() => TryConnectAsync(connectionDetails, tempSession));
+        }
+
+        private async UniTask TryConnectAsync(ConnectionDetails connectionDetails, ArchipelagoSession tempSession)
+        {
+            IsConnecting = true;
             var Result = tempSession.TryConnectAndLogin("YAYARG", connectionDetails.SlotName,
-                Archipelago.MultiClient.Net.Enums.ItemsHandlingFlags.AllItems, new Version(0,6,1), password: connectionDetails.Password);
+                Archipelago.MultiClient.Net.Enums.ItemsHandlingFlags.AllItems, new Version(0, 6, 1), password: connectionDetails.Password);
             if (Result is LoginFailure failure)
             {
-                ToastManager.ToastError($"{YargAPUtils.APToastFlag}Failed to connect!\n{connectionDetails.SlotName}@{connectionDetails.Address}:\n{string.Join("\n", failure.Errors)}");
-                return false;
+                ToastManager.ToastError($"{YargAPUtils.APToastFlag}Failed to connect!\n{connectionDetails.SlotName}@{connectionDetails.Address}:\n" +
+                    $"{string.Join("\n", failure.Errors)}");
+                IsConnecting = false;
+                return;
             }
             Session = tempSession;
-            SlotData = YargSlotData.Parse(Session.DataStorage.GetSlotData());
+            try
+            {
+                // This is the only really "dangerous" code here. if it tries to connect 
+                // to an old version of the APWorld it could try to parse bad data.
+                SlotData = YargSlotData.Parse(Session.DataStorage.GetSlotData());
+            }
+            catch (Exception ex)
+            {
+                ToastManager.ToastError($"{YargAPUtils.APToastFlag}Failed to parse slot data!\n" +
+                    $"{connectionDetails.SlotName}@{connectionDetails.Address}:\n" +
+                    $"{ex.Message}\n" +
+                    $"{ex.GetType()}");
+                Session = null;
+                SlotData = null;
+                IsConnecting = false;
+                return;
+            }
             seedConfig = PersistantData.Load(this);
             DeathLinkService = Session.CreateDeathLinkService();
             SeededRNG = new Random(GetAPSeed());
+
+            await UniTask.SwitchToMainThread();
 
             AddListeners();
             eventManager.UpdateAPData();
@@ -114,7 +141,7 @@ namespace YargArchipelagoPlugin
             ToastManager.ToastSuccess($"{YargAPUtils.APToastFlag}Connected Archipelago!\n{connectionDetails.SlotName}@{connectionDetails.Address}");
             File.WriteAllText(Path.Combine(CommonData.DataFolder, "Debug.json"), JsonConvert.SerializeObject(SlotData, Formatting.Indented));
             connectionDetails.Save();
-            return true;
+            IsConnecting = false;
         }
 
         public void Disconnect()
@@ -131,6 +158,7 @@ namespace YargArchipelagoPlugin
             SlotData = null;
             seedConfig = null;
             Session = null;
+            eventManager.FlagSongLibraryForUpdate();
         }
 
         private bool _Listening = false;

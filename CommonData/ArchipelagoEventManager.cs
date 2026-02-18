@@ -163,9 +163,14 @@ namespace YargArchipelagoPlugin
         {
             parent.UpdateReceivedItems();
             parent.UpdateCheckedLocations();
+            FlagSongLibraryForUpdate();
+            PendingTrapsFiller = true;
+        }
+
+        public void FlagSongLibraryForUpdate()
+        {
             if (parent.IsInSong(out _, out _) || !YargEngineActions.UpdateRecommendedSongsMenu())
                 APPatches.HasAvailableAPSongUpdate = true;
-            PendingTrapsFiller = true;
         }
 
         public bool PendingTrapsFiller = false;

@@ -134,6 +134,8 @@ namespace YargArchipelagoPlugin
 
         private void ToggleConnect()
         {
+            if (connectionContainer.IsConnecting)
+                return;
             GUI.FocusControl(null);
             GUIUtility.keyboardControl = 0;
             if (connectionContainer.IsSessionConnected)
@@ -237,9 +239,10 @@ namespace YargArchipelagoPlugin
 
 
             GUILayout.Space(10);
-            string buttonText = connectionContainer.IsSessionConnected ? "Disconnect" : "Connect";
-            if (GUILayout.Button(buttonText, GUILayout.Height(28)))
-                ToggleConnect();
+            string buttonText = connectionContainer.IsSessionConnected ? "Disconnect" : connectionContainer.IsConnecting ? "Connecting..." : "Connect";
+            using (new GUIEnabledScope(!connectionContainer.IsConnecting))
+                if (GUILayout.Button(buttonText, GUILayout.Height(28)))
+                    ToggleConnect();
 
             GUILayout.Space(6);
 
