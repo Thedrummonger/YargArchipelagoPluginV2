@@ -339,7 +339,8 @@ namespace YargArchipelagoCommon
 
             public SongPool GetPool(YargSlotData slotData) => slotData.Pools[PoolName];
             public string GetActiveHash(APConnectionContainer container) => HasProxy(container, out var ProxyHash) ? ProxyHash : Hash;
-            public bool HasProxy(APConnectionContainer container, out string proxyHash) => container.seedConfig.SongProxies.TryGetValue(UniqueKey, out proxyHash);
+            public bool HasProxy(APConnectionContainer container, out string proxyHash) => 
+                container.seedConfig.SongProxies.TryGetValue(UniqueKey, out proxyHash);
 
             public SongEntry GetYargSongEntry(APConnectionContainer container) =>
                 HadYargSongEntry(container, out var entry) ? entry : null;

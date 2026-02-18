@@ -65,7 +65,7 @@ namespace YargArchipelagoPlugin
         public PersistantData seedConfig { get; private set; } = null;
 
         public bool HasActiveSession => Session != null;
-        public bool IsSessionConnected => !IsConnecting && HasActiveSession && Session.Socket.Connected;
+        public bool IsSessionConnected => HasActiveSession && Session.Socket.Connected;
         public bool IsConnecting { get; private set; } = false;
 
         public YargSlotData SlotData { get; private set; }
@@ -142,6 +142,26 @@ namespace YargArchipelagoPlugin
             File.WriteAllText(Path.Combine(CommonData.DataFolder, "Debug.json"), JsonConvert.SerializeObject(SlotData, Formatting.Indented));
             connectionDetails.Save();
             IsConnecting = false;
+            CheckForMissingSongs();
+        }
+
+        private void CheckForMissingSongs()
+        {
+            HashSet<string> Missing = new HashSet<string>();
+            foreach(var i in SlotData.Songs)
+            {
+                if (!i.HadYargSongEntry(this, out _))
+                {
+                    var MainLocation = Session.Locations.GetLocationNameFromId(i.MainLocationID);
+                    var SongName = YargAPUtils.GetSongNameFromLocationString(MainLocation);
+                    Missing.Add(SongName);
+                }
+            }
+            if (Missing.Count > 0)
+            {
+                DialogManager.Instance.ShowMessage($"The following songs were in your AP seed but missing from yarg!",
+                    YargAPUtils.TruncateString(string.Join(", ", Missing), 1000));
+            }
         }
 
         public void Disconnect()

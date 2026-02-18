@@ -198,6 +198,23 @@ namespace YargArchipelagoPlugin
                 x.IsSongUnlocked(container));
             return APSongEntries.Any();
         }
+
+        public static string GetSongNameFromLocationString(string input)
+        {
+            if (string.IsNullOrEmpty(input))
+                return input;
+
+            int index = input.LastIndexOf("on ", StringComparison.Ordinal);
+            return index >= 0 ? input.Substring(0, index) : input;
+        }
+
+        public static string TruncateString(string input, int maxLength)
+        {
+            if (string.IsNullOrEmpty(input) || input.Length <= maxLength)
+                return input;
+
+            return input.Substring(0, maxLength) + "...";
+        }
     }
 
     public static class APAssets
