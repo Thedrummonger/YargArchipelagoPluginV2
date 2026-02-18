@@ -269,7 +269,7 @@ namespace Yaml_Creator
             {
                 ctxMenu.Items.Clear();
                 ctxMenu.Items.Add("Export as Text File", null, (_, __) => SaveSongData(true));
-                ctxMenu.Items.Add("Export as Json File", null, (_, __) => SaveSongData(true));
+                ctxMenu.Items.Add("Export as Json File", null, (_, __) => SaveSongData(false));
                 ctxMenu.Show(btnExport, new Point(0, btnExport.Height));
             };
 
