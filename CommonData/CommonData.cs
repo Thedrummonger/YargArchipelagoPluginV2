@@ -448,6 +448,8 @@ namespace YargArchipelagoCommon
             public EnergyLinkType EnergyLink { get; set; }
             public Dictionary<string, SongPool> Pools { get; set; } = new Dictionary<string, SongPool>();
 
+            public Version APWorldVersion { get; set; }
+
             public HashSet<SongAPData> Songs { get; set; } = new HashSet<SongAPData>();
             public Dictionary<SupportedInstrument, SongAPData[]> SongsByInstrument { get; set; } = new Dictionary<SupportedInstrument, SongAPData[]>();
             public HashSet<long> SongUnlockIds { get; set; } = new HashSet<long>();
@@ -460,7 +462,9 @@ namespace YargArchipelagoCommon
                     SetlistNeededForGoal = Convert.ToInt32(slotData["setlist_needed_for_goal"]),
                     GoalData = GoalData.FromTuple(slotData["goal_data"] as JArray),
                     DeathLink = (DeathLinkType)Convert.ToInt32(slotData["death_link"]),
-                    EnergyLink = (EnergyLinkType)Convert.ToInt32(slotData["energy_link"])
+                    EnergyLink = (EnergyLinkType)Convert.ToInt32(slotData["energy_link"]),
+                    APWorldVersion = slotData.TryGetValue("apworld_version", out var v) && Version.TryParse(v?.ToString(), out var parsed)
+                        ? parsed : new Version(2, 3, 0)
                 };
 
                 var poolsJson = slotData["pools"] as JObject;

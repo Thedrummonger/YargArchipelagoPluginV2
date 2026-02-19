@@ -110,11 +110,18 @@ namespace YargArchipelagoPlugin
                 return;
             }
             Session = tempSession;
+            bool ValidData = true;
             try
             {
                 // This is the only really "dangerous" code here. if it tries to connect 
                 // to an old version of the APWorld it could try to parse bad data.
                 SlotData = YargSlotData.Parse(Session.DataStorage.GetSlotData());
+                var ClientVersion = Version.Parse(ArchipelagoPlugin.pluginVersion.Substring(2));
+                if (SlotData.APWorldVersion != ClientVersion)
+                {
+                    ToastManager.ToastError($"{YargAPUtils.APToastFlag}Version Missmatch!\nWorld Version {SlotData.APWorldVersion}\nClient Version {ClientVersion}");
+                    ValidData = false;
+                }
             }
             catch (Exception ex)
             {
@@ -122,11 +129,17 @@ namespace YargArchipelagoPlugin
                     $"{connectionDetails.SlotName}@{connectionDetails.Address}:\n" +
                     $"{ex.Message}\n" +
                     $"{ex.GetType()}");
+                ValidData = false;
+            }
+
+            if (!ValidData)
+            {
                 Session = null;
                 SlotData = null;
                 IsConnecting = false;
                 return;
             }
+
             seedConfig = PersistantData.Load(this);
             DeathLinkService = Session.CreateDeathLinkService();
             SeededRNG = new Random(GetAPSeed());
