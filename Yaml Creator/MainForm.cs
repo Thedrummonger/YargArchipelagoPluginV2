@@ -292,37 +292,48 @@ namespace Yaml_Creator
 
         private void ShowSeedStats(object sender, EventArgs e)
         {
-            StringBuilder PoolString = new StringBuilder();
+            var lines = new List<string>();
+            var validInSeed = new HashSet<SongExportExtendedData>();
+            int totalSongCount = 0;
 
-            HashSet<SongExportExtendedData> ValidInSeed = new HashSet<SongExportExtendedData>();
-
-            int TotalSongCount = 0;
             foreach (var pool in YAML.YAYARG.song_pools)
             {
-                TotalSongCount += (int)pool.Value.amount_in_pool;
-                PoolString.AppendLine($"Pool [{pool.Key}] Stats");
-                var Songs = ExportFile.Where(x => x.core.ValidForPool(pool.Value));
-                foreach (var song in Songs) ValidInSeed.Add(song);
-                if (!Songs.Any()) continue;
-                var (Count, AverageTime, TotalTime) = GetLengthStats(Songs);
-                var PlayTime = FormatSeconds(AverageTime * pool.Value.amount_in_pool);
-                PoolString.AppendLine($"Song amount in Pool: {pool.Value.amount_in_pool}");
-                PoolString.AppendLine($"Valid Song Candiates for Pool: {Count}");
-                PoolString.AppendLine($"Average time per song: {FormatSeconds(AverageTime)}");
-                PoolString.AppendLine($"Estimated play time for pool: {PlayTime}");
-                PoolString.AppendLine();
+                totalSongCount += (int)pool.Value.amount_in_pool;
+
+                var songs = ExportFile.Where(x => x.core.ValidForPool(pool.Value));
+
+                if (!songs.Any())
+                    continue;
+
+                foreach (var song in songs)
+                    validInSeed.Add(song);
+
+                lines.Add(null);
+                lines.Add($"Pool [{pool.Key}] Stats");
+
+                var (count, avg, _) = GetLengthStats(songs);
+                var playTime = FormatSeconds(avg * pool.Value.amount_in_pool);
+
+                lines.Add($"{"Songs in pool",-20} {pool.Value.amount_in_pool}");
+                lines.Add($"{"Valid candidates",-20} {count}");
+                lines.Add($"{"Avg length",-20} {FormatSeconds(avg)}");
+                lines.Add($"{"Est. play time",-20} {playTime}");
+                lines.Add("");
             }
 
-            var (AllCount, AllAverageTime, AllTotalTime) = GetLengthStats(ValidInSeed);
-            var AllPlayTime = FormatSeconds(AllAverageTime * TotalSongCount);
-            StringBuilder OverallString = new StringBuilder();
-            OverallString.AppendLine($"Song amount in Seed: {TotalSongCount}");
-            OverallString.AppendLine($"Valid Song Candiates for Seed: {AllCount}");
-            OverallString.AppendLine($"Average time per song: {FormatSeconds(AllAverageTime)}");
-            OverallString.AppendLine($"Estimated play time for Seed: {AllPlayTime}");
+            var (allCount, allAvg, _) = GetLengthStats(validInSeed);
+            var allPlay = FormatSeconds(allAvg * totalSongCount);
 
-            MessageBox.Show($"{OverallString}\n{PoolString}", "Seed Stats:");
+            lines.Insert(0, "");
+            lines.Insert(0, $"{"Est. play time",-20} {allPlay}");
+            lines.Insert(0, $"{"Avg length",-20} {FormatSeconds(allAvg)}");
+            lines.Insert(0, $"{"Valid candidates",-20} {allCount}");
+            lines.Insert(0, $"{"Songs in seed",-20} {totalSongCount}");
+            lines.Insert(0, $"Overall Seed Stats");
+
+            this.ShowTextDialog("Seed Stats", lines);
         }
+
         private string FormatSeconds(double seconds)
         {
             var ts = TimeSpan.FromSeconds(seconds);
