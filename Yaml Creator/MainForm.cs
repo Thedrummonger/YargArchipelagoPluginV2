@@ -88,6 +88,8 @@ namespace Yaml_Creator
                 nudPoolRandomVariance.Value = 0;
                 nudPoolMinDifficulty .Value = 0;
                 nudPoolMaxDifficulty .Value = 0;
+                nudPoolMinTime.Value = 0;
+                nudPoolMaxTime.Value = 0;
                 cmbReward1Diff.SelectedItem = null;
                 cmbReward2Diff.SelectedItem = null;
                 cmbReward1Score.SelectedItem = null;
@@ -102,6 +104,10 @@ namespace Yaml_Creator
             nudPoolRandomVariance.Value = SelectedSongPool.Pool.random_variance;
             nudPoolMinDifficulty.Value = SelectedSongPool.Pool.min_difficulty;
             nudPoolMaxDifficulty.Value = SelectedSongPool.Pool.max_difficulty;
+            if (SelectedSongPool.Pool.min_time <= 0 && SelectedSongPool.Pool.max_time <= 0)
+                SelectedSongPool.Pool.max_time = 3600;
+            nudPoolMinTime.Value = SelectedSongPool.Pool.min_time;
+            nudPoolMaxTime.Value = SelectedSongPool.Pool.max_time;
             cmbReward1Diff.SelectedItem = cmbReward1Diff.Items.Cast<DisplayItem<SupportedDifficulty>>().FirstOrDefault(x => x.Value == SelectedSongPool.Pool.completion_requirements.reward1_diff);
             cmbReward2Diff.SelectedItem = cmbReward2Diff.Items.Cast<DisplayItem<SupportedDifficulty>>().FirstOrDefault(x => x.Value == SelectedSongPool.Pool.completion_requirements.reward2_diff);
             cmbReward1Score.SelectedItem = cmbReward1Score.Items.Cast<DisplayItem<CompletionReq>>().FirstOrDefault(x => x.Value == SelectedSongPool.Pool.completion_requirements.reward1_req);
@@ -130,6 +136,8 @@ namespace Yaml_Creator
             SelectedSongPool.Pool.random_variance = (int)nudPoolRandomVariance.Value;
             SelectedSongPool.Pool.min_difficulty = (int)nudPoolMinDifficulty.Value;
             SelectedSongPool.Pool.max_difficulty = (int)nudPoolMaxDifficulty.Value;
+            SelectedSongPool.Pool.min_time = (int)nudPoolMinTime.Value;
+            SelectedSongPool.Pool.max_time = (int)nudPoolMaxTime.Value;
             SelectedSongPool.Pool.completion_requirements.reward1_diff = cmbReward1Diff.SelectedItem is DisplayItem<SupportedDifficulty> item1 ? item1.Value : SupportedDifficulty.Expert;
             SelectedSongPool.Pool.completion_requirements.reward2_diff = cmbReward2Diff.SelectedItem is DisplayItem<SupportedDifficulty> item2 ? item2.Value : SupportedDifficulty.Expert;
             SelectedSongPool.Pool.completion_requirements.reward1_req = cmbReward1Score.SelectedItem is DisplayItem<CompletionReq> item3 ? item3.Value : CompletionReq.Clear;
@@ -242,6 +250,8 @@ namespace Yaml_Creator
             nudPoolRandomVariance.ValueChanged += (s, e) => SavePoolValues();
             nudPoolMinDifficulty.ValueChanged += (s, e) => SavePoolValues();
             nudPoolMaxDifficulty.ValueChanged += (s, e) => SavePoolValues();
+            nudPoolMinTime.ValueChanged += (s, e) => SavePoolValues();
+            nudPoolMaxTime.ValueChanged += (s, e) => SavePoolValues();
             cmbReward1Diff.SelectedIndexChanged += (s, e) => SavePoolValues();
             cmbReward2Diff.SelectedIndexChanged += (s, e) => SavePoolValues();
             cmbReward1Score.SelectedIndexChanged += (s, e) => SavePoolValues();

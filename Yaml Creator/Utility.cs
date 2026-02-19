@@ -58,6 +58,8 @@ namespace Yaml_Creator
                 random_variance = 0,
                 max_difficulty = max,
                 min_difficulty = min,
+                max_time = 3600,
+                min_time = 0,
                 completion_requirements = new CompletionRequirements()
                 {
                     reward1_diff = SupportedDifficulty.Expert,

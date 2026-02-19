@@ -16,6 +16,7 @@ namespace Yaml_Creator
         public class CompressedSongData
         {
             public string Title { get; set; }
+            public double Time { get; set; }
             public Dictionary<string, int> Difficulties { get; set; }
         }
         public static string ConvertSongDataToBase64(IEnumerable<SongExportExtendedData> songArray)

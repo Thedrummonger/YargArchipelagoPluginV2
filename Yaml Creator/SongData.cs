@@ -26,6 +26,7 @@ namespace Yaml_Creator
                 return new SongDataConverter.CompressedSongData
                 {
                     Title = ToString(),
+                    Time = core.Time,
                     Difficulties = core.Difficulties.ToDictionary(x => x.Key.ToString(), x => x.Value)
                 };
             }

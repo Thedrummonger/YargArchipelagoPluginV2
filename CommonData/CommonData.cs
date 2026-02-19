@@ -258,11 +258,14 @@ namespace YargArchipelagoCommon
             public string Album;
             public string Genre;
             public string Charter;
+            public double Time;
             public Dictionary<SupportedInstrument, int> Difficulties = new Dictionary<SupportedInstrument, int>();
             [Newtonsoft.Json.JsonIgnore]
             public SongEntry YargSongEntry;
             public bool TryGetDifficulty(SupportedInstrument instrument, out int Difficulty) => Difficulties.TryGetValue(instrument, out Difficulty);
-            public bool ValidForPool(SongPool pool) => TryGetDifficulty(pool.instrument, out var diff) && diff <= pool.max_difficulty && diff >= pool.min_difficulty;
+            public bool ValidForPool(SongPool pool) => TryGetDifficulty(pool.instrument, out var diff) && 
+                diff <= pool.max_difficulty && diff >= pool.min_difficulty &&
+                Time <= pool.max_time && Time >= pool.min_time;
             public static SongExportData FromSongEntry(SongEntry song)
             {
                 var Entry = new SongExportData()
@@ -275,6 +278,7 @@ namespace YargArchipelagoCommon
                     Album = song.Album,
                     Genre = song.Genre,
                     Charter = song.Charter,
+                    Time = song.SongLengthSeconds,
                     YargSongEntry = song
 
                 };
@@ -313,6 +317,8 @@ namespace YargArchipelagoCommon
             public long amount_in_pool { get; set; }
             public long min_difficulty { get; set; }
             public long max_difficulty { get; set; }
+            public long min_time { get; set; }
+            public long max_time { get; set; }
             public CompletionRequirements completion_requirements { get; set; }
 
             public static SongPool FromJson(JObject json)
@@ -323,6 +329,8 @@ namespace YargArchipelagoCommon
                     amount_in_pool = json["amount_in_pool"].ToObject<int>(),
                     min_difficulty = json["min_difficulty"].ToObject<int>(),
                     max_difficulty = json["max_difficulty"].ToObject<int>(),
+                    min_time = json["min_time"].ToObject<int>(),
+                    max_time = json["max_time"].ToObject<int>(),
                     completion_requirements = CompletionRequirements.FromJson(json["completion_requirements"] as JObject)
                 };
             }
