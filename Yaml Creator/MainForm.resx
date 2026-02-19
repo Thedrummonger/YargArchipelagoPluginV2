@@ -174,6 +174,11 @@ Requires at least two song pools with different instruments.</value>
     - Other Song: Only songs without item checks contribute energy.
     - Any Song: All completed songs contribute energy.</value>
   </data>
+  <data name="nudFailPrevention.ToolTip" xml:space="preserve">
+    <value>Specifies the weight of the Failure Prevention item.
+These will prevent you from failing a song once per item by granting you 1/4 of a rock meter.
+It will activate automatically when you would fail a song.</value>
+  </data>
   <data name="cmbGoalPoolPlando.ToolTip" xml:space="preserve">
     <value>Forces the goal song into the selected pool. 
 Multiple potential "Goal Pools" can be defined with 0 songs, then this option can be set to a 

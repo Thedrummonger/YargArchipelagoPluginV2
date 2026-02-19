@@ -229,7 +229,7 @@
             this.SettingsTab.Padding = new System.Windows.Forms.Padding(2);
             this.SettingsTab.Size = new System.Drawing.Size(427, 319);
             this.SettingsTab.TabIndex = 0;
-            this.SettingsTab.Text = "Settings";
+            this.SettingsTab.Text = "Main Settings";
             this.SettingsTab.UseVisualStyleBackColor = true;
             // 
             // tableLayoutPanel11
@@ -599,7 +599,7 @@
             this.ExtraTab.Name = "ExtraTab";
             this.ExtraTab.Size = new System.Drawing.Size(427, 319);
             this.ExtraTab.TabIndex = 3;
-            this.ExtraTab.Text = "Extra";
+            this.ExtraTab.Text = "Extra Settings";
             this.ExtraTab.UseVisualStyleBackColor = true;
             // 
             // tableLayoutPanel15
@@ -921,6 +921,7 @@
             this.nudFailPrevention.Name = "nudFailPrevention";
             this.nudFailPrevention.Size = new System.Drawing.Size(99, 20);
             this.nudFailPrevention.TabIndex = 13;
+            this.YamlTT.SetToolTip(this.nudFailPrevention, resources.GetString("nudFailPrevention.ToolTip"));
             // 
             // label30
             // 
@@ -939,6 +940,8 @@
             this.nudNothingItem.Name = "nudNothingItem";
             this.nudNothingItem.Size = new System.Drawing.Size(99, 20);
             this.nudNothingItem.TabIndex = 15;
+            this.YamlTT.SetToolTip(this.nudNothingItem, "Specifies the weight of the Nothing filler item.\r\nIt does nothing.\r\nIf all filler" +
+        "/trap items are set to a weight of zero, this value will be forced to 1");
             // 
             // groupBox9
             // 
@@ -1199,6 +1202,8 @@
             this.cmbReward2Score.Name = "cmbReward2Score";
             this.cmbReward2Score.Size = new System.Drawing.Size(90, 21);
             this.cmbReward2Score.TabIndex = 11;
+            this.YamlTT.SetToolTip(this.cmbReward2Score, "The minimum score you must achieve when completing this song at to earn this rewa" +
+        "rd.");
             // 
             // label9
             // 
@@ -1221,6 +1226,8 @@
             this.cmbReward2Diff.Name = "cmbReward2Diff";
             this.cmbReward2Diff.Size = new System.Drawing.Size(90, 21);
             this.cmbReward2Diff.TabIndex = 9;
+            this.YamlTT.SetToolTip(this.cmbReward2Diff, "The minimum difficulty (Expert, Medium, etc..) you must play this song at to earn" +
+        " this reward.");
             // 
             // label4
             // 
@@ -1248,6 +1255,7 @@
             this.nudPoolMaxDifficulty.Name = "nudPoolMaxDifficulty";
             this.nudPoolMaxDifficulty.Size = new System.Drawing.Size(98, 20);
             this.nudPoolMaxDifficulty.TabIndex = 5;
+            this.YamlTT.SetToolTip(this.nudPoolMaxDifficulty, "The maximum Intensity for songs in this pool .");
             // 
             // groupBox3
             // 
@@ -1314,6 +1322,8 @@
             this.cmbReward1Diff.Name = "cmbReward1Diff";
             this.cmbReward1Diff.Size = new System.Drawing.Size(90, 21);
             this.cmbReward1Diff.TabIndex = 8;
+            this.YamlTT.SetToolTip(this.cmbReward1Diff, "The minimum difficulty (Expert, Medium, etc..) you must play this song at to earn" +
+        " this reward.");
             // 
             // cmbReward1Score
             // 
@@ -1324,6 +1334,8 @@
             this.cmbReward1Score.Name = "cmbReward1Score";
             this.cmbReward1Score.Size = new System.Drawing.Size(90, 21);
             this.cmbReward1Score.TabIndex = 10;
+            this.YamlTT.SetToolTip(this.cmbReward1Score, "The minimum score you must achieve when completing this song at to earn this rewa" +
+        "rd.");
             // 
             // nudAmountInPool
             // 
@@ -1338,6 +1350,9 @@
             this.nudAmountInPool.Name = "nudAmountInPool";
             this.nudAmountInPool.Size = new System.Drawing.Size(98, 20);
             this.nudAmountInPool.TabIndex = 1;
+            this.YamlTT.SetToolTip(this.nudAmountInPool, "Number of songs to include in this pool.\r\nThe ? button will show what songs are c" +
+        "urrently valid for inclusion.\r\nThe title displays how many songs are valid for t" +
+        "his pool.");
             // 
             // label6
             // 
@@ -1360,9 +1375,9 @@
             this.label5.Location = new System.Drawing.Point(2, 88);
             this.label5.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.label5.Name = "label5";
-            this.label5.Size = new System.Drawing.Size(126, 19);
+            this.label5.Size = new System.Drawing.Size(123, 19);
             this.label5.TabIndex = 2;
-            this.label5.Text = "Min - Max Difficulty Value";
+            this.label5.Text = "Min - Max Song Intensity";
             this.label5.TextAlign = System.Drawing.ContentAlignment.BottomLeft;
             // 
             // nudPoolMinDifficulty
@@ -1378,6 +1393,7 @@
             this.nudPoolMinDifficulty.Name = "nudPoolMinDifficulty";
             this.nudPoolMinDifficulty.Size = new System.Drawing.Size(98, 20);
             this.nudPoolMinDifficulty.TabIndex = 3;
+            this.YamlTT.SetToolTip(this.nudPoolMinDifficulty, "The minimum Intensity for songs in this pool .");
             // 
             // btnListValidSongs
             // 
@@ -1426,6 +1442,7 @@
             this.nudPoolMinTime.Name = "nudPoolMinTime";
             this.nudPoolMinTime.Size = new System.Drawing.Size(98, 20);
             this.nudPoolMinTime.TabIndex = 12;
+            this.YamlTT.SetToolTip(this.nudPoolMinTime, "The minimum duration (in seconds) for songs in this pool .");
             // 
             // nudPoolMaxTime
             // 
@@ -1440,6 +1457,7 @@
             this.nudPoolMaxTime.Name = "nudPoolMaxTime";
             this.nudPoolMaxTime.Size = new System.Drawing.Size(98, 20);
             this.nudPoolMaxTime.TabIndex = 13;
+            this.YamlTT.SetToolTip(this.nudPoolMaxTime, "The maximum duration (in seconds) for songs in this pool .");
             // 
             // groupBox1
             // 
@@ -1508,6 +1526,7 @@
             this.txtNewPoolIsntrument.Name = "txtNewPoolIsntrument";
             this.txtNewPoolIsntrument.Size = new System.Drawing.Size(199, 21);
             this.txtNewPoolIsntrument.TabIndex = 3;
+            this.YamlTT.SetToolTip(this.txtNewPoolIsntrument, "The instrument that must be played for songs in the new pool.");
             // 
             // label3
             // 
@@ -1529,6 +1548,7 @@
             this.txtNewPoolName.Name = "txtNewPoolName";
             this.txtNewPoolName.Size = new System.Drawing.Size(199, 20);
             this.txtNewPoolName.TabIndex = 1;
+            this.YamlTT.SetToolTip(this.txtNewPoolName, "The unique name for the new pool.");
             // 
             // SongListTab
             // 
@@ -1621,7 +1641,7 @@
             this.tableLayoutPanel17.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 50F));
             this.tableLayoutPanel17.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 30F));
             this.tableLayoutPanel17.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 50F));
-            this.tableLayoutPanel17.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 34F));
+            this.tableLayoutPanel17.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 35F));
             this.tableLayoutPanel17.Controls.Add(this.btnEditIncludePools, 3, 0);
             this.tableLayoutPanel17.Controls.Add(this.label12, 0, 0);
             this.tableLayoutPanel17.Controls.Add(this.btnEditExcludePools, 1, 0);
@@ -1698,7 +1718,7 @@
             this.label13.Name = "label13";
             this.label13.Size = new System.Drawing.Size(172, 22);
             this.label13.TabIndex = 5;
-            this.label13.Text = "Include in pools";
+            this.label13.Text = "Force include in pools";
             this.label13.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             // 
             // txtPoolInclude

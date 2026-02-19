@@ -316,7 +316,7 @@ namespace Yaml_Creator
 
                 lines.Add($"{"Songs in pool",-20} {pool.Value.amount_in_pool}");
                 lines.Add($"{"Valid candidates",-20} {count}");
-                lines.Add($"{"Avg length",-20} {FormatSeconds(avg)}");
+                lines.Add($"{"Avg song length",-20} {FormatSeconds(avg)}");
                 lines.Add($"{"Est. play time",-20} {playTime}");
                 lines.Add("");
             }
@@ -326,7 +326,7 @@ namespace Yaml_Creator
 
             lines.Insert(0, "");
             lines.Insert(0, $"{"Est. play time",-20} {allPlay}");
-            lines.Insert(0, $"{"Avg length",-20} {FormatSeconds(allAvg)}");
+            lines.Insert(0, $"{"Avg song length",-20} {FormatSeconds(allAvg)}");
             lines.Insert(0, $"{"Valid candidates",-20} {allCount}");
             lines.Insert(0, $"{"Songs in seed",-20} {totalSongCount}");
             lines.Insert(0, $"Overall Seed Stats");
