@@ -4,6 +4,7 @@ using HarmonyLib;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.Windows;
+using YargArchipelagoCommon;
 
 namespace YargArchipelagoPlugin
 {
@@ -23,6 +24,9 @@ namespace YargArchipelagoPlugin
         private ConfigEntry<bool> requireCtrl;
         private ConfigEntry<bool> requireShift;
         private ConfigEntry<bool> requireAlt;
+
+        public static ConfigEntry<CommonData.ItemLog> DefaultItemLog;
+        public static ConfigEntry<bool> DefaultShowChat;
         public void Awake()
         {
             var patcher = new Harmony(pluginGuid);
@@ -36,6 +40,9 @@ namespace YargArchipelagoPlugin
             requireCtrl = Config.Bind("Hotkeys", "ToggleDialogRequireCtrl", false, "Require Ctrl to be held.");
             requireShift = Config.Bind("Hotkeys", "ToggleDialogRequireShift", false, "Require Shift to be held.");
             requireAlt = Config.Bind("Hotkeys", "ToggleDialogRequireAlt", false, "Require Alt to be held.");
+
+            DefaultShowChat = Config.Bind("Chat", "DefaultShowChat", false, "The default Show Chat setting for new connections.");
+            DefaultItemLog = Config.Bind("Chat", "DefaultItemLog", CommonData.ItemLog.ToMe, "The default Item Log setting for new connections.");
 
         }
 

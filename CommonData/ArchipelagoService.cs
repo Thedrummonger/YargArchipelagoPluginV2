@@ -364,9 +364,11 @@ namespace YargArchipelagoPlugin
 
             PersistantData CreateNew() => new PersistantData
             {
-                DeathLinkMode = (DeathLinkType)container.SlotData.DeathLink,
-                EnergyLinkMode = (EnergyLinkType)container.SlotData.EnergyLink,
-                parent = container
+                DeathLinkMode = container.SlotData.DeathLink,
+                EnergyLinkMode = container.SlotData.EnergyLink,
+                parent = container,
+                InGameItemLog = ArchipelagoPlugin.DefaultItemLog.Value,
+                InGameAPChat = ArchipelagoPlugin.DefaultShowChat.Value
             };
         }
         public void Save()
