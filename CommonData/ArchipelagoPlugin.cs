@@ -20,10 +20,10 @@ namespace YargArchipelagoPlugin
 #endif
         public static APConnectionContainer APcontainer;
 
-        private ConfigEntry<Key> toggleKey;
-        private ConfigEntry<bool> requireCtrl;
-        private ConfigEntry<bool> requireShift;
-        private ConfigEntry<bool> requireAlt;
+        public static ConfigEntry<Key> toggleKey;
+        public static ConfigEntry<bool> requireCtrl;
+        public static ConfigEntry<bool> requireShift;
+        public static ConfigEntry<bool> requireAlt;
 
         public static ConfigEntry<CommonData.ItemLog> DefaultItemLog;
         public static ConfigEntry<bool> DefaultShowChat;

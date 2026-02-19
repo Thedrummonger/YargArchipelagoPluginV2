@@ -145,7 +145,15 @@ namespace YargArchipelagoPlugin
             string currentText = textProperty.GetValue(watermarkText) as string;
 
             if (!string.IsNullOrEmpty(currentText))
-                textProperty.SetValue(watermarkText, $"{currentText}\nYarg Archipelago plugin V{ArchipelagoPlugin.pluginVersion}. Press F10 to connect!");
+            {
+                var keyCodes = new List<string>();
+                if (ArchipelagoPlugin.requireCtrl.Value) keyCodes.Add("ctrl");
+                if (ArchipelagoPlugin.requireAlt.Value) keyCodes.Add("alt");
+                if (ArchipelagoPlugin.requireShift.Value) keyCodes.Add("shift");
+                keyCodes.Add(ArchipelagoPlugin.toggleKey.Value.ToString());
+                string ToggleButton = string.Join(" + ", keyCodes);
+                textProperty.SetValue(watermarkText, $"{currentText}\nYarg Archipelago plugin V{ArchipelagoPlugin.pluginVersion}. Press {ToggleButton} to connect!");
+            }
         }
 
         [HarmonyPatch(typeof(ToastManager), "ShowToast")]

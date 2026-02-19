@@ -326,11 +326,11 @@ namespace YargArchipelagoCommon
                 return new SongPool
                 {
                     instrument = ParseEnum<SupportedInstrument>(json["instrument"].ToObject<string>()),
-                    amount_in_pool = json["amount_in_pool"].ToObject<int>(),
-                    min_difficulty = json["min_difficulty"].ToObject<int>(),
-                    max_difficulty = json["max_difficulty"].ToObject<int>(),
-                    min_time = json["min_time"].ToObject<int>(),
-                    max_time = json["max_time"].ToObject<int>(),
+                    amount_in_pool = json.Value<int>("amount_in_pool"),
+                    min_difficulty = json.Value<int>("min_difficulty"),
+                    max_difficulty = json.Value<int>("max_difficulty"),
+                    min_time = json.Value<int?>("min_time") ?? 0,
+                    max_time = json.Value<int?>("max_time") ?? int.MaxValue,
                     completion_requirements = CompletionRequirements.FromJson(json["completion_requirements"] as JObject)
                 };
             }
