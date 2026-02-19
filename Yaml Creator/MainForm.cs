@@ -6,9 +6,11 @@ using System.Diagnostics;
 using System.Drawing;
 using System.IO;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Windows.Forms;
 using YargArchipelagoPlugin;
+using static System.Windows.Forms.VisualStyles.VisualStyleElement.ProgressBar;
 using static Yaml_Creator.SongData;
 using static Yaml_Creator.Utility;
 using static YargArchipelagoCommon.CommonData;
@@ -284,6 +286,76 @@ namespace Yaml_Creator
             };
 
             btnGenYaml.Click += SaveYaml;
+
+            btnSeedStats.Click += ShowSeedStats;
+        }
+
+        private void ShowSeedStats(object sender, EventArgs e)
+        {
+            StringBuilder PoolString = new StringBuilder();
+
+            HashSet<SongExportExtendedData> ValidInSeed = new HashSet<SongExportExtendedData>();
+
+            int TotalSongCount = 0;
+            foreach (var pool in YAML.YAYARG.song_pools)
+            {
+                TotalSongCount += (int)pool.Value.amount_in_pool;
+                PoolString.AppendLine($"Pool [{pool.Key}] Stats");
+                var Songs = ExportFile.Where(x => x.core.ValidForPool(pool.Value));
+                foreach (var song in Songs) ValidInSeed.Add(song);
+                if (!Songs.Any()) continue;
+                var (Count, AverageTime, TotalTime) = GetLengthStats(Songs);
+                var PlayTime = FormatSeconds(AverageTime * pool.Value.amount_in_pool);
+                PoolString.AppendLine($"Song amount in Pool: {pool.Value.amount_in_pool}");
+                PoolString.AppendLine($"Valid Song Candiates for Pool: {Count}");
+                PoolString.AppendLine($"Average time per song: {FormatSeconds(AverageTime)}");
+                PoolString.AppendLine($"Estimated play time for pool: {PlayTime}");
+                PoolString.AppendLine();
+            }
+
+            var (AllCount, AllAverageTime, AllTotalTime) = GetLengthStats(ValidInSeed);
+            var AllPlayTime = FormatSeconds(AllAverageTime * TotalSongCount);
+            StringBuilder OverallString = new StringBuilder();
+            OverallString.AppendLine($"Song amount in Seed: {TotalSongCount}");
+            OverallString.AppendLine($"Valid Song Candiates for Seed: {AllCount}");
+            OverallString.AppendLine($"Average time per song: {FormatSeconds(AllAverageTime)}");
+            OverallString.AppendLine($"Estimated play time for Seed: {AllPlayTime}");
+
+            MessageBox.Show($"{OverallString}\n{PoolString}", "Seed Stats:");
+        }
+        private string FormatSeconds(double seconds)
+        {
+            var ts = TimeSpan.FromSeconds(seconds);
+
+            int hours = ts.Hours + (ts.Days * 24);
+            int minutes = ts.Minutes;
+            int secs = ts.Seconds;
+
+            var parts = new List<string>();
+
+            if (hours > 0)
+                parts.Add($"{hours} hour{(hours == 1 ? "" : "s")}");
+
+            if (minutes > 0)
+                parts.Add($"{minutes} minute{(minutes == 1 ? "" : "s")}");
+
+            if (secs > 0 || parts.Count == 0)
+                parts.Add($"{secs} second{(secs == 1 ? "" : "s")}");
+
+            return string.Join(", ", parts);
+        }
+
+        private (int Count, double AverageTime, double TotalTime) GetLengthStats(IEnumerable<SongExportExtendedData> songs)
+        {
+            int Count = 0;
+            double TotalTime = 0;
+            foreach(var s in songs)
+            {
+                Count++;
+                TotalTime += s.core.Time;
+            }
+            double AverageTime = Count == 0 ? 0 : TotalTime / (double)Count;
+            return (Count, AverageTime, TotalTime);
         }
 
         private void ListValidSongs(object sender, EventArgs e)
