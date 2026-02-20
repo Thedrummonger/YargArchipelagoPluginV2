@@ -430,6 +430,7 @@ namespace Yaml_Creator
             else
             {
                 ValidateIncludeExcludeList();
+                //RemoveUnneededSongs();
                 using (SaveFileDialog saveDialog = new SaveFileDialog())
                 {
                     saveDialog.InitialDirectory = OutputFolder;
@@ -443,6 +444,24 @@ namespace Yaml_Creator
                 }
             }
         }
+
+        private void RemoveUnneededSongs()
+        {
+            var UsedSongs = ExportFile.Where(IsUsableBySeed).ToArray();
+            YAML.YAYARG.songList = SongDataConverter.ConvertSongDataToBase64(UsedSongs);
+
+            bool IsUsableBySeed(SongExportExtendedData song)
+            {
+                if (YAML.YAYARG.goal_song_plando == song.core.SongChecksum)
+                    return true;
+                if (YAML.YAYARG.inclusions_per_pool.Any(x => x.Value.Contains(song.core.SongChecksum)))
+                    return true;
+                if (YAML.YAYARG.song_exclusion_list.Contains(song.core.SongChecksum))
+                    return false;
+                return YAML.YAYARG.song_pools.Values.Any(p => song.core.ValidForPool(p));
+            }
+        }
+
         private void SongPoolListUpdated()
         {
             var AllPools = YAML.YAYARG.song_pools.Select(x => new SongPoolContainer(x.Key, x.Value)).ToArray();
