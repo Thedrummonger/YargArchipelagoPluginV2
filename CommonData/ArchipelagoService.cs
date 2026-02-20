@@ -350,6 +350,11 @@ namespace YargArchipelagoPlugin
         public DeathLinkType DeathLinkMode = DeathLinkType.disabled;
 
         /// <summary>
+        /// This value tracks when deathlink should trigger. It can be changed in game independently of the yaml.
+        /// </summary>
+        public DeathLinkTriggerType DeathLinkTrigger = DeathLinkTriggerType.both;
+
+        /// <summary>
         /// This value tracks the current energylink mode. It can be changed in game independently of the yaml.
         /// </summary>
         public EnergyLinkType EnergyLinkMode = EnergyLinkType.disabled;
