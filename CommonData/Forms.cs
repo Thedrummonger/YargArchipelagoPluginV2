@@ -265,6 +265,18 @@ namespace YargArchipelagoPlugin
                 GUILayout.EndVertical();
 
                 GUILayout.BeginVertical(GUILayout.Width(188));
+                GUILayout.Label($"DL Trigger:");
+                GUILayout.Label($" ");
+                string deathLinkTriggerText = isConnected ? connectionContainer.seedConfig.DeathLinkTrigger.GetDescription() : "N/A";
+                if (GUILayout.Button(deathLinkTriggerText, GUILayout.Height(20)))
+                    if (isConnected)
+                    {
+                        connectionContainer.seedConfig.DeathLinkTrigger = YargAPUtils.CycleEnum(connectionContainer.seedConfig.DeathLinkTrigger);
+                        connectionContainer.seedConfig.Save();
+                    }
+                GUILayout.EndVertical();
+
+                GUILayout.BeginVertical(GUILayout.Width(188));
                 string energyLinkYaml = isConnected ? connectionContainer.SlotData.EnergyLink.GetDescription() : "N/A";
                 GUILayout.Label($"Energy Link:");
                 GUILayout.Label($"YAML: {energyLinkYaml}");

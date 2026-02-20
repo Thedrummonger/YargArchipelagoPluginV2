@@ -39,7 +39,7 @@ namespace YargArchipelagoPlugin
             if (!parent.IsSessionConnected || parent.seedConfig is null)
                 return;
 
-            if (parent.seedConfig.DeathLinkMode > DeathLinkType.disabled)
+            if (parent.seedConfig.DeathLinkMode > DeathLinkType.disabled && parent.seedConfig.DeathLinkTrigger != DeathLinkTriggerType.failed_requirements_only)
                 parent.DeathLinkService?.SendDeathLink(new DeathLink(parent.GetSession().Players.ActivePlayer.Name, $"Failed Song {gameManager.Song.Name} by {gameManager.Song.Artist}"));
         }
 
@@ -85,7 +85,7 @@ namespace YargArchipelagoPlugin
 
             ExtraAPFunctionalityHelper.SendScoreAsEnergy(parent, gameManager.BandScore, HasLocationsTocheck);
 
-            if (DoDeathlink && (parent.seedConfig?.DeathLinkMode ?? DeathLinkType.disabled) > DeathLinkType.disabled)
+            if (DoDeathlink && (parent.seedConfig?.DeathLinkMode ?? DeathLinkType.disabled) > DeathLinkType.disabled && parent.seedConfig.DeathLinkTrigger != DeathLinkTriggerType.song_fail_only)
                 parent.DeathLinkService?.SendDeathLink(
                     new DeathLink(parent.GetSession().Players.ActivePlayer.Name,
                     $"Failed to meet the requirements playing {gameManager.Song.Name} by {gameManager.Song.Artist}"));
@@ -106,7 +106,7 @@ namespace YargArchipelagoPlugin
             if (MetStandard && MetExtra)
                 parent.GetSession().Locations.CompleteLocationChecks(parent.SlotData.GoalData.MainLocationID);
 
-            if ((deathLinkExtra || deathLinkStandard) && (parent.seedConfig?.DeathLinkMode ?? DeathLinkType.disabled) > DeathLinkType.disabled)
+            if ((deathLinkExtra || deathLinkStandard) && (parent.seedConfig?.DeathLinkMode ?? DeathLinkType.disabled) > DeathLinkType.disabled && parent.seedConfig.DeathLinkTrigger != DeathLinkTriggerType.song_fail_only)
                 parent.DeathLinkService?.SendDeathLink(
                     new DeathLink(parent.GetSession().Players.ActivePlayer.Name,
                     $"Failed to meet the requirements playing {manager.Song.Name} by {manager.Song.Artist}"));

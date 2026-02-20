@@ -208,6 +208,15 @@ namespace YargArchipelagoCommon
             [Description("Instant Fail")]
             instant_fail = 2,
         }
+        public enum DeathLinkTriggerType
+        {
+            [Description("Both")]
+            both = 0,
+            [Description("Song Fail Only")]
+            song_fail_only = 1,
+            [Description("Failed Reqs Only")]
+            failed_requirements_only = 2,
+        }
         public enum EnergyLinkType
         {
             [Description("Disabled")]
