@@ -287,9 +287,8 @@ namespace YargArchipelagoCommon
                     Album = song.Album,
                     Genre = song.Genre,
                     Charter = song.Charter,
-                    Time = song.SongLengthSeconds,
+                    Time = Math.Round(song.SongLengthSeconds),
                     YargSongEntry = song
-
                 };
                 foreach (var instrument in AllYargInstruments)
                 {
