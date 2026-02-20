@@ -294,7 +294,7 @@ namespace YargArchipelagoCommon
                 {
                     if (!song.HasInstrument(instrument) || !YargAPUtils.IsSupportedInstrument(instrument, out var supportedInstrument))
                         continue;
-                    Entry.Difficulties[supportedInstrument.Value] = song[instrument].Intensity;
+                    Entry.Difficulties[supportedInstrument.Value] = song[instrument].Intensity < 0 ? 0 : song[instrument].Intensity;
                 }
                 return Entry;
             }
