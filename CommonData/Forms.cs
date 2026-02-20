@@ -254,7 +254,7 @@ namespace YargArchipelagoPlugin
             {
                 GUILayout.BeginHorizontal();
 
-                GUILayout.BeginVertical(GUILayout.Width(188));
+                GUILayout.BeginVertical(GUILayout.Width(124));
                 string deathLinkYaml = isConnected ? connectionContainer.SlotData.DeathLink.GetDescription() : "N/A";
                 GUILayout.Label($"Death Link:");
                 GUILayout.Label($"YAML: {deathLinkYaml}");
@@ -267,9 +267,9 @@ namespace YargArchipelagoPlugin
                     }
                 GUILayout.EndVertical();
 
-                GUILayout.BeginVertical(GUILayout.Width(188));
+                GUILayout.BeginVertical(GUILayout.Width(124));
                 GUILayout.Label($"DL Trigger:");
-                GUILayout.Label($" ");
+                GUILayout.Label($"YAML: {DeathLinkTriggerType.both.GetDescription()}"); //No YAML setting yet so we'll just hard code for now
                 string deathLinkTriggerText = isConnected ? connectionContainer.seedConfig.DeathLinkTrigger.GetDescription() : "N/A";
                 if (GUILayout.Button(deathLinkTriggerText, GUILayout.Height(20)))
                     if (isConnected)
@@ -279,7 +279,7 @@ namespace YargArchipelagoPlugin
                     }
                 GUILayout.EndVertical();
 
-                GUILayout.BeginVertical(GUILayout.Width(188));
+                GUILayout.BeginVertical(GUILayout.Width(124));
                 string energyLinkYaml = isConnected ? connectionContainer.SlotData.EnergyLink.GetDescription() : "N/A";
                 GUILayout.Label($"Energy Link:");
                 GUILayout.Label($"YAML: {energyLinkYaml}");
