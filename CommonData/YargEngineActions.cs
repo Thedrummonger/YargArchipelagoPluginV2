@@ -104,7 +104,7 @@ namespace YargArchipelagoPlugin
             var AvailableSongs = container.GetAvailableSongs(out var AvailableMissingInst, out var AllKnownSongs);
 
             listView.Insert(insertIndex++, new CategoryViewType("ARCHIPELAGO".ToRainbowString() + " SONGS", AvailableSongs.Count(),
-                AvailableSongs.Select(x => x.GetYargSongEntry(container)).ToArray(), menu.RefreshAndReselect));
+                AvailableSongs.Select(x => x.GetYargSongEntry(container)).ToArray(), () => menu.APRefreshAndReselect(false)));
 
             if (container.SlotData.GoalData.IsSongUnlocked(container) && 
                 container.SlotData.GoalData.HadYargSongEntry(container, out var GoalSong) && 
@@ -132,7 +132,7 @@ namespace YargArchipelagoPlugin
             {
                 container.seedConfig.ShowAPMenu = !container.seedConfig.ShowAPMenu;
                 container.seedConfig.Save();
-                menu.RefreshAndReselectIndexOnly();
+                menu.APRefreshAndReselect(true);
             }));
 
             if (container.seedConfig.ShowAPMenu)
@@ -159,7 +159,7 @@ namespace YargArchipelagoPlugin
         {
             container.seedConfig.ShowMissingInstruments = !container.seedConfig.ShowMissingInstruments;
             container.seedConfig.Save();
-            menu.RefreshAndReselectIndexOnly();
+            menu.APRefreshAndReselect(true);
         }
 
         private static int AddMacGuffinEntry(StaticItems Type, string Name, int Needed, List<ViewType> L, APConnectionContainer C, int I)
@@ -513,14 +513,19 @@ namespace YargArchipelagoPlugin
             AccessTools.MethodDelegate<Action<MusicLibraryMenu, int>>(
                 AccessTools.PropertySetter(MenuType, "SelectedIndex")
             );
-        public static void RefreshAndReselectIndexOnly(this MusicLibraryMenu menu)
+        public static void APRefreshAndReselect(this MusicLibraryMenu menu, bool strictKeepPosition)
         {
 #if STABLE
             menu.RefreshAndReselect();
 #else
-            int selectedIndex = _getSelectedIndex(menu);
-            _refresh(menu);
-            _setSelectedIndex(menu, selectedIndex);
+            if (strictKeepPosition)
+            {
+                int selectedIndex = _getSelectedIndex(menu);
+                _refresh(menu);
+                _setSelectedIndex(menu, selectedIndex);
+            }
+            else
+                menu.RefreshAndReselect();
 #endif
         }
 
