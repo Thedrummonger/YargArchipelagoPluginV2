@@ -232,7 +232,7 @@ namespace YargArchipelagoCommon
 
         public class ConnectionDetails
         {
-            public string Address { get; set; } = "Archipleago.gg:38281";
+            public string Address { get; set; } = "archipelago.gg:38281";
             public string SlotName { get; set; } = string.Empty;
             public string Password { get; set; } = string.Empty;
 
