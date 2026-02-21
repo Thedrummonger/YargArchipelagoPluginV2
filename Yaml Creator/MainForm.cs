@@ -419,6 +419,7 @@ namespace Yaml_Creator
             }
         }
 
+        private const int MaxRecommendedSongs = 500;
         private void SaveYaml(object sender, EventArgs e)
         {
             if (String.IsNullOrWhiteSpace(YAML.name))
@@ -430,7 +431,26 @@ namespace Yaml_Creator
             else
             {
                 ValidateIncludeExcludeList();
-                //RemoveUnneededSongs();
+                var ExportedSongList = ExportFile;
+                if (ExportedSongList.Length > MaxRecommendedSongs)
+                    RemoveUnneededSongs(out ExportedSongList);
+                if (ExportedSongList.Length > MaxRecommendedSongs)
+                {
+                    var Confirmation = MessageBox.Show(
+                        $"Your seed contains {ExportedSongList.Length} valid songs, which exceeds the recommended maximum of {MaxRecommendedSongs}.\n\n" +
+                        $"Very large song lists can create excessively large YAML files and data packets. This may cause generation failures, " +
+                        $"connection issues, or instability; especially in large multiworld games or sessions hosted on the Archipelago website.\n\n" +
+                        $"It is strongly recommended that you reduce your song list to a smaller, AP-focused setlist.\n\n" +
+                        $"Click OK to proceed and accept these risks, or Cancel to go back.",
+                        "MAX SONG LIMIT EXCEEDED",
+                        MessageBoxButtons.OKCancel,
+                        MessageBoxIcon.Warning);
+                    if (Confirmation != DialogResult.OK)
+                        return;
+                }
+
+                YAML.YAYARG.songList = SongDataConverter.ConvertSongDataToBase64(ExportedSongList);
+
                 using (SaveFileDialog saveDialog = new SaveFileDialog())
                 {
                     saveDialog.InitialDirectory = OutputFolder;
@@ -445,10 +465,9 @@ namespace Yaml_Creator
             }
         }
 
-        private void RemoveUnneededSongs()
+        private void RemoveUnneededSongs(out SongExportExtendedData[] UsedSongs)
         {
-            var UsedSongs = ExportFile.Where(IsUsableBySeed).ToArray();
-            YAML.YAYARG.songList = SongDataConverter.ConvertSongDataToBase64(UsedSongs);
+            UsedSongs = ExportFile.Where(IsUsableBySeed).ToArray();
 
             bool IsUsableBySeed(SongExportExtendedData song)
             {

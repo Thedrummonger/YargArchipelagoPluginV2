@@ -56,7 +56,7 @@ namespace YargArchipelagoPlugin
             if (Menu == null || !Menu.gameObject.activeInHierarchy)
                 return false;
 
-            Menu.RefreshAndReselect();
+            Menu.APRefreshAndReselect(true);
             return true;
         }
 
@@ -104,7 +104,7 @@ namespace YargArchipelagoPlugin
             var AvailableSongs = container.GetAvailableSongs(out var AvailableMissingInst, out var AllKnownSongs);
 
             listView.Insert(insertIndex++, new CategoryViewType("ARCHIPELAGO".ToRainbowString() + " SONGS", AvailableSongs.Count(),
-                AvailableSongs.Select(x => x.GetYargSongEntry(container)).ToArray(), () => menu.APRefreshAndReselect(false)));
+                AvailableSongs.Select(x => x.GetYargSongEntry(container)).ToArray(), () => menu.APRefreshAndReselect(true)));
 
             if (container.SlotData.GoalData.IsSongUnlocked(container) && 
                 container.SlotData.GoalData.HadYargSongEntry(container, out var GoalSong) && 
