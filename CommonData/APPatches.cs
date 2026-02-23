@@ -121,29 +121,26 @@ namespace YargArchipelagoPlugin
                 YargEngineActions.ApplyDeathLink(ArchipelagoPlugin.APcontainer, null);
         }
         [HarmonyPatch(typeof(DevWatermark), "Start")]
-        [HarmonyPostfix]
-        public static void DevWatermark_Start_Postfix(DevWatermark __instance)
+        [HarmonyPrefix]
+        public static bool DevWatermark_Start_Prefix(DevWatermark __instance)
         {
-            var field = typeof(DevWatermark).GetField("_watermarkText", BindingFlags.NonPublic | BindingFlags.Instance);
+            var watermarkText = typeof(DevWatermark)
+                .GetField("_watermarkText", BindingFlags.NonPublic | BindingFlags.Instance)
+                .GetValue(__instance);
 
-            if (field == null) return;
-            var watermarkText = field.GetValue(__instance);
-            if (watermarkText == null) return;
             var textProperty = watermarkText.GetType().GetProperty("text");
-            if (textProperty == null) return;
+            string currentText = string.Empty;
 
-            string currentText = textProperty.GetValue(watermarkText) as string;
+#if NIGHTLY
+            currentText = $"<b>YARG {MonoSingleton<GlobalVariables>.Instance.CurrentVersion}</b> Nightly Build ({SystemInfo.graphicsDeviceType}). ";
+#endif
+            __instance.gameObject.SetActive(true);
+            textProperty.SetValue(
+                watermarkText,
+                $"{currentText}Yarg Archipelago plugin V{ArchipelagoPlugin.pluginVersion}."
+            );
 
-            if (!string.IsNullOrEmpty(currentText))
-            {
-                var keyCodes = new List<string>();
-                if (ArchipelagoPlugin.requireCtrl.Value) keyCodes.Add("ctrl");
-                if (ArchipelagoPlugin.requireAlt.Value) keyCodes.Add("alt");
-                if (ArchipelagoPlugin.requireShift.Value) keyCodes.Add("shift");
-                keyCodes.Add(ArchipelagoPlugin.toggleKey.Value.ToString());
-                string ToggleButton = string.Join(" + ", keyCodes);
-                textProperty.SetValue(watermarkText, $"{currentText}\nYarg Archipelago plugin V{ArchipelagoPlugin.pluginVersion}. Press {ToggleButton} to connect!");
-            }
+            return false;
         }
 
         [HarmonyPatch(typeof(ToastManager), "ShowToast")]
