@@ -76,6 +76,19 @@ namespace YargArchipelagoPlugin
             target = null;
             return false;
         }
+        private static readonly Instrument[] YARGHighTierDrums = new Instrument[] { Instrument.EliteDrums, Instrument.ProDrums };
+        private static readonly SupportedInstrument[] APDrums = new SupportedInstrument[] { SupportedInstrument.FourLaneDrums, SupportedInstrument.ProDrums };
+        public static bool PlayedValidInsturmentForCheck(Instrument YargInstrument, SupportedInstrument CheckInstrument, out CommonData.SupportedInstrument? PlayedInstrument)
+        {
+            if (YARGHighTierDrums.Contains(YargInstrument) && APDrums.Contains(CheckInstrument))
+            {
+                PlayedInstrument = CheckInstrument;
+                return true;
+            }
+
+            return IsSupportedInstrument(YargInstrument, out PlayedInstrument) && PlayedInstrument == CheckInstrument;
+
+        }
         public static CommonData.SupportedDifficulty GetSupportedDifficulty(Difficulty source)
         {
             if (source > Difficulty.Expert)
@@ -109,8 +122,7 @@ namespace YargArchipelagoPlugin
             var HadValidPlayer = false;
             foreach (var player in passInfo.Players)
             {
-                if (!IsSupportedInstrument(player.Player.Profile.CurrentInstrument, out SupportedInstrument? inst)) continue;
-                if (inst != pool.instrument) continue;
+                if (!PlayedValidInsturmentForCheck(player.Player.Profile.CurrentInstrument, pool.instrument, out _)) continue;
                 if (GetSupportedDifficulty(player.Player.Profile.CurrentDifficulty) < diff) continue;
                 HadValidPlayer = true;
                 if (req == CompletionReq.FullCombo && !player.IsFc) continue;

@@ -74,10 +74,6 @@ namespace YargArchipelagoCommon
             FiveFretBass,
             [Description("Keys")]
             Keys,
-            [Description("Six Fret Guitar")]
-            SixFretGuitar,
-            [Description("Six Fret Bass")]
-            SixFretBass,
             [Description("Four Lane Drums")]
             FourLaneDrums,
             [Description("Pro Drums")]
