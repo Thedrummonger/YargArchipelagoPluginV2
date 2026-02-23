@@ -73,6 +73,9 @@
     <Reference Include="UnityEngine.IMGUIModule">
       <HintPath>Libraries\UnityEngine.IMGUIModule.dll</HintPath>
     </Reference>
+    <Reference Include="UnityEngine.UI">
+      <HintPath>Libraries\UnityEngine.UI.dll</HintPath>
+    </Reference>
     <Reference Include="YARG.Core.Package">
       <HintPath>Libraries\YARG.Core.Package.dll</HintPath>
     </Reference>

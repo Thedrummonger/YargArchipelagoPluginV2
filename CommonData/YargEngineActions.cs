@@ -24,6 +24,7 @@ using YARG.Gameplay.Player;
 using YARG.Localization;
 using YARG.Menu.Dialogs;
 using YARG.Menu.MusicLibrary;
+using YARG.Menu.Navigation;
 using YARG.Menu.Persistent;
 using YARG.Song;
 using YargArchipelagoCommon;
@@ -527,6 +528,31 @@ namespace YargArchipelagoPlugin
             else
                 menu.RefreshAndReselect();
 #endif
+        }
+
+        public static readonly FieldInfo NavigatableButton_onClick = AccessTools.Field(typeof(NavigatableButton), "_onClick");
+        public static readonly FieldInfo NavigationGroup_navigatables = AccessTools.Field(typeof(NavigationGroup), "_navigatables");
+        public static NavigatableButton FindNav(GameObject root, string method)
+        {
+            foreach (var b in root.GetComponentsInChildren<NavigatableButton>(true))
+            {
+                var ev = (UnityEngine.UI.Button.ButtonClickedEvent)NavigatableButton_onClick.GetValue(b);
+                for (int i = 0, n = ev.GetPersistentEventCount(); i < n; i++)
+                    if (ev.GetPersistentMethodName(i) == method) return b;
+            }
+            return null;
+        }
+
+        public static void TrySetText(GameObject root, string text)
+        {
+            foreach (var c in root.GetComponentsInChildren<Component>(true))
+            {
+                var t = c.GetType();
+                var p = t.GetProperty("text", BindingFlags.Public | BindingFlags.Instance);
+                if (p != null && p.PropertyType == typeof(string) && p.CanWrite) { p.SetValue(c, text, null); return; }
+                var f = t.GetField("text", BindingFlags.Public | BindingFlags.Instance);
+                if (f != null && f.FieldType == typeof(string)) { f.SetValue(c, text); return; }
+            }
         }
 
     }

@@ -16,6 +16,7 @@ using YARG.Gameplay.Player;
 using YARG.Localization;
 using YARG.Menu.Main;
 using YARG.Menu.MusicLibrary;
+using YARG.Menu.Navigation;
 using YARG.Menu.Persistent;
 using YARG.Playback;
 using YARG.Scores;
@@ -39,17 +40,6 @@ namespace YargArchipelagoPlugin
         public static bool HasAvailableAPSongUpdate = false;
         public static bool IgnoreScoreForNextSong = false;
         private static bool FirstAwake = true;
-
-        [HarmonyPatch(typeof(MainMenu), "Start")]
-        [HarmonyPostfix]
-        public static void MainMenu_Start(MainMenu __instance)
-        {
-            if (FirstAwake)
-            {
-                ArchipelagoPlugin.ToggleArchipelagoDialog();
-                FirstAwake = false;
-            }
-        }
 
         [HarmonyPatch(typeof(GameManager), "Awake")]
         [HarmonyPostfix]
@@ -160,5 +150,42 @@ namespace YargArchipelagoPlugin
         [HarmonyPrefix]
         public static bool ToastManager_ShowToast(ToastManager __instance, object type, string body, Action onClick) =>
             !YargAPUtils.HandleAPToasts(__instance, type, body, onClick);
+
+        private static readonly bool IsUsingMenuButton = true;
+        private static bool _added;
+
+        [HarmonyPatch(typeof(MainMenu), "Start")]
+        [HarmonyPostfix]
+        public static void AddAPButton(MainMenu __instance)
+        {
+            if (FirstAwake && !IsUsingMenuButton)
+                ArchipelagoPlugin.ToggleArchipelagoDialog();
+            FirstAwake = false;
+
+            if (_added) return;
+            _added = true;
+
+            var t = YargEngineActions.FindNav(__instance.gameObject, "Profiles") ?? 
+                __instance.GetComponentInChildren<NavigatableButton>(true);
+            var p = t.transform.parent;
+            if (p.Find("AP_MenuEntry")) return;
+
+            var go = UnityEngine.Object.Instantiate(t.gameObject, p);
+            go.name = "AP_MenuEntry";
+            go.transform.SetSiblingIndex(t.transform.GetSiblingIndex() - 1);
+            go.SetActive(true);
+
+            var b = go.GetComponent<NavigatableButton>();
+            YargEngineActions.NavigatableButton_onClick.SetValue(b, new UnityEngine.UI.Button.ButtonClickedEvent());
+            ((UnityEngine.UI.Button.ButtonClickedEvent)YargEngineActions.NavigatableButton_onClick.GetValue(b))
+                .AddListener(ArchipelagoPlugin.ToggleArchipelagoDialog);
+
+            YargEngineActions.TrySetText(go, "Archipelago");
+
+            var g = t.NavigationGroup ?? t.GetComponentInParent<NavigationGroup>();
+            g.AddNavigatable(b);
+            ((List<NavigatableBehaviour>)YargEngineActions.NavigationGroup_navigatables.GetValue(g))
+                .Sort((x, y) => x.transform.GetSiblingIndex() - y.transform.GetSiblingIndex());
+        }
     }
 }
