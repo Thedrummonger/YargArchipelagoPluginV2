@@ -71,44 +71,6 @@ namespace Yaml_Creator
             };
         }
 
-        public static string TryGetCrossPlatformSongDataFile()
-        {
-            string fileName = Path.GetFileName(CommonData.SongExportFile);
-
-            // Try HOME environment variable. Might work in standard wine but I guess some containers like bottles does not expose this
-            string home = Environment.GetEnvironmentVariable("HOME");
-            if (!string.IsNullOrEmpty(home))
-            {
-                string linuxConfigPath = Path.Combine("Z:" + home.Replace("/", "\\"), ".config", "YARChipelago");
-                if (Directory.Exists(linuxConfigPath))
-                {
-                    string linuxFilePath = Path.Combine(linuxConfigPath, fileName);
-                    if (File.Exists(linuxFilePath))
-                        return linuxFilePath;
-                }
-            }
-
-            // Try Z:\home scan
-            string username = Environment.UserName;
-            if (!string.IsNullOrEmpty(username))
-            {
-                string linuxConfigPath = Path.Combine("Z:\\home", username, ".config", "YARChipelago");
-                if (Directory.Exists(linuxConfigPath))
-                {
-                    string linuxFilePath = Path.Combine(linuxConfigPath, fileName);
-                    if (File.Exists(linuxFilePath))
-                        return linuxFilePath;
-                }
-            }
-
-            // Standard Windows AppData path
-            if (File.Exists(CommonData.SongExportFile))
-                return CommonData.SongExportFile;
-
-            return null;
-        }
-
-
         public static T Clamp<T>(this T val, T min, T max) where T : IComparable<T>
         {
             if (val.CompareTo(min) < 0) return min;
