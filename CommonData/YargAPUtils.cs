@@ -77,17 +77,18 @@ namespace YargArchipelagoPlugin
             return false;
         }
         private static readonly Instrument[] YARGHighTierDrums = new Instrument[] { Instrument.EliteDrums, Instrument.ProDrums };
-        private static readonly SupportedInstrument[] APDrums = new SupportedInstrument[] { SupportedInstrument.FourLaneDrums, SupportedInstrument.ProDrums };
-        public static bool PlayedValidInsturmentForCheck(Instrument YargInstrument, SupportedInstrument CheckInstrument, out CommonData.SupportedInstrument? PlayedInstrument)
+        private static readonly SupportedInstrument[] APDrums = new SupportedInstrument[] { SupportedInstrument.FourLaneDrums, SupportedInstrument.ProDrums, SupportedInstrument.FiveLaneDrums };
+        public static bool PlayedValidInsturmentForCheck(Instrument YargInstrument, SupportedInstrument CheckInstrument)
         {
-            if (YARGHighTierDrums.Contains(YargInstrument) && APDrums.Contains(CheckInstrument))
-            {
-                PlayedInstrument = CheckInstrument;
-                return true;
-            }
+            HashSet<SupportedInstrument> PlayedInstruments = new HashSet<SupportedInstrument>();
+            if (YARGHighTierDrums.Contains(YargInstrument))
+                foreach(var i in APDrums)
+                    PlayedInstruments.Add(i);
+            // Yarg allows you to play five lane drum charts with four lane kits naturally, so for now we'll allow them to be completed with four lane kits.
+            if (YargInstrument == Instrument.FourLaneDrums)
+                PlayedInstruments.Add(SupportedInstrument.FiveLaneDrums);
 
-            return IsSupportedInstrument(YargInstrument, out PlayedInstrument) && PlayedInstrument == CheckInstrument;
-
+            return PlayedInstruments.Contains(CheckInstrument);
         }
         public static CommonData.SupportedDifficulty GetSupportedDifficulty(Difficulty source)
         {
@@ -122,7 +123,7 @@ namespace YargArchipelagoPlugin
             var HadValidPlayer = false;
             foreach (var player in passInfo.Players)
             {
-                if (!PlayedValidInsturmentForCheck(player.Player.Profile.CurrentInstrument, pool.instrument, out _)) continue;
+                if (!PlayedValidInsturmentForCheck(player.Player.Profile.CurrentInstrument, pool.instrument)) continue;
                 if (GetSupportedDifficulty(player.Player.Profile.CurrentDifficulty) < diff) continue;
                 HadValidPlayer = true;
                 if (req == CompletionReq.FullCombo && !player.IsFc) continue;

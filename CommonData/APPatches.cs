@@ -149,7 +149,6 @@ namespace YargArchipelagoPlugin
             !YargAPUtils.HandleAPToasts(__instance, type, body, onClick);
 
         private static readonly bool IsUsingMenuButton = true;
-        private static bool _added;
 
         [HarmonyPatch(typeof(MainMenu), "Start")]
         [HarmonyPostfix]
@@ -158,9 +157,6 @@ namespace YargArchipelagoPlugin
             if (FirstAwake && !IsUsingMenuButton)
                 ArchipelagoPlugin.ToggleArchipelagoDialog();
             FirstAwake = false;
-
-            if (_added) return;
-            _added = true;
 
             var t = YargEngineActions.FindNav(__instance.gameObject, "Profiles") ?? 
                 __instance.GetComponentInChildren<NavigatableButton>(true);
