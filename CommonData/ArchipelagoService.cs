@@ -117,7 +117,10 @@ namespace YargArchipelagoPlugin
                 // to an old version of the APWorld it could try to parse bad data.
                 SlotData = YargSlotData.Parse(Session.DataStorage.GetSlotData());
                 var ClientVersion = Version.Parse(ArchipelagoPlugin.pluginVersion.Substring(2));
-                if (SlotData.APWorldVersion != ClientVersion)
+                bool MatchingVersion = true;
+                if (SlotData.APWorldVersion.Major != ClientVersion.Major) MatchingVersion = false;
+                if (SlotData.APWorldVersion.Minor != ClientVersion.Minor) MatchingVersion = false;
+                if (!MatchingVersion)
                 {
                     ToastManager.ToastError($"{YargAPUtils.APToastFlag}Version Missmatch!\nWorld Version {SlotData.APWorldVersion}\nClient Version {ClientVersion}");
                     ValidData = false;
