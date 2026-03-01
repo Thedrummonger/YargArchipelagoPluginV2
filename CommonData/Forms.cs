@@ -403,10 +403,14 @@ namespace YargArchipelagoPlugin
             return result;
         }
 
-        public static SongAPData[] GetAvailableSongs(APConnectionContainer container)
+        public static BaseAPSong[] GetEditableSongs(APConnectionContainer container)
         {
-            container.GetAvailableSongs(out _, out var AllAvailable);
-            return AllAvailable.ToArray();
+            HashSet<BaseAPSong> Available = new HashSet<BaseAPSong>();
+            foreach (var s in container.SlotData.Songs.Where(x => x.VisableInSongMenu(container)))
+                Available.Add(s);
+            if (container.SlotData.GoalData.VisableInSongMenu(container))
+                Available.Add(container.SlotData.GoalData);
+            return Available.ToArray();
         }
 
         /// <summary>
@@ -496,14 +500,14 @@ namespace YargArchipelagoPlugin
     public class LowerDifficultyMenu : BlockerMenu<LowerDifficultyMenu>
     {
         private StaticYargAPItem _item;
-        private SongAPData SelectedSong;
+        private BaseAPSong SelectedSong;
 
         private string CurrentFilter = "";
         private int currentPage = 0;
         protected override string WindowTitle => "Lower Difficulty";
         public static void ShowMenu(APConnectionContainer container, StaticYargAPItem item)
         {
-            if (FormHelpers.GetAvailableSongs(container).Length == 0)
+            if (FormHelpers.GetEditableSongs(container).Length == 0)
             {
                 ToastManager.ToastError($"{YargAPUtils.APToastFlag}No Available Songs!");
                 return;
@@ -521,7 +525,7 @@ namespace YargArchipelagoPlugin
             GUILayout.BeginVertical();
 
             if (SelectedSong is null)
-                (currentPage, CurrentFilter) = FormHelpers.DisplayItemList(FormHelpers.GetAvailableSongs(container), 5, currentPage, "SELECT SONG TO LOWER DIFFICULTY", CurrentFilter, GetDisplay, OnSongSelect);
+                (currentPage, CurrentFilter) = FormHelpers.DisplayItemList(FormHelpers.GetEditableSongs(container), 5, currentPage, "SELECT SONG TO LOWER DIFFICULTY", CurrentFilter, GetDisplay, OnSongSelect);
             else
             {
                 GUILayout.Label("SELECT A DIFFICULTY VALUE TO LOWER", GUI.skin.label);
@@ -575,7 +579,7 @@ namespace YargArchipelagoPlugin
             CloseMenu();
         }
 
-        private void OnSongSelect(SongAPData data)
+        private void OnSongSelect(BaseAPSong data)
         {
             var CurrentReqs = data.GetCurrentCompletionRequirements(container);
             var CanLower1Diff = CurrentReqs.reward1_diff > SupportedDifficulty.Easy;
@@ -590,25 +594,25 @@ namespace YargArchipelagoPlugin
             SelectedSong = data;
         }
 
-        private string GetDisplay(SongAPData songAPData) => songAPData.GetDisplayName(container, true);
+        private string GetDisplay(BaseAPSong songAPData) => songAPData.GetDisplayName(container, true);
     }
 
     public class SwapSongMenu : BlockerMenu<SwapSongMenu>
     {
         private StaticYargAPItem _item;
-        private SongAPData selectedSongToReplace;
+        private BaseAPSong selectedSongToReplace;
 
         private string CurrentFilter = "";
         private int currentPage = 0;
 
         // I think this calculates every frame while the window is up so we should cache it.
-        Dictionary<SongAPData, SongEntry[]> ValidEntryCache = new Dictionary<SongAPData, SongEntry[]>();
+        Dictionary<BaseAPSong, SongEntry[]> ValidEntryCache = new Dictionary<BaseAPSong, SongEntry[]>();
 
         protected override string WindowTitle => "Swap Song";
 
         public static void ShowMenu(APConnectionContainer container, StaticYargAPItem item)
         {
-            if (FormHelpers.GetAvailableSongs(container).Length == 0)
+            if (FormHelpers.GetEditableSongs(container).Length == 0)
             {
                 ToastManager.ToastError($"{YargAPUtils.APToastFlag}No Available Songs!");
                 return;
@@ -619,7 +623,7 @@ namespace YargArchipelagoPlugin
             var menu = CreateMenu();
             menu.Initialize(container, new Rect(50, 50, 500, 400));
             menu._item = item;
-            menu.ValidEntryCache = new Dictionary<SongAPData, SongEntry[]>();
+            menu.ValidEntryCache = new Dictionary<BaseAPSong, SongEntry[]>();
             menu.Show = true;
         }
 
@@ -628,7 +632,7 @@ namespace YargArchipelagoPlugin
             GUILayout.BeginVertical();
 
             if (selectedSongToReplace is null)
-                (currentPage, CurrentFilter) = FormHelpers.DisplayItemList(FormHelpers.GetAvailableSongs(container), 5, currentPage, "SELECT SONG TO REPLACE", CurrentFilter, GetDisplay, OnSongToReplaceSelected);
+                (currentPage, CurrentFilter) = FormHelpers.DisplayItemList(FormHelpers.GetEditableSongs(container), 5, currentPage, "SELECT SONG TO REPLACE", CurrentFilter, GetDisplay, OnSongToReplaceSelected);
             else
                 (currentPage, CurrentFilter) = FormHelpers.DisplayItemList(GetValidReplacements(selectedSongToReplace), 5, currentPage, "SELECT REPLACEMENT", CurrentFilter, GetDisplay, OnReplacementSelected);
 
@@ -643,7 +647,7 @@ namespace YargArchipelagoPlugin
             GUI.DragWindow(new Rect(0, 0, 10000, 20));
         }
 
-        private void OnSongToReplaceSelected(SongAPData song)
+        private void OnSongToReplaceSelected(BaseAPSong song)
         {
             var validReplacements = GetValidReplacements(song);
 
@@ -671,7 +675,7 @@ namespace YargArchipelagoPlugin
             CloseMenu();
         }
 
-        private SongEntry[] GetValidReplacements(SongAPData song)
+        private SongEntry[] GetValidReplacements(BaseAPSong song)
         {
             if (ValidEntryCache.ContainsKey(song))
                 return ValidEntryCache[song];
@@ -703,9 +707,9 @@ namespace YargArchipelagoPlugin
 
         private string GetDisplay(SongEntry songEntry) => $"{songEntry.Name} by {songEntry.Artist}";
 
-        private string GetDisplay(SongAPData songAPData) => songAPData.GetDisplayName(container, true);
+        private string GetDisplay(BaseAPSong songAPData) => songAPData.GetDisplayName(container, true);
 
-        private void PerformSwap(SongAPData toReplace, SongEntry replacement)
+        private void PerformSwap(BaseAPSong toReplace, SongEntry replacement)
         {
             string ToReplace = toReplace.GetDisplayName(container, false);
             string Replacement = $"{replacement.Name} by {replacement.Artist}";

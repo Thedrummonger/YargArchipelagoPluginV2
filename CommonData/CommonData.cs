@@ -382,6 +382,9 @@ namespace YargArchipelagoCommon
                 var HasInstrument = connectionContainer.ReceivedInstruments.ContainsKey(GetPool(connectionContainer.SlotData).instrument);
                 return HasUnlockItem && HasInstrument;
             }
+
+            public abstract bool VisableInSongMenu(APConnectionContainer connectionContainer);
+
             public abstract bool HasAvailableLocations(APConnectionContainer connectionContainer);
         }
 
@@ -411,6 +414,9 @@ namespace YargArchipelagoCommon
                     UnlockItemID = tuple[3].ToObject<long>()
                 };
             }
+
+            public override bool VisableInSongMenu(APConnectionContainer connectionContainer) =>
+                connectionContainer.ReceivedSongUnlockItems.ContainsKey(UnlockItemID) && HasAvailableLocations(connectionContainer);
         }
 
         public class GoalData : BaseAPSong
@@ -441,6 +447,8 @@ namespace YargArchipelagoCommon
 
                 return HasEnoughFame && HasEnoughCompletions;
             }
+
+            public override bool VisableInSongMenu(APConnectionContainer connectionContainer) => IsSongUnlocked(connectionContainer);
         }
 
         public class YargSlotData

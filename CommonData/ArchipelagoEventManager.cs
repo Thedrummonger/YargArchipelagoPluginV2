@@ -100,8 +100,8 @@ namespace YargArchipelagoPlugin
                 return;
 
             var pool = parent.SlotData.GoalData.GetPool(parent.SlotData);
-            var MetStandard = pool.MetStandard(manager, out var deathLinkStandard);
-            var MetExtra = pool.MetExtra(manager, out var deathLinkExtra);
+            var MetStandard = pool.MetStandard(manager, out var deathLinkStandard, parent.SlotData.GoalData.GetCurrentCompletionRequirements(parent));
+            var MetExtra = pool.MetExtra(manager, out var deathLinkExtra, parent.SlotData.GoalData.GetCurrentCompletionRequirements(parent));
 
             if (MetStandard && MetExtra)
                 parent.GetSession().Locations.CompleteLocationChecks(parent.SlotData.GoalData.MainLocationID);
