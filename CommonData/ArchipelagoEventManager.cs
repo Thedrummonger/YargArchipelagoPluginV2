@@ -36,11 +36,10 @@ namespace YargArchipelagoPlugin
 
         public void FailedSong(GameManager gameManager)
         {
-            if (!parent.IsSessionConnected || parent.seedConfig is null)
+            if (!parent.IsSessionConnected || parent.seedConfig is null || !parent.seedConfig.SendDlOnSongFail())
                 return;
 
-            if (parent.seedConfig.DeathLinkMode > DeathLinkType.disabled && parent.seedConfig.DeathLinkTrigger != DeathLinkTriggerType.failed_requirements_only)
-                parent.DeathLinkService?.SendDeathLink(new DeathLink(parent.GetSession().Players.ActivePlayer.Name, $"Failed Song {gameManager.Song.Name} by {gameManager.Song.Artist}"));
+            parent.DeathLinkService?.SendDeathLink(new DeathLink(parent.GetSession().Players.ActivePlayer.Name, $"Failed Song {gameManager.Song.Name} by {gameManager.Song.Artist}"));
         }
 
         public void TryCheckSongLocations(GameManager gameManager)
@@ -58,16 +57,15 @@ namespace YargArchipelagoPlugin
                     continue;
                 if (!i.HasAvailableLocations(parent))
                     continue;
-                var pool = i.GetPool(parent.SlotData);
 
-                var MetStandard = pool.MetStandard(gameManager, out var deathLinkStandard, i.GetCurrentCompletionRequirements(parent)) || ShouldCheat;
+                var MetStandard = gameManager.Players.MetStandardCheckRequirement(i, parent, out var deathLinkStandard) || ShouldCheat;
                 if (!MetStandard && deathLinkStandard) DoDeathlink = true;
                 if (MetStandard) LocationsToComplete.Add(i.MainLocationID);
 
                 var MetExtra = true;
                 if (i.ExtraLocationID >= 0)
                 {
-                    MetExtra = pool.MetExtra(gameManager, out var deathLinkExtra, i.GetCurrentCompletionRequirements(parent)) || ShouldCheat;
+                    MetExtra = gameManager.Players.MetExtraCheckRequirement(i, parent, out var deathLinkExtra) || ShouldCheat;
                     if (!MetExtra && deathLinkExtra) DoDeathlink = true;
                     if (MetExtra) LocationsToComplete.Add(i.ExtraLocationID);
                 }
@@ -85,28 +83,22 @@ namespace YargArchipelagoPlugin
 
             ExtraAPFunctionalityHelper.SendScoreAsEnergy(parent, gameManager.BandScore, HasLocationsTocheck);
 
-            if (DoDeathlink && (parent.seedConfig?.DeathLinkMode ?? DeathLinkType.disabled) > DeathLinkType.disabled && parent.seedConfig.DeathLinkTrigger != DeathLinkTriggerType.song_fail_only)
+            if (DoDeathlink && (parent.seedConfig?.SendDlOnRequirements() ?? false))
                 parent.DeathLinkService?.SendDeathLink(
                     new DeathLink(parent.GetSession().Players.ActivePlayer.Name,
                     $"Failed to meet the requirements playing {gameManager.Song.Name} by {gameManager.Song.Artist}"));
         }
         internal void TryCheckSongGoalSong(GameManager manager)
         {
-            if (!parent.IsSessionConnected)
-                return;
-            if (!parent.SlotData.GoalData.WasActiveSongInGame(parent, manager))
-                return;
-            if (!parent.SlotData.GoalData.IsSongUnlocked(parent))
+            if (!parent.IsSessionConnected || !parent.SlotData.GoalData.WasActiveSongInGame(parent, manager) || !parent.SlotData.GoalData.IsSongUnlocked(parent))
                 return;
 
-            var pool = parent.SlotData.GoalData.GetPool(parent.SlotData);
-            var MetStandard = pool.MetStandard(manager, out var deathLinkStandard, parent.SlotData.GoalData.GetCurrentCompletionRequirements(parent));
-            var MetExtra = pool.MetExtra(manager, out var deathLinkExtra, parent.SlotData.GoalData.GetCurrentCompletionRequirements(parent));
+            var MetRequirements = manager.Players.MetAllCheckRequirments(parent.SlotData.GoalData, parent, out bool DL);
 
-            if (MetStandard && MetExtra)
+            if (MetRequirements)
                 parent.GetSession().Locations.CompleteLocationChecks(parent.SlotData.GoalData.MainLocationID);
 
-            if ((deathLinkExtra || deathLinkStandard) && (parent.seedConfig?.DeathLinkMode ?? DeathLinkType.disabled) > DeathLinkType.disabled && parent.seedConfig.DeathLinkTrigger != DeathLinkTriggerType.song_fail_only)
+            if (DL && (parent.seedConfig?.SendDlOnRequirements()??false))
                 parent.DeathLinkService?.SendDeathLink(
                     new DeathLink(parent.GetSession().Players.ActivePlayer.Name,
                     $"Failed to meet the requirements playing {manager.Song.Name} by {manager.Song.Artist}"));
@@ -121,9 +113,9 @@ namespace YargArchipelagoPlugin
 
             var Flag = GetMessageToastFlag(message, out var wasProgressive);
             if (Relay && wasProgressive)
-                ToastManager.ToastSuccess(Flag + message.ToYargColoredString());
+                ToastManager.ToastSuccess(message.ToYargColoredString().FlagAPToast(Flag));
             else if (Relay) 
-                ToastManager.ToastMessage(Flag + message.ToYargColoredString());
+                ToastManager.ToastMessage(message.ToYargColoredString().FlagAPToast(Flag));
 
             bool ShouldRelayItemSend(ItemSendLogMessage IL)
             {
@@ -133,17 +125,17 @@ namespace YargArchipelagoPlugin
             }
         }
 
-        private string GetMessageToastFlag(LogMessage message, out bool WasProgressive)
+        private YargAPUtils.APToastFlags GetMessageToastFlag(LogMessage message, out bool WasProgressive)
         {
             WasProgressive = false;
             if (message is ItemSendLogMessage itemSendLog)
             {
                 WasProgressive = itemSendLog.Item.Flags.HasFlag(Archipelago.MultiClient.Net.Enums.ItemFlags.Advancement);
                 if (WasProgressive || itemSendLog.Item.Flags.HasFlag(Archipelago.MultiClient.Net.Enums.ItemFlags.NeverExclude))
-                    return YargAPUtils.APToastFlags.GoodItem.GetDescription();
-                return YargAPUtils.APToastFlags.JunkItem.GetDescription();
+                    return YargAPUtils.APToastFlags.GoodItem;
+                return YargAPUtils.APToastFlags.JunkItem;
             }
-            return YargAPUtils.APToastFlag;
+            return YargAPUtils.APToastFlags.Message;
         }
 
         public void UpdateChatHistory(LogMessage message) => ArchipelagoConnectionDialog.ChatHistory.Add(message);
@@ -154,7 +146,7 @@ namespace YargArchipelagoPlugin
                 return;
             if (!parent.GetSession().Socket.Connected)
             {
-                ToastManager.ToastWarning($"{YargAPUtils.APToastFlag}Lost Connection to Archipelago");
+                ToastManager.ToastWarning($"Lost Connection to Archipelago".FlagAPToast());
                 parent.Disconnect();
             }
         }
@@ -211,16 +203,16 @@ namespace YargArchipelagoPlugin
             switch (Item.Type)
             {
                 case StaticItems.StarPower:
-                    ToastManager.ToastInformation($"{YargAPUtils.APToastFlag}{FromPlayer.Name} sent you Star Power!");
+                    ToastManager.ToastInformation($"{FromPlayer.Name} sent you Star Power!".FlagAPToast());
                     YargEngineActions.ApplyStarPowerItem(parent);
                     break;
                 case StaticItems.TrapRestart:
                     parent.ResetBuffer();
-                    ToastManager.ToastWarning($"{YargAPUtils.APToastFlag}{FromPlayer.Name} sent you a Restart Trap!");
+                    ToastManager.ToastWarning($"{FromPlayer.Name} sent you a Restart Trap!".FlagAPToast());
                     YargEngineActions.ForceRestartSong(parent);
                     break;
                 case StaticItems.TrapRockMeter:
-                    ToastManager.ToastWarning($"{YargAPUtils.APToastFlag}{FromPlayer.Name} sent you a Rock Meter Trap!");
+                    ToastManager.ToastWarning($"{FromPlayer.Name} sent you a Rock Meter Trap!".FlagAPToast());
                     YargEngineActions.ApplyRockMetertrapItem(parent);
                     break;
             }
@@ -248,7 +240,7 @@ namespace YargArchipelagoPlugin
                 YargEngineActions.PreventSongFail(engineManager);
                 var ToUse = Pending.First();
                 var Player = ToUse.GetPlayerInfo(parent);
-                ToastManager.ToastSuccess($"{YargAPUtils.APToastFlag}{Player.Name} cheered you on!");
+                ToastManager.ToastSuccess($"{Player.Name} cheered you on!".FlagAPToast());
                 parent.seedConfig.ApItemsUsed.Add(ToUse);
                 parent.seedConfig.Save();
                 IsPreventingSongFail = false;

@@ -210,16 +210,16 @@ namespace YargArchipelagoPlugin
         private static void ShowMacGuffinStatus(int Current, int Need, string Title)
         {
             if (Current < Need)
-                ToastManager.ToastError($"{YargAPUtils.APToastFlag}{Title} goal not met!\nHas: {Current}\nNeed:{Need}");
+                ToastManager.ToastError($"{Title} goal not met!\nHas: {Current}\nNeed:{Need}".FlagAPToast());
             else
-                ToastManager.ToastSuccess($"{YargAPUtils.APToastFlag}{Title} goal met!\nHas: {Current}\nNeed:{Need}");
+                ToastManager.ToastSuccess($"{Title} goal met!\nHas: {Current}\nNeed:{Need}".FlagAPToast());
         }
 
         private static void ShowGoalRecieveMessage(APConnectionContainer container, bool Recieved, BaseYargAPItem recieveInfo)
         {
             if (!Recieved)
             {
-                ToastManager.ToastError($"{YargAPUtils.APToastFlag}Your goal song unlock item has not been found!");
+                ToastManager.ToastError($"Your goal song unlock item has not been found!".FlagAPToast());
                 return;
             }
             var Team = container.GetSession().Players.ActivePlayer.Team;
@@ -305,7 +305,7 @@ namespace YargArchipelagoPlugin
                     default:
                         return;
                 }
-                ToastManager.ToastInformation($"{YargAPUtils.APToastFlag}DeathLink Received!\n\n{deathLink?.Source??"Debug"} {deathLink?.Cause ?? "Command"}");
+                ToastManager.ToastInformation($"DeathLink Received!\n\n{deathLink?.Source ?? "Debug"} {deathLink?.Cause ?? "Command"}".FlagAPToast());
             }
             catch (Exception e)
             {

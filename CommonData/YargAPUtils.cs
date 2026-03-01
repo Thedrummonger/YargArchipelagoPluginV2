@@ -14,6 +14,7 @@ using YARG.Core.Game;
 using YARG.Core.Song;
 using YARG.Core.Utility;
 using YARG.Gameplay;
+using YARG.Gameplay.Player;
 using YARG.Menu.Persistent;
 using YARG.Scores;
 using YargArchipelagoCommon;
@@ -116,17 +117,27 @@ namespace YargArchipelagoPlugin
              .OfType<DescriptionAttribute>()
              .FirstOrDefault()?.Description ?? value.ToString();
 
-        public static bool MetStandard(this SongPool pool, GameManager passInfo, out bool DeathLink, CompletionRequirements CustomReqs = null) =>
-            pool.MetReq(passInfo, out DeathLink, (CustomReqs ?? pool.completion_requirements).reward1_req, (CustomReqs ?? pool.completion_requirements).reward1_diff);
-        public static bool MetExtra(this SongPool pool, GameManager passInfo, out bool DeathLink, CompletionRequirements CustomReqs = null) =>
-            pool.MetReq(passInfo, out DeathLink, (CustomReqs ?? pool.completion_requirements).reward2_req, (CustomReqs ?? pool.completion_requirements).reward2_diff);
-
-        private static bool MetReq(this SongPool pool, GameManager passInfo, out bool DeathLink, CompletionReq req, SupportedDifficulty diff)
+        public static bool MetStandardCheckRequirement(this IEnumerable<BasePlayer> Players, BaseAPSong song, APConnectionContainer container, out bool DeathLink) =>
+            MetSongCheckRequirements(Players, song, container, false, out DeathLink);
+        public static bool MetExtraCheckRequirement(this IEnumerable<BasePlayer> Players, BaseAPSong song, APConnectionContainer container, out bool DeathLink) =>
+            MetSongCheckRequirements(Players, song, container, true, out DeathLink);
+        public static bool MetAllCheckRequirments(this IEnumerable<BasePlayer> Players, BaseAPSong song, APConnectionContainer container, out bool DeathLink)
         {
+            var MetStandard = MetStandardCheckRequirement(Players, song, container, out bool DLS);
+            var MetExtra = MetExtraCheckRequirement(Players, song, container, out bool DLE);
+            DeathLink = DLS || DLE;
+            return MetStandard && MetExtra;
+        }
+        public static bool MetSongCheckRequirements(this IEnumerable<BasePlayer> Players, BaseAPSong song, APConnectionContainer container, bool ExtraCheck, out bool DeathLink)
+        {
+            var CurrentRequirements = song.GetCurrentCompletionRequirements(container);
+            var diff = ExtraCheck ? CurrentRequirements.reward2_diff : CurrentRequirements.reward1_diff;
+            var req = ExtraCheck ? CurrentRequirements.reward2_req : CurrentRequirements.reward1_req;
+            var pool = song.GetPool(container.SlotData);
             // Only send a deathlink if we had a player playing the correct instrument
             // at the correct difficulty and they failed to meet the score requirement.
             var HadValidPlayer = false;
-            foreach (var player in passInfo.Players)
+            foreach (var player in Players)
             {
                 if (!PlayedValidInsturmentForCheck(player.Player.Profile.CurrentInstrument, pool.instrument)) continue;
                 if (GetSupportedDifficulty(player.Player.Profile.CurrentDifficulty) < diff) continue;
@@ -172,9 +183,10 @@ namespace YargArchipelagoPlugin
             [Description("[APU]"), APAssets.APIcon(APAssets.APIcon.Blue)]
             JunkItem,
         }
-        public static readonly string APToastFlag = APToastFlags.Message.GetDescription();
         private static readonly Dictionary<string, APToastFlags> ToastPrefixes = Enum.GetValues(typeof(APToastFlags))
             .Cast<APToastFlags>().ToDictionary(x => x.GetDescription(),x => x,StringComparer.OrdinalIgnoreCase);
+
+        public static string FlagAPToast(this string key, APToastFlags value = APToastFlags.Message) => string.Concat(value.GetDescription(), key);
 
         public static void TestFlags()
         {

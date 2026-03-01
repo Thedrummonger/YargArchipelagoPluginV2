@@ -104,8 +104,8 @@ namespace YargArchipelagoPlugin
                 Archipelago.MultiClient.Net.Enums.ItemsHandlingFlags.AllItems, new Version(0, 6, 1), password: connectionDetails.Password);
             if (Result is LoginFailure failure)
             {
-                ToastManager.ToastError($"{YargAPUtils.APToastFlag}Failed to connect!\n{connectionDetails.SlotName}@{connectionDetails.Address}:\n" +
-                    $"{string.Join("\n", failure.Errors)}");
+                ToastManager.ToastError($"Failed to connect!\n{connectionDetails.SlotName}@{connectionDetails.Address}:\n" +
+                    $"{string.Join("\n", failure.Errors)}".FlagAPToast());
                 IsConnecting = false;
                 return;
             }
@@ -122,16 +122,16 @@ namespace YargArchipelagoPlugin
                 if (SlotData.APWorldVersion.Minor != ClientVersion.Minor) MatchingVersion = false;
                 if (!MatchingVersion)
                 {
-                    ToastManager.ToastError($"{YargAPUtils.APToastFlag}Version Missmatch!\nWorld Version {SlotData.APWorldVersion}\nClient Version {ClientVersion}");
+                    ToastManager.ToastError($"Version Missmatch!\nWorld Version {SlotData.APWorldVersion}\nClient Version {ClientVersion}".FlagAPToast());
                     ValidData = false;
                 }
             }
             catch (Exception ex)
             {
-                ToastManager.ToastError($"{YargAPUtils.APToastFlag}Failed to parse slot data!\n" +
+                ToastManager.ToastError($"Failed to parse slot data!\n" +
                     $"{connectionDetails.SlotName}@{connectionDetails.Address}:\n" +
                     $"{ex.Message}\n" +
-                    $"{ex.GetType()}");
+                    $"{ex.GetType()}".FlagAPToast());
                 ValidData = false;
             }
 
@@ -154,7 +154,7 @@ namespace YargArchipelagoPlugin
             UpdateDeathLinkTags();
             BuildSongLookup();
 
-            ToastManager.ToastSuccess($"{YargAPUtils.APToastFlag}Connected Archipelago!\n{connectionDetails.SlotName}@{connectionDetails.Address}");
+            ToastManager.ToastSuccess($"Connected Archipelago!\n{connectionDetails.SlotName}@{connectionDetails.Address}".FlagAPToast());
             File.WriteAllText(Path.Combine(CommonData.DataFolder, "Debug.json"), JsonConvert.SerializeObject(SlotData, Formatting.Indented));
             connectionDetails.Save();
             IsConnecting = false;
@@ -402,6 +402,19 @@ namespace YargArchipelagoPlugin
         private static string getSaveFileName(APConnectionContainer container) =>
             $"{container.GetSession()?.RoomState?.Seed}_{container.GetSession()?.Players?.ActivePlayer?.Slot}_" +
             $"{container.GetSession()?.Players?.ActivePlayer?.Slot}_{container.GetSession()?.Players?.ActivePlayer?.GetHashCode()}";
+
+        public bool SendDlOnSongFail()
+        {
+            if (DeathLinkMode <= DeathLinkType.disabled) return false;
+            if (DeathLinkTrigger == DeathLinkTriggerType.failed_requirements_only) return false;
+            return true;
+        }
+        public bool SendDlOnRequirements()
+        {
+            if (DeathLinkMode <= DeathLinkType.disabled) return false;
+            if (DeathLinkTrigger == DeathLinkTriggerType.song_fail_only) return false;
+            return true;
+        }
 
     }
 }
