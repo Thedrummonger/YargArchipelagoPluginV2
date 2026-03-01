@@ -120,6 +120,9 @@
   <metadata name="YamlTT.TrayLocation" type="System.Drawing.Point, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
     <value>132, 17</value>
   </metadata>
+  <metadata name="YamlTT.TrayLocation" type="System.Drawing.Point, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
+    <value>132, 17</value>
+  </metadata>
   <data name="nudSongPack.ToolTip" xml:space="preserve">
     <value>    Determines how many songs are unlocked by each Song Pack item.
 
@@ -192,6 +195,9 @@ random one of those pools using Archipelago’s built-in option randomization; t
 pool will be set to 1 automatically.
 </value>
   </data>
+  <metadata name="YamlTT.TrayLocation" type="System.Drawing.Point, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
+    <value>132, 17</value>
+  </metadata>
   <data name="nudPoolRandomVariance.ToolTip" xml:space="preserve">
     <value>Adds randomness to the pool size. When set greater than zero, amount_in_pool 
 is replaced with a randomly selected value between 
