@@ -81,12 +81,17 @@ namespace YargArchipelagoPlugin
         public static bool PlayedValidInsturmentForCheck(Instrument YargInstrument, SupportedInstrument CheckInstrument)
         {
             HashSet<SupportedInstrument> PlayedInstruments = new HashSet<SupportedInstrument>();
+
             if (YARGHighTierDrums.Contains(YargInstrument))
                 foreach(var i in APDrums)
                     PlayedInstruments.Add(i);
+
             // Yarg allows you to play five lane drum charts with four lane kits naturally, so for now we'll allow them to be completed with four lane kits.
             if (YargInstrument == Instrument.FourLaneDrums)
                 PlayedInstruments.Add(SupportedInstrument.FiveLaneDrums);
+
+            if (IsSupportedInstrument(YargInstrument, out var Played))
+                PlayedInstruments.Add(Played.Value);   
 
             return PlayedInstruments.Contains(CheckInstrument);
         }
