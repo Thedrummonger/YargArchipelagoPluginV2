@@ -31,14 +31,5 @@ namespace Yaml_Creator
                 };
             }
         }
-        public class TaggedSongExportExtendedData : SongExportExtendedData
-        {
-            public TaggedSongExportExtendedData(SongExportExtendedData data, Func<SongExportExtendedData, string> Display) : base(data.core)
-            {
-                display = Display(data);
-            }
-            private readonly string display;
-            public override string ToString() => display;
-        }
     }
 }

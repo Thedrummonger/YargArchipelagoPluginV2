@@ -154,11 +154,12 @@ namespace Yaml_Creator
             PrintingSongs = true;
             var ActiveSongs = FormHelpers.FilterItems(ExportFile, txtActiveSongFilter.Text, x => AddTags(x));
             ActiveSongs = ActiveSongs.OrderBy(x => x.ToString()).ToArray();
-            lbActiveSongs.DataSource = ActiveSongs.Select(x => new TaggedSongExportExtendedData(x, AddTags)).ToArray();
-
-            Debug.WriteLine(JsonConvert.SerializeObject(YAML.YAYARG.song_exclusion_list, Formatting.Indented));
-            for (int i = 0; i < ActiveSongs.Length; i++)
-                lbActiveSongs.SetItemChecked(i, !IsExcluded(ActiveSongs[i]));
+            lbActiveSongs.Rows.Clear();
+            foreach (var d in ActiveSongs)
+            {
+                int r = lbActiveSongs.Rows.Add(!IsExcluded(d), AddTags(d));
+                lbActiveSongs.Rows[r].Tag = d;
+            }
 
             string AddTags(SongExportExtendedData extendedData)
             {
@@ -268,9 +269,30 @@ namespace Yaml_Creator
                 LoadSongPool();
             };
             txtNewPoolIsntrument.DataSource = Utility.GetEnumDataSource<SupportedInstrument>();
+            lbActiveSongs.CurrentCellDirtyStateChanged += (s, e) => {
+                if (lbActiveSongs.IsCurrentCellDirty) lbActiveSongs.CommitEdit(DataGridViewDataErrorContexts.Commit);
+            };
 
-            lbActiveSongs.ItemCheck += (s, e) => ToggleGlobalExludeList(((TaggedSongExportExtendedData)lbActiveSongs.Items[e.Index]).core, e.NewValue);
-            lbActiveSongs.SelectedIndexChanged += (s, e) => UpdateIncludeExcludeListOnSongPage();
+            lbActiveSongs.CellValueChanged += (s, e) => {
+                if (e.RowIndex < 0 || e.ColumnIndex != 0) return;
+                var d = (SongExportExtendedData)lbActiveSongs.Rows[e.RowIndex].Tag;
+                ToggleGlobalExludeList(d.core, (bool)lbActiveSongs.Rows[e.RowIndex].Cells[0].Value ? CheckState.Checked : CheckState.Unchecked);
+            };
+            lbActiveSongs.SelectionChanged += (s, e) => UpdateIncludeExcludeListOnSongPage();
+            lbActiveSongs.KeyDown += (s, e) => {
+                if ((e.KeyCode != Keys.Space && e.KeyCode != Keys.Enter) || lbActiveSongs.SelectedRows.Count == 0) return;
+                bool anyUnchecked = false;
+                foreach (DataGridViewRow r in lbActiveSongs.SelectedRows)
+                    if (!(bool)r.Cells[0].Value) { anyUnchecked = true; break; }
+                foreach (DataGridViewRow r in lbActiveSongs.SelectedRows)
+                    r.Cells[0].Value = anyUnchecked;
+                e.Handled = true;
+            };
+            lbActiveSongs.CellDoubleClick += (s, e) => {
+                if (e.RowIndex < 0 || e.ColumnIndex != 1) return;
+                var cell = lbActiveSongs.Rows[e.RowIndex].Cells[0];
+                cell.Value = !(bool)cell.Value;
+            };
 
             btnEditExcludePools.Click += (s, e) => EditExculdeIncludeDictForSong(YAML.YAYARG.exclusions_per_pool, "Exclude");
             btnEditIncludePools.Click += (s, e) => EditExculdeIncludeDictForSong(YAML.YAYARG.inclusions_per_pool, "Include");
@@ -380,24 +402,17 @@ namespace Yaml_Creator
 
         private void LbActiveSongs_MouseDown(object sender, MouseEventArgs e)
         {
-            if (e.Button != MouseButtons.Right)
+            if (e.Button != MouseButtons.Right) 
                 return;
-
-            int index = lbActiveSongs.IndexFromPoint(e.Location);
-            if (index == ListBox.NoMatches)
+            var h = lbActiveSongs.HitTest(e.X, e.Y);
+            if (h.RowIndex < 0) 
                 return;
-
-            lbActiveSongs.SelectedIndex = index;
-
-            var item = (TaggedSongExportExtendedData)lbActiveSongs.Items[index];
-
+            lbActiveSongs.ClearSelection();
+            lbActiveSongs.Rows[h.RowIndex].Selected = true;
+            var item = (SongExportExtendedData)lbActiveSongs.Rows[h.RowIndex].Tag;
             ctxMenu.Items.Clear();
-            ctxMenu.Items.Add("Copy song hash", null, (_, __) =>
-            {
-                Clipboard.SetText(item.core.SongChecksum);
-            });
-
-            ctxMenu.Show(lbActiveSongs, e.Location);
+            ctxMenu.Items.Add("Copy song hash", null, (_, __) => Clipboard.SetText(item.core.SongChecksum));
+            ctxMenu.Show(lbActiveSongs, new Point(e.X, e.Y));
         }
 
         private void SaveSongData(bool AsHash)
@@ -571,7 +586,8 @@ namespace Yaml_Creator
             txtPoolExclude.Text = "";
             btnEditExcludePools.Enabled = false;
             btnEditIncludePools.Enabled = false;
-            SongExportExtendedData ExtendedData = lbActiveSongs.SelectedItem is SongExportExtendedData ed ? ed : null;
+            if (lbActiveSongs.SelectedRows.Count != 1) return;
+            SongExportExtendedData ExtendedData = (SongExportExtendedData)lbActiveSongs.SelectedRows[0].Tag;
             if (ExtendedData is null)
                 return;
 
@@ -657,9 +673,8 @@ namespace Yaml_Creator
 
         private void EditExculdeIncludeDictForSong(Dictionary<string, string[]> Target, string Action)
         {
-            SongExportExtendedData ExtendedData = lbActiveSongs.SelectedItem is SongExportExtendedData ed ? ed : null;
-            if (ExtendedData is null)
-                return;
+            if (lbActiveSongs.SelectedRows.Count != 1) return;
+            SongExportExtendedData ExtendedData = (SongExportExtendedData)lbActiveSongs.SelectedRows[0].Tag;
 
             ValueSelectForm form = new ValueSelectForm($"Select pools to {Action} {ExtendedData.core.Name} by {ExtendedData.core.Artist}");
             var allPools = YAML.YAYARG.song_pools.Where(x => ExtendedData.core.TryGetDifficulty(x.Value.instrument, out _)).Select(x => x.Key);
