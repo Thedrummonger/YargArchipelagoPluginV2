@@ -37,6 +37,18 @@ namespace Yaml_Creator
             rtbClientItems.ItemSelectionChanged += (s, e) => { e.Item.Selected = false; };
             rtbClientItems.MouseDoubleClick += listView1_MouseDoubleClick;
             listView1_Resize(rtbClientItems, EventArgs.Empty);
+
+            string ConnectionFile = CrossPlatformFileLoader.TryGetConnectionJson();
+            if (ConnectionFile != null)
+            {
+                var ConnectionDetails = Utility.TryParseConnectionDetails(ConnectionFile, out string error);
+                if (ConnectionDetails != null)
+                {
+                    txtClientAddress.Text = ConnectionDetails.Address;
+                    txtClientPass.Text = ConnectionDetails.Password;
+                    txtClientSlot.Text = ConnectionDetails.SlotName;
+                }
+            }
         }
 
         private void Timer_Tick(object sender, EventArgs e)

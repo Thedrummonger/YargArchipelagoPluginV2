@@ -59,13 +59,55 @@ namespace Yaml_Creator
 
         private void Form1_Load(object sender, EventArgs e)
         {
-            var datas = CrossPlatformFileLoader.LoadSongDataCrossPlatform();
-            if (datas == null)
+            if (CrossPlatformFileLoader.IsRunningUnderProton() || true)
             {
-                this.Close();
+                var result = MessageBox.Show(
+                    "This application is not supported under Proton.\n\n" +
+                    "It is recommended to run it using Wine or Bottles instead.\n\n" +
+                    "If you continue, you must manually copy your SongExport.json\n" +
+                    $"to the AppData/{CrossPlatformFileLoader.RootFolderName} folder inside the Proton prefix.\n\n" +
+                    "Do you want to continue anyway?",
+                    "Unsupported Environment",
+                    MessageBoxButtons.YesNo,
+                    MessageBoxIcon.Warning,
+                    MessageBoxDefaultButton.Button2);
+
+                if (result != DialogResult.Yes)
+                {
+                    Close();
+                    return;
+                }
+            }
+
+            var path = CrossPlatformFileLoader.TryGetSongExportJson();
+
+            if (path == null)
+            {
+                MessageBox.Show(
+                    "ERROR: Song data file could not be found.\n\n" +
+                    "Ensure you have launched YARG at least once with the mod loaded.",
+                    "File Not Found",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Error);
+                Close();
                 return;
             }
-            
+
+            var datas = Utility.TryParseSongExport(path, out string error);
+            if (datas is null)
+            {
+                MessageBox.Show(
+                    "ERROR: Song data file could not be parsed.\n\n" +
+                    $"File: {path}\n\n" +
+                    $"Error: {error}\n\n" +
+                    "The file may be corrupted. Try launching YARG again to regenerate it.",
+                    "Parse Error",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Error);
+                Close();
+                return;
+            }
+
             ExportFile = datas.Select(x => new SongExportExtendedData(x)).ToArray();
             SanitizeExportFile();
             YAML.YAYARG.songList = SongDataConverter.ConvertSongDataToBase64(ExportFile);

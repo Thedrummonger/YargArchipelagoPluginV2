@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Drawing;
@@ -131,7 +132,37 @@ namespace Yaml_Creator
             }
         }
 
+        public static SongExportData[] TryParseSongExport(string filePath, out string error)
+        {
+            try
+            {
+                var raw = File.ReadAllText(filePath);
+                var data = JsonConvert.DeserializeObject<SongExportData[]>(raw);
+                error = null;
+                return data;
+            }
+            catch (Exception ex)
+            {
+                error = ex.Message;
+                return null;
+            }
+        }
 
+        public static ConnectionDetails TryParseConnectionDetails(string filePath, out string error)
+        {
+            try
+            {
+                var raw = File.ReadAllText(filePath);
+                var data = JsonConvert.DeserializeObject<ConnectionDetails>(raw);
+                error = null;
+                return data;
+            }
+            catch (Exception ex)
+            {
+                error = ex.Message;
+                return null;
+            }
+        }
 
     }
 }
