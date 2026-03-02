@@ -33,6 +33,10 @@ namespace Yaml_Creator
         private void InitializeClientComponents()
         {
             CreateClientListeners();
+            rtbClientItems.Resize += listView1_Resize;
+            rtbClientItems.ItemSelectionChanged += (s, e) => { e.Item.Selected = false; };
+            rtbClientItems.MouseDoubleClick += listView1_MouseDoubleClick;
+            listView1_Resize(rtbClientItems, EventArgs.Empty);
         }
 
         private void Timer_Tick(object sender, EventArgs e)
@@ -78,26 +82,82 @@ namespace Yaml_Creator
             rtbClientLocations.AppendMessages(Result.ToArray());
         }
 
-        public static Dictionary<StaticItems, Archipelago.MultiClient.Net.Enums.ItemFlags> ItemPriorities = new Dictionary<StaticItems, Archipelago.MultiClient.Net.Enums.ItemFlags>();
+        public static Dictionary<StaticItems, ItemFlags> ItemPriorities = new Dictionary<StaticItems, ItemFlags>();
 
         private void UpdateItemsList()
         {
             List<ColoredString> ToPrint = new List<ColoredString>();
-            Dictionary<StaticItems, int> Recived = new Dictionary<StaticItems, int>();
-            rtbClientItems.Clear();
-            var InstrumentMessages = ReceivedInstruments.Keys.Select(i => new ColoredString(i.GetDescription(), GetColor(Archipelago.MultiClient.Net.Enums.ItemFlags.Advancement)));
-            rtbClientItems.AppendMessages(InstrumentMessages.ToArray());
+            Dictionary<StaticItems, List<BaseYargAPItem>> Recived = new Dictionary<StaticItems, List<BaseYargAPItem>>();
+            rtbClientItems.Items.Clear();
+            foreach (var item in ReceivedInstruments)
+            {
+                var Entry = new ListViewItem(new string[] { 1.ToString(), item.Key.GetDescription() }) { ForeColor = GetColor(ItemFlags.Advancement) };
+                Entry.Tag = item.Value;
+                rtbClientItems.Items.Add(Entry);
+            }
 
-            var AllSongs = ReceivedSongUnlockItems.Select(x => session.Items.GetItemName(x.Key)).OrderBy(x => x)
-                .Select(i => new ColoredString(i, GetColor(Archipelago.MultiClient.Net.Enums.ItemFlags.Advancement)));
-            rtbClientItems.AppendMessages(AllSongs.ToArray());
+            var AllSongs = ReceivedSongUnlockItems.ToDictionary(x => session.Items.GetItemName(x.Key), x => x.Value).OrderBy(x => x.Key);
+            foreach (var item in AllSongs)
+            {
+                var Entry = new ListViewItem(new string[] { 1.ToString(), item.Key }) { ForeColor = GetColor(ItemFlags.Advancement) };
+                Entry.Tag = item.Value;
+                rtbClientItems.Items.Add(Entry);
+            }
 
             foreach (var i in ApItemsRecieved)
             {
-                if (!Recived.ContainsKey(i.Type)) Recived.Add(i.Type, 0);
-                Recived[i.Type]++;
+                if (!Recived.ContainsKey(i.Type)) Recived.Add(i.Type, new List<BaseYargAPItem>());
+                Recived[i.Type].Add(i);
             }
-            rtbClientItems.AppendMessages(Recived.Select(i => new ColoredString($"{i.Value}X {i.Key.GetDescription()}", GetColor(ItemPriorities[i.Key]))).ToArray());
+            foreach(var item in Recived)
+            {
+                var Entry = new ListViewItem(new string[] { 
+                    item.Value.Count.ToString(), 
+                    item.Key.GetDescription() }) 
+                { ForeColor = GetColor(ItemPriorities[item.Key]) };
+                Entry.Tag = item.Value.ToArray();
+                rtbClientItems.Items.Add(Entry);
+            }
+        }
+        private void listView1_MouseDoubleClick(object sender, MouseEventArgs e)
+        {
+            var hit = rtbClientItems.HitTest(e.Location);
+            if (hit.Item == null) return;
+
+            var item = hit.Item;
+            if (item?.Tag is null)
+                return;
+            BaseYargAPItem[] RecieveInfo = Array.Empty<BaseYargAPItem>();
+            if (item.Tag is BaseYargAPItem yargItem)
+                RecieveInfo = new BaseYargAPItem[] { yargItem };
+            else if (item.Tag is BaseYargAPItem[] yargItems)
+                RecieveInfo = yargItems;
+            string Header = item.SubItems[1].Text;
+            StringBuilder sb = new StringBuilder($"Found by: ");
+            foreach(var data in RecieveInfo)
+            {
+                sb.AppendLine();
+                sb.AppendLine();
+                var Player = session.Players.GetPlayerInfo(data.SendingPlayerSlot);
+                var Location = session.Locations.GetLocationNameFromId(data.SendingPlayerLocation, Player.Game);
+                sb.Append($"{Player.Name}");
+                if (Player != 0)
+                {
+                    sb.Append($" Playing {data.SendingPlayerGame}");
+                    if (!String.IsNullOrWhiteSpace(Location))
+                        sb.Append($" at:\n{Location}");
+                }
+            }
+            MessageBox.Show(sb.ToString(), Header);
+        }
+        private void listView1_Resize(object sender, EventArgs e)
+        {
+            if (rtbClientItems.View != View.Details || rtbClientItems.Columns.Count < 2) return;
+            int col0 = rtbClientItems.Columns[0].Width;
+            int padding = SystemInformation.VerticalScrollBarWidth + 4;
+            int newWidth = rtbClientItems.ClientSize.Width - col0 - padding;
+            if (newWidth < 50) newWidth = 50;
+            rtbClientItems.Columns[1].Width = newWidth;
         }
 
         private void UpdateHintList()
@@ -218,12 +278,15 @@ namespace Yaml_Creator
             _hasHintUpdate = true;
             return true;
         }
-        private void DisConnectClient()
+        private void DisconnectClient()
         {
             if (session.Socket.Connected)
                 session.Socket.DisconnectAsync();
             session = null;
             SlotData = null;
+            ApItemsRecieved.Clear();
+            ReceivedInstruments.Clear();
+            ReceivedSongUnlockItems.Clear();
             rtbClientLocations.Clear();
             rtbClientItems.Clear();
             rtbClientHints.Clear();
@@ -233,7 +296,7 @@ namespace Yaml_Creator
         {
             if (ClientConnected)
             {
-                DisConnectClient();
+                DisconnectClient();
             }
             else
             {

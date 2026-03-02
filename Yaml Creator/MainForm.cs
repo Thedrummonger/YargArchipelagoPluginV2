@@ -164,12 +164,13 @@ namespace Yaml_Creator
         public void PrintActiveSongs(object sender, EventArgs e)
         {
             PrintingSongs = true;
-            var ActiveSongs = FormHelpers.FilterItems(ExportFile, txtActiveSongFilter.Text, x => AddTags(x));
+            Dictionary<SongExportExtendedData, string> DisplayString = ExportFile.ToDictionary(x => x, x => AddTags(x));
+            var ActiveSongs = FormHelpers.FilterItems(ExportFile, txtActiveSongFilter.Text, x => DisplayString[x]);
             ActiveSongs = ActiveSongs.OrderBy(x => x.ToString()).ToArray();
             lbActiveSongs.Rows.Clear();
             foreach (var d in ActiveSongs)
             {
-                int r = lbActiveSongs.Rows.Add(!IsExcluded(d), AddTags(d));
+                int r = lbActiveSongs.Rows.Add(!IsExcluded(d), DisplayString[d]);
                 lbActiveSongs.Rows[r].Tag = d;
             }
 
@@ -191,7 +192,10 @@ namespace Yaml_Creator
                 if (CurrentTypes.Contains(DisplayTypes.Hash))
                     stringBuilder.Append($"[{extendedData.core.SongChecksum}]");
                 var final = stringBuilder.ToString();
-                return string.IsNullOrWhiteSpace(final) ? extendedData.core.SongChecksum : stringBuilder.ToString();
+                if (YAML.YAYARG.inclusions_per_pool.ContainsKey(extendedData.core.SongChecksum) ||
+                    YAML.YAYARG.exclusions_per_pool.ContainsKey(extendedData.core.SongChecksum))
+                    final += " *";
+                return string.IsNullOrWhiteSpace(final) ? extendedData.core.SongChecksum : final;
             }
             bool IsExcluded(SongExportExtendedData song) => YAML.YAYARG.song_exclusion_list.Contains(song.core.SongChecksum);
             PrintingSongs = false;
@@ -735,6 +739,7 @@ namespace Yaml_Creator
             {
                 CurrentTypes = form.GetSelectedValues<DisplayTypes>().ToHashSet();
                 PrintActiveSongs(sender, e);
+                FormHelpers.ClearFilters();
             }
         }
     }
