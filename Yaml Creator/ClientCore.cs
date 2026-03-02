@@ -250,6 +250,10 @@ namespace Yaml_Creator
             timer.Start();
             btnClientConnect.Click += ToggleClientConenction;
             btnClientSend.Click += BtnClientSend_Click;
+            txtClientAddress.KeyDown += (s, e) => { if (e.KeyCode == Keys.Enter) { e.SuppressKeyPress = true; ToggleClientConenction(s, e); } };
+            txtClientSlot.KeyDown += (s, e) => { if (e.KeyCode == Keys.Enter) { e.SuppressKeyPress = true; ToggleClientConenction(s, e); } };
+            txtClientPass.KeyDown += (s, e) => { if (e.KeyCode == Keys.Enter) { e.SuppressKeyPress = true; ToggleClientConenction(s, e); } };
+            txtClientMessageInput.KeyDown += (s, e) => { if (e.KeyCode == Keys.Enter) { e.SuppressKeyPress = true; BtnClientSend_Click(s, e); } };
         }
 
         private void BtnClientSend_Click(object sender, EventArgs e)
@@ -261,7 +265,9 @@ namespace Yaml_Creator
 
         private bool ConnectClient()
         {
+            if (string.IsNullOrWhiteSpace(txtClientAddress.Text) || string.IsNullOrWhiteSpace(txtClientSlot.Text)) return false;
             var (Ip, Port) = YargAPUtils.ParseIpAddress(txtClientAddress.Text);
+            if (Ip is null || Port < 0) return false;
             rtbClientChat.AppendMessages($"Connecting to {txtClientSlot.Text}@{Ip}:{Port}");
             var TempSession = ArchipelagoSessionFactory.CreateSession(Ip, Port);
             var Result = TempSession.TryConnectAndLogin("YAYARG", txtClientSlot.Text, Archipelago.MultiClient.Net.Enums.ItemsHandlingFlags.AllItems, new Version(0, 6, 1), password: txtClientPass.Text);
@@ -288,20 +294,16 @@ namespace Yaml_Creator
             ReceivedInstruments.Clear();
             ReceivedSongUnlockItems.Clear();
             rtbClientLocations.Clear();
-            rtbClientItems.Clear();
+            rtbClientItems.Items.Clear();
             rtbClientHints.Clear();
             rtbClientChat.AppendMessages($"Disconnected From Archipelago");
         }
         private void ToggleClientConenction(object sender, EventArgs e)
         {
             if (ClientConnected)
-            {
                 DisconnectClient();
-            }
             else
-            {
                 ConnectClient();
-            }
             btnClientConnect.Text = ClientConnected ? "Disconnect" : "Connect";
         }
 
