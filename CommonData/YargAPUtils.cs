@@ -67,6 +67,11 @@ namespace YargArchipelagoPlugin
             }
             return result.ToString();
         }
+        public static string ToYargColoredString(this string message, Color color) =>
+            $"<color=#{ColorUtility.ToHtmlStringRGB(color)}>{message}</color>";
+
+        public static string ToYargColoredString(this bool val) =>
+            $"<color=#{ColorUtility.ToHtmlStringRGB(val ? Color.green : Color.red)}>{val}</color>";
         public static bool IsSupportedInstrument(Instrument source, out CommonData.SupportedInstrument? target)
         {
             if (Enum.TryParse<CommonData.SupportedInstrument>(source.ToString(), out var result))

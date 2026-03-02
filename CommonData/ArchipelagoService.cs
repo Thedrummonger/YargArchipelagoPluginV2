@@ -343,6 +343,8 @@ namespace YargArchipelagoPlugin
 
         public bool ShowAPMenu = false;
 
+        public bool ShowGoalStatus = false;
+
         public bool InGameAPChat = true;
 
         public ItemLog InGameItemLog = ItemLog.ToMe;
