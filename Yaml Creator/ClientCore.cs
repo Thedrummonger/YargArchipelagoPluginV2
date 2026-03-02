@@ -241,7 +241,9 @@ namespace Yaml_Creator
                 rtbClientChat.ScrollToCaret();
             }
         }
-
+        List<string> MessageHistory = new List<string>();
+        int _hist = -1;
+        string _draft = "";
         private void CreateClientListeners()
         {
             timer = new Timer();
@@ -253,13 +255,35 @@ namespace Yaml_Creator
             txtClientAddress.KeyDown += (s, e) => { if (e.KeyCode == Keys.Enter) { e.SuppressKeyPress = true; ToggleClientConenction(s, e); } };
             txtClientSlot.KeyDown += (s, e) => { if (e.KeyCode == Keys.Enter) { e.SuppressKeyPress = true; ToggleClientConenction(s, e); } };
             txtClientPass.KeyDown += (s, e) => { if (e.KeyCode == Keys.Enter) { e.SuppressKeyPress = true; ToggleClientConenction(s, e); } };
-            txtClientMessageInput.KeyDown += (s, e) => { if (e.KeyCode == Keys.Enter) { e.SuppressKeyPress = true; BtnClientSend_Click(s, e); } };
+            txtClientMessageInput.KeyDown += (s, e) =>
+            {
+                if (e.KeyCode == Keys.Enter) { e.SuppressKeyPress = true; BtnClientSend_Click(s, e); return; }
+                if (e.KeyCode == Keys.Up) { e.SuppressKeyPress = true; HistoryUp(); return; }
+                if (e.KeyCode == Keys.Down) { e.SuppressKeyPress = true; HistoryDown(); return; }
+            };
+        }
+        void HistoryUp()
+        {
+            if (MessageHistory.Count == 0) return;
+            if (_hist == -1) _draft = txtClientMessageInput.Text;
+            _hist = Math.Min(_hist + 1, MessageHistory.Count - 1);
+            txtClientMessageInput.Text = MessageHistory[MessageHistory.Count - 1 - _hist];
+            txtClientMessageInput.SelectionStart = txtClientMessageInput.TextLength;
+        }
+
+        void HistoryDown()
+        {
+            if (_hist == -1) return;
+            _hist--;
+            txtClientMessageInput.Text = _hist == -1 ? _draft : MessageHistory[MessageHistory.Count - 1 - _hist];
+            txtClientMessageInput.SelectionStart = txtClientMessageInput.TextLength;
         }
 
         private void BtnClientSend_Click(object sender, EventArgs e)
         {
             if (!ClientConnected || string.IsNullOrWhiteSpace(txtClientMessageInput.Text)) return;
             session.Say(txtClientMessageInput.Text);
+            MessageHistory.Add(txtClientMessageInput.Text);
             txtClientMessageInput.Text = string.Empty;
         }
 
