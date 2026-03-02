@@ -59,7 +59,7 @@ namespace Yaml_Creator
 
         private void Form1_Load(object sender, EventArgs e)
         {
-            if (CrossPlatformFileLoader.IsRunningUnderProton() || true)
+            if (CrossPlatformFileLoader.IsRunningUnderProton())
             {
                 var result = MessageBox.Show(
                     "This application is not supported under Proton.\n\n" +
