@@ -1,4 +1,5 @@
 ﻿//Don't Let visual studios lie to me these are needed
+using Archipelago.MultiClient.Net;
 using Archipelago.MultiClient.Net.Helpers;
 using Newtonsoft.Json.Linq;
 using System;
@@ -386,19 +387,21 @@ namespace YargArchipelagoCommon
             public abstract bool VisableInSongMenu(APConnectionContainer connectionContainer);
 
             public abstract bool HasAvailableLocations(APConnectionContainer connectionContainer);
+            public abstract bool HasAvailableLocations(ArchipelagoSession session);
         }
 
         public class SongAPData : BaseAPSong
         {
             public long ExtraLocationID { get; set; }
             public long CompletionLocationID { get; set; }
-            public override bool HasAvailableLocations(APConnectionContainer connectionContainer)
+            public override bool HasAvailableLocations(APConnectionContainer connectionContainer) => HasAvailableLocations(connectionContainer.GetSession());
+            public override bool HasAvailableLocations(ArchipelagoSession session)
             {
-                if (!connectionContainer.GetSession().Locations.AllLocationsChecked.Contains(MainLocationID))
+                if (!session.Locations.AllLocationsChecked.Contains(MainLocationID))
                     return true;
-                if (ExtraLocationID > 0 && !connectionContainer.GetSession().Locations.AllLocationsChecked.Contains(ExtraLocationID))
+                if (ExtraLocationID > 0 && !session.Locations.AllLocationsChecked.Contains(ExtraLocationID))
                     return true;
-                if (CompletionLocationID > 0 && !connectionContainer.GetSession().Locations.AllLocationsChecked.Contains(CompletionLocationID))
+                if (CompletionLocationID > 0 && !session.Locations.AllLocationsChecked.Contains(CompletionLocationID))
                     return true;
                 return false;
             }
@@ -432,8 +435,9 @@ namespace YargArchipelagoCommon
                 };
             }
 
-            public override bool HasAvailableLocations(APConnectionContainer connectionContainer) => 
-                !connectionContainer.GetSession().Locations.AllLocationsChecked.Contains(MainLocationID);
+            public override bool HasAvailableLocations(APConnectionContainer connectionContainer) => HasAvailableLocations(connectionContainer.GetSession());
+            public override bool HasAvailableLocations(ArchipelagoSession session) => 
+                !session.Locations.AllLocationsChecked.Contains(MainLocationID);
 
             public override bool IsSongUnlocked(APConnectionContainer connectionContainer)
             {

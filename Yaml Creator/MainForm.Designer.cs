@@ -142,6 +142,22 @@ namespace Yaml_Creator
             this.txtPoolInclude = new System.Windows.Forms.TextBox();
             this.label11 = new System.Windows.Forms.Label();
             this.btnExport = new System.Windows.Forms.Button();
+            this.lbActiveSongs = new System.Windows.Forms.DataGridView();
+            this.tabPage1 = new System.Windows.Forms.TabPage();
+            this.tableLayoutPanel18 = new System.Windows.Forms.TableLayoutPanel();
+            this.label34 = new System.Windows.Forms.Label();
+            this.label35 = new System.Windows.Forms.Label();
+            this.label36 = new System.Windows.Forms.Label();
+            this.btnClientConnect = new System.Windows.Forms.Button();
+            this.txtClientAddress = new System.Windows.Forms.TextBox();
+            this.txtClientSlot = new System.Windows.Forms.TextBox();
+            this.txtClientPass = new System.Windows.Forms.TextBox();
+            this.tabControl1 = new System.Windows.Forms.TabControl();
+            this.tabPage2 = new System.Windows.Forms.TabPage();
+            this.tableLayoutPanel19 = new System.Windows.Forms.TableLayoutPanel();
+            this.txtClientMessageInput = new System.Windows.Forms.TextBox();
+            this.btnClientSend = new System.Windows.Forms.Button();
+            this.rtbClientChat = new System.Windows.Forms.RichTextBox();
             this.tableLayoutPanel1 = new System.Windows.Forms.TableLayoutPanel();
             this.panel1 = new System.Windows.Forms.Panel();
             this.tableLayoutPanel16 = new System.Windows.Forms.TableLayoutPanel();
@@ -150,7 +166,12 @@ namespace Yaml_Creator
             this.label29 = new System.Windows.Forms.Label();
             this.btnGenYaml = new System.Windows.Forms.Button();
             this.YamlTT = new System.Windows.Forms.ToolTip(this.components);
-            this.lbActiveSongs = new System.Windows.Forms.DataGridView();
+            this.tabPage4 = new System.Windows.Forms.TabPage();
+            this.tabPage5 = new System.Windows.Forms.TabPage();
+            this.rtbClientItems = new System.Windows.Forms.RichTextBox();
+            this.rtbClientHints = new System.Windows.Forms.RichTextBox();
+            this.tabPage3 = new System.Windows.Forms.TabPage();
+            this.rtbClientLocations = new System.Windows.Forms.RichTextBox();
             this.TabControlMain.SuspendLayout();
             this.SettingsTab.SuspendLayout();
             this.tableLayoutPanel11.SuspendLayout();
@@ -203,10 +224,18 @@ namespace Yaml_Creator
             this.SongListTab.SuspendLayout();
             this.tableLayoutPanel8.SuspendLayout();
             this.tableLayoutPanel17.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.lbActiveSongs)).BeginInit();
+            this.tabPage1.SuspendLayout();
+            this.tableLayoutPanel18.SuspendLayout();
+            this.tabControl1.SuspendLayout();
+            this.tabPage2.SuspendLayout();
+            this.tableLayoutPanel19.SuspendLayout();
             this.tableLayoutPanel1.SuspendLayout();
             this.panel1.SuspendLayout();
             this.tableLayoutPanel16.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.lbActiveSongs)).BeginInit();
+            this.tabPage4.SuspendLayout();
+            this.tabPage5.SuspendLayout();
+            this.tabPage3.SuspendLayout();
             this.SuspendLayout();
             // 
             // TabControlMain
@@ -215,6 +244,7 @@ namespace Yaml_Creator
             this.TabControlMain.Controls.Add(this.ExtraTab);
             this.TabControlMain.Controls.Add(this.SongPoolTab);
             this.TabControlMain.Controls.Add(this.SongListTab);
+            this.TabControlMain.Controls.Add(this.tabPage1);
             this.TabControlMain.Dock = System.Windows.Forms.DockStyle.Fill;
             this.TabControlMain.Location = new System.Drawing.Point(3, 36);
             this.TabControlMain.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
@@ -243,7 +273,7 @@ namespace Yaml_Creator
             this.tableLayoutPanel11.Controls.Add(this.groupBox6, 0, 1);
             this.tableLayoutPanel11.Dock = System.Windows.Forms.DockStyle.Fill;
             this.tableLayoutPanel11.Location = new System.Drawing.Point(3, 2);
-            this.tableLayoutPanel11.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.tableLayoutPanel11.Margin = new System.Windows.Forms.Padding(4);
             this.tableLayoutPanel11.Name = "tableLayoutPanel11";
             this.tableLayoutPanel11.RowCount = 2;
             this.tableLayoutPanel11.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 60F));
@@ -283,7 +313,7 @@ namespace Yaml_Creator
             this.tableLayoutPanel9.Controls.Add(this.nudUnlockExtra, 1, 4);
             this.tableLayoutPanel9.Dock = System.Windows.Forms.DockStyle.Fill;
             this.tableLayoutPanel9.Location = new System.Drawing.Point(3, 17);
-            this.tableLayoutPanel9.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.tableLayoutPanel9.Margin = new System.Windows.Forms.Padding(4);
             this.tableLayoutPanel9.Name = "tableLayoutPanel9";
             this.tableLayoutPanel9.RowCount = 6;
             this.tableLayoutPanel9.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 16.66667F));
@@ -432,7 +462,7 @@ namespace Yaml_Creator
             // 
             this.nudSongPackPercentage.Dock = System.Windows.Forms.DockStyle.Fill;
             this.nudSongPackPercentage.Location = new System.Drawing.Point(372, 39);
-            this.nudSongPackPercentage.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.nudSongPackPercentage.Margin = new System.Windows.Forms.Padding(4);
             this.nudSongPackPercentage.Name = "nudSongPackPercentage";
             this.nudSongPackPercentage.Size = new System.Drawing.Size(177, 22);
             this.nudSongPackPercentage.TabIndex = 16;
@@ -454,7 +484,7 @@ namespace Yaml_Creator
             // 
             this.nudUnlockExtra.Dock = System.Windows.Forms.DockStyle.Fill;
             this.nudUnlockExtra.Location = new System.Drawing.Point(372, 144);
-            this.nudUnlockExtra.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.nudUnlockExtra.Margin = new System.Windows.Forms.Padding(4);
             this.nudUnlockExtra.Name = "nudUnlockExtra";
             this.nudUnlockExtra.Size = new System.Drawing.Size(177, 22);
             this.nudUnlockExtra.TabIndex = 18;
@@ -487,7 +517,7 @@ namespace Yaml_Creator
             this.tableLayoutPanel10.Controls.Add(this.label18, 0, 2);
             this.tableLayoutPanel10.Dock = System.Windows.Forms.DockStyle.Fill;
             this.tableLayoutPanel10.Location = new System.Drawing.Point(3, 17);
-            this.tableLayoutPanel10.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.tableLayoutPanel10.Margin = new System.Windows.Forms.Padding(4);
             this.tableLayoutPanel10.Name = "tableLayoutPanel10";
             this.tableLayoutPanel10.RowCount = 4;
             this.tableLayoutPanel10.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 25F));
@@ -601,7 +631,7 @@ namespace Yaml_Creator
             this.ExtraTab.Location = new System.Drawing.Point(4, 25);
             this.ExtraTab.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.ExtraTab.Name = "ExtraTab";
-            this.ExtraTab.Size = new System.Drawing.Size(572, 396);
+            this.ExtraTab.Size = new System.Drawing.Size(571, 397);
             this.ExtraTab.TabIndex = 3;
             this.ExtraTab.Text = "Extra Settings";
             this.ExtraTab.UseVisualStyleBackColor = true;
@@ -616,12 +646,12 @@ namespace Yaml_Creator
             this.tableLayoutPanel15.Controls.Add(this.groupBox9, 1, 0);
             this.tableLayoutPanel15.Dock = System.Windows.Forms.DockStyle.Fill;
             this.tableLayoutPanel15.Location = new System.Drawing.Point(0, 0);
-            this.tableLayoutPanel15.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.tableLayoutPanel15.Margin = new System.Windows.Forms.Padding(4);
             this.tableLayoutPanel15.Name = "tableLayoutPanel15";
             this.tableLayoutPanel15.RowCount = 2;
             this.tableLayoutPanel15.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 50F));
             this.tableLayoutPanel15.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 50F));
-            this.tableLayoutPanel15.Size = new System.Drawing.Size(572, 396);
+            this.tableLayoutPanel15.Size = new System.Drawing.Size(571, 397);
             this.tableLayoutPanel15.TabIndex = 7;
             // 
             // groupBox8
@@ -632,7 +662,7 @@ namespace Yaml_Creator
             this.groupBox8.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.groupBox8.Name = "groupBox8";
             this.groupBox8.Padding = new System.Windows.Forms.Padding(3, 2, 3, 2);
-            this.groupBox8.Size = new System.Drawing.Size(280, 194);
+            this.groupBox8.Size = new System.Drawing.Size(279, 194);
             this.groupBox8.TabIndex = 5;
             this.groupBox8.TabStop = false;
             this.groupBox8.Text = "Link Settings";
@@ -647,14 +677,14 @@ namespace Yaml_Creator
             this.tableLayoutPanel13.Controls.Add(this.cmbEnergyLink, 0, 1);
             this.tableLayoutPanel13.Dock = System.Windows.Forms.DockStyle.Fill;
             this.tableLayoutPanel13.Location = new System.Drawing.Point(3, 17);
-            this.tableLayoutPanel13.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.tableLayoutPanel13.Margin = new System.Windows.Forms.Padding(4);
             this.tableLayoutPanel13.Name = "tableLayoutPanel13";
             this.tableLayoutPanel13.RowCount = 4;
             this.tableLayoutPanel13.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 27F));
             this.tableLayoutPanel13.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 50F));
             this.tableLayoutPanel13.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 27F));
             this.tableLayoutPanel13.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 50F));
-            this.tableLayoutPanel13.Size = new System.Drawing.Size(274, 175);
+            this.tableLayoutPanel13.Size = new System.Drawing.Size(273, 175);
             this.tableLayoutPanel13.TabIndex = 7;
             // 
             // label21
@@ -663,7 +693,7 @@ namespace Yaml_Creator
             this.label21.Dock = System.Windows.Forms.DockStyle.Fill;
             this.label21.Location = new System.Drawing.Point(3, 0);
             this.label21.Name = "label21";
-            this.label21.Size = new System.Drawing.Size(268, 27);
+            this.label21.Size = new System.Drawing.Size(267, 27);
             this.label21.TabIndex = 0;
             this.label21.Text = "Energy Link Mode";
             // 
@@ -705,7 +735,7 @@ namespace Yaml_Creator
             this.groupBox7.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.groupBox7.Name = "groupBox7";
             this.groupBox7.Padding = new System.Windows.Forms.Padding(3, 2, 3, 2);
-            this.groupBox7.Size = new System.Drawing.Size(566, 194);
+            this.groupBox7.Size = new System.Drawing.Size(565, 195);
             this.groupBox7.TabIndex = 4;
             this.groupBox7.TabStop = false;
             this.groupBox7.Text = "Filler Item Weights";
@@ -735,23 +765,23 @@ namespace Yaml_Creator
             this.tableLayoutPanel14.Controls.Add(this.nudNothingItem, 3, 3);
             this.tableLayoutPanel14.Dock = System.Windows.Forms.DockStyle.Fill;
             this.tableLayoutPanel14.Location = new System.Drawing.Point(3, 17);
-            this.tableLayoutPanel14.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.tableLayoutPanel14.Margin = new System.Windows.Forms.Padding(4);
             this.tableLayoutPanel14.Name = "tableLayoutPanel14";
             this.tableLayoutPanel14.RowCount = 4;
             this.tableLayoutPanel14.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 25F));
             this.tableLayoutPanel14.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 25F));
             this.tableLayoutPanel14.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 25F));
             this.tableLayoutPanel14.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 25F));
-            this.tableLayoutPanel14.Size = new System.Drawing.Size(560, 175);
+            this.tableLayoutPanel14.Size = new System.Drawing.Size(559, 176);
             this.tableLayoutPanel14.TabIndex = 7;
             // 
             // nudRestartTrap
             // 
             this.nudRestartTrap.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.nudRestartTrap.Location = new System.Drawing.Point(283, 131);
+            this.nudRestartTrap.Location = new System.Drawing.Point(281, 134);
             this.nudRestartTrap.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.nudRestartTrap.Name = "nudRestartTrap";
-            this.nudRestartTrap.Size = new System.Drawing.Size(134, 22);
+            this.nudRestartTrap.Size = new System.Drawing.Size(133, 22);
             this.nudRestartTrap.TabIndex = 9;
             this.YamlTT.SetToolTip(this.nudRestartTrap, "Specifies the weight of the Restart Trap filler item.\r\nRecieving this item during" +
         " a song will cause the song to immediately exit to the menu.");
@@ -760,9 +790,9 @@ namespace Yaml_Creator
             // 
             this.label26.AutoSize = true;
             this.label26.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.label26.Location = new System.Drawing.Point(283, 86);
+            this.label26.Location = new System.Drawing.Point(281, 88);
             this.label26.Name = "label26";
-            this.label26.Size = new System.Drawing.Size(134, 43);
+            this.label26.Size = new System.Drawing.Size(133, 44);
             this.label26.TabIndex = 11;
             this.label26.Text = "Restart Trap";
             this.label26.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
@@ -770,10 +800,10 @@ namespace Yaml_Creator
             // nudRockTrap
             // 
             this.nudRockTrap.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.nudRockTrap.Location = new System.Drawing.Point(143, 131);
+            this.nudRockTrap.Location = new System.Drawing.Point(142, 134);
             this.nudRockTrap.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.nudRockTrap.Name = "nudRockTrap";
-            this.nudRockTrap.Size = new System.Drawing.Size(134, 22);
+            this.nudRockTrap.Size = new System.Drawing.Size(133, 22);
             this.nudRockTrap.TabIndex = 8;
             this.YamlTT.SetToolTip(this.nudRockTrap, "Specifies the weight of the Rock Meter Trap filler item.\r\nRecieving this item dur" +
         "ing a song will drain your rock meter by 1/4th.");
@@ -789,7 +819,7 @@ namespace Yaml_Creator
             this.label23.Dock = System.Windows.Forms.DockStyle.Fill;
             this.label23.Location = new System.Drawing.Point(3, 0);
             this.label23.Name = "label23";
-            this.label23.Size = new System.Drawing.Size(134, 43);
+            this.label23.Size = new System.Drawing.Size(133, 44);
             this.label23.TabIndex = 0;
             this.label23.Text = "Star Power";
             this.label23.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
@@ -797,10 +827,10 @@ namespace Yaml_Creator
             // nudLowerDiff
             // 
             this.nudLowerDiff.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.nudLowerDiff.Location = new System.Drawing.Point(3, 131);
+            this.nudLowerDiff.Location = new System.Drawing.Point(3, 134);
             this.nudLowerDiff.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.nudLowerDiff.Name = "nudLowerDiff";
-            this.nudLowerDiff.Size = new System.Drawing.Size(134, 22);
+            this.nudLowerDiff.Size = new System.Drawing.Size(133, 22);
             this.nudLowerDiff.TabIndex = 7;
             this.YamlTT.SetToolTip(this.nudLowerDiff, "Specifies the weight of the Lower Difficulty filler item.\r\nThis item lets you Low" +
         "er the instrument difficulty or score requirement for a song of your choice.");
@@ -814,9 +844,9 @@ namespace Yaml_Creator
             // 
             this.label27.AutoSize = true;
             this.label27.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.label27.Location = new System.Drawing.Point(143, 86);
+            this.label27.Location = new System.Drawing.Point(142, 88);
             this.label27.Name = "label27";
-            this.label27.Size = new System.Drawing.Size(134, 43);
+            this.label27.Size = new System.Drawing.Size(133, 44);
             this.label27.TabIndex = 10;
             this.label27.Text = "Rock Meter Trap";
             this.label27.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
@@ -824,10 +854,10 @@ namespace Yaml_Creator
             // nudSwapPick
             // 
             this.nudSwapPick.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.nudSwapPick.Location = new System.Drawing.Point(283, 45);
+            this.nudSwapPick.Location = new System.Drawing.Point(281, 46);
             this.nudSwapPick.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.nudSwapPick.Name = "nudSwapPick";
-            this.nudSwapPick.Size = new System.Drawing.Size(134, 22);
+            this.nudSwapPick.Size = new System.Drawing.Size(133, 22);
             this.nudSwapPick.TabIndex = 3;
             this.YamlTT.SetToolTip(this.nudSwapPick, "Specifies the weight of the Swap Song (Pick) filler item.\r\nThis item lets you swa" +
         "p one of your songs with a new one of your choice.");
@@ -841,9 +871,9 @@ namespace Yaml_Creator
             // 
             this.label24.AutoSize = true;
             this.label24.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.label24.Location = new System.Drawing.Point(143, 0);
+            this.label24.Location = new System.Drawing.Point(142, 0);
             this.label24.Name = "label24";
-            this.label24.Size = new System.Drawing.Size(134, 43);
+            this.label24.Size = new System.Drawing.Size(133, 44);
             this.label24.TabIndex = 4;
             this.label24.Text = "Swap Song Random";
             this.label24.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
@@ -851,10 +881,10 @@ namespace Yaml_Creator
             // nudSwapRandom
             // 
             this.nudSwapRandom.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.nudSwapRandom.Location = new System.Drawing.Point(143, 45);
+            this.nudSwapRandom.Location = new System.Drawing.Point(142, 46);
             this.nudSwapRandom.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.nudSwapRandom.Name = "nudSwapRandom";
-            this.nudSwapRandom.Size = new System.Drawing.Size(134, 22);
+            this.nudSwapRandom.Size = new System.Drawing.Size(133, 22);
             this.nudSwapRandom.TabIndex = 2;
             this.YamlTT.SetToolTip(this.nudSwapRandom, "Specifies the weight of the Swap Song (Random) filler item.\r\nThis item lets you s" +
         "wap one of your songs with a randomly selected new song.");
@@ -868,9 +898,9 @@ namespace Yaml_Creator
             // 
             this.label25.AutoSize = true;
             this.label25.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.label25.Location = new System.Drawing.Point(283, 0);
+            this.label25.Location = new System.Drawing.Point(281, 0);
             this.label25.Name = "label25";
-            this.label25.Size = new System.Drawing.Size(134, 43);
+            this.label25.Size = new System.Drawing.Size(133, 44);
             this.label25.TabIndex = 5;
             this.label25.Text = "Swap Song Pick";
             this.label25.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
@@ -878,10 +908,10 @@ namespace Yaml_Creator
             // nudStarPower
             // 
             this.nudStarPower.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.nudStarPower.Location = new System.Drawing.Point(3, 45);
+            this.nudStarPower.Location = new System.Drawing.Point(3, 46);
             this.nudStarPower.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.nudStarPower.Name = "nudStarPower";
-            this.nudStarPower.Size = new System.Drawing.Size(134, 22);
+            this.nudStarPower.Size = new System.Drawing.Size(133, 22);
             this.nudStarPower.TabIndex = 1;
             this.YamlTT.SetToolTip(this.nudStarPower, "Specifies the weight of the Star Power filler item.\r\nThis item adds 1/4 of a Star" +
         " Power bar when received.\r\n\r\nIf all filler/trap items are set to a weight of zer" +
@@ -896,9 +926,9 @@ namespace Yaml_Creator
             // 
             this.label28.AutoSize = true;
             this.label28.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.label28.Location = new System.Drawing.Point(3, 86);
+            this.label28.Location = new System.Drawing.Point(3, 88);
             this.label28.Name = "label28";
-            this.label28.Size = new System.Drawing.Size(134, 43);
+            this.label28.Size = new System.Drawing.Size(133, 44);
             this.label28.TabIndex = 6;
             this.label28.Text = "Lower Difficulty";
             this.label28.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
@@ -907,18 +937,18 @@ namespace Yaml_Creator
             // 
             this.label1.AutoSize = true;
             this.label1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.label1.Location = new System.Drawing.Point(424, 0);
+            this.label1.Location = new System.Drawing.Point(421, 0);
             this.label1.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(132, 43);
+            this.label1.Size = new System.Drawing.Size(134, 44);
             this.label1.TabIndex = 12;
             this.label1.Text = "Fail Prevention";
             this.label1.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             // 
             // nudFailPrevention
             // 
-            this.nudFailPrevention.Location = new System.Drawing.Point(424, 47);
-            this.nudFailPrevention.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.nudFailPrevention.Location = new System.Drawing.Point(421, 48);
+            this.nudFailPrevention.Margin = new System.Windows.Forms.Padding(4);
             this.nudFailPrevention.Name = "nudFailPrevention";
             this.nudFailPrevention.Size = new System.Drawing.Size(132, 22);
             this.nudFailPrevention.TabIndex = 13;
@@ -928,18 +958,18 @@ namespace Yaml_Creator
             // 
             this.label30.AutoSize = true;
             this.label30.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.label30.Location = new System.Drawing.Point(424, 86);
+            this.label30.Location = new System.Drawing.Point(421, 88);
             this.label30.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.label30.Name = "label30";
-            this.label30.Size = new System.Drawing.Size(132, 43);
+            this.label30.Size = new System.Drawing.Size(134, 44);
             this.label30.TabIndex = 14;
             this.label30.Text = "Nothing";
             this.label30.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             // 
             // nudNothingItem
             // 
-            this.nudNothingItem.Location = new System.Drawing.Point(424, 133);
-            this.nudNothingItem.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.nudNothingItem.Location = new System.Drawing.Point(421, 136);
+            this.nudNothingItem.Margin = new System.Windows.Forms.Padding(4);
             this.nudNothingItem.Name = "nudNothingItem";
             this.nudNothingItem.Size = new System.Drawing.Size(132, 22);
             this.nudNothingItem.TabIndex = 15;
@@ -950,7 +980,7 @@ namespace Yaml_Creator
             // 
             this.groupBox9.Controls.Add(this.tableLayoutPanel12);
             this.groupBox9.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.groupBox9.Location = new System.Drawing.Point(289, 2);
+            this.groupBox9.Location = new System.Drawing.Point(288, 2);
             this.groupBox9.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.groupBox9.Name = "groupBox9";
             this.groupBox9.Padding = new System.Windows.Forms.Padding(3, 2, 3, 2);
@@ -969,7 +999,7 @@ namespace Yaml_Creator
             this.tableLayoutPanel12.Controls.Add(this.chkGoalPoolPlando, 0, 2);
             this.tableLayoutPanel12.Dock = System.Windows.Forms.DockStyle.Fill;
             this.tableLayoutPanel12.Location = new System.Drawing.Point(3, 17);
-            this.tableLayoutPanel12.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.tableLayoutPanel12.Margin = new System.Windows.Forms.Padding(4);
             this.tableLayoutPanel12.Name = "tableLayoutPanel12";
             this.tableLayoutPanel12.RowCount = 4;
             this.tableLayoutPanel12.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 27F));
@@ -1034,7 +1064,7 @@ namespace Yaml_Creator
             this.SongPoolTab.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.SongPoolTab.Name = "SongPoolTab";
             this.SongPoolTab.Padding = new System.Windows.Forms.Padding(3, 2, 3, 2);
-            this.SongPoolTab.Size = new System.Drawing.Size(572, 396);
+            this.SongPoolTab.Size = new System.Drawing.Size(571, 397);
             this.SongPoolTab.TabIndex = 1;
             this.SongPoolTab.Text = "Song Pools";
             this.SongPoolTab.UseVisualStyleBackColor = true;
@@ -1049,12 +1079,12 @@ namespace Yaml_Creator
             this.tableLayoutPanel7.Controls.Add(this.groupBox1, 0, 1);
             this.tableLayoutPanel7.Dock = System.Windows.Forms.DockStyle.Fill;
             this.tableLayoutPanel7.Location = new System.Drawing.Point(3, 2);
-            this.tableLayoutPanel7.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.tableLayoutPanel7.Margin = new System.Windows.Forms.Padding(4);
             this.tableLayoutPanel7.Name = "tableLayoutPanel7";
             this.tableLayoutPanel7.RowCount = 2;
             this.tableLayoutPanel7.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
             this.tableLayoutPanel7.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 160F));
-            this.tableLayoutPanel7.Size = new System.Drawing.Size(566, 392);
+            this.tableLayoutPanel7.Size = new System.Drawing.Size(565, 393);
             this.tableLayoutPanel7.TabIndex = 7;
             // 
             // groupBox2
@@ -1062,10 +1092,10 @@ namespace Yaml_Creator
             this.groupBox2.Controls.Add(this.tableLayoutPanel5);
             this.groupBox2.Dock = System.Windows.Forms.DockStyle.Fill;
             this.groupBox2.Location = new System.Drawing.Point(4, 4);
-            this.groupBox2.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.groupBox2.Margin = new System.Windows.Forms.Padding(4);
             this.groupBox2.Name = "groupBox2";
-            this.groupBox2.Padding = new System.Windows.Forms.Padding(4, 4, 4, 4);
-            this.groupBox2.Size = new System.Drawing.Size(275, 224);
+            this.groupBox2.Padding = new System.Windows.Forms.Padding(4);
+            this.groupBox2.Size = new System.Drawing.Size(274, 225);
             this.groupBox2.TabIndex = 6;
             this.groupBox2.TabStop = false;
             this.groupBox2.Text = "Song Pools";
@@ -1078,12 +1108,12 @@ namespace Yaml_Creator
             this.tableLayoutPanel5.Controls.Add(this.btnRemovePool, 0, 1);
             this.tableLayoutPanel5.Dock = System.Windows.Forms.DockStyle.Fill;
             this.tableLayoutPanel5.Location = new System.Drawing.Point(4, 19);
-            this.tableLayoutPanel5.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.tableLayoutPanel5.Margin = new System.Windows.Forms.Padding(4);
             this.tableLayoutPanel5.Name = "tableLayoutPanel5";
             this.tableLayoutPanel5.RowCount = 2;
             this.tableLayoutPanel5.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
             this.tableLayoutPanel5.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 31F));
-            this.tableLayoutPanel5.Size = new System.Drawing.Size(267, 201);
+            this.tableLayoutPanel5.Size = new System.Drawing.Size(266, 202);
             this.tableLayoutPanel5.TabIndex = 0;
             // 
             // lbSongPoolList
@@ -1094,16 +1124,16 @@ namespace Yaml_Creator
             this.lbSongPoolList.Location = new System.Drawing.Point(3, 2);
             this.lbSongPoolList.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.lbSongPoolList.Name = "lbSongPoolList";
-            this.lbSongPoolList.Size = new System.Drawing.Size(261, 166);
+            this.lbSongPoolList.Size = new System.Drawing.Size(260, 167);
             this.lbSongPoolList.TabIndex = 4;
             // 
             // btnRemovePool
             // 
             this.btnRemovePool.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.btnRemovePool.Location = new System.Drawing.Point(3, 172);
+            this.btnRemovePool.Location = new System.Drawing.Point(3, 173);
             this.btnRemovePool.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.btnRemovePool.Name = "btnRemovePool";
-            this.btnRemovePool.Size = new System.Drawing.Size(261, 27);
+            this.btnRemovePool.Size = new System.Drawing.Size(260, 27);
             this.btnRemovePool.TabIndex = 5;
             this.btnRemovePool.Text = "Remove Selected";
             this.btnRemovePool.UseVisualStyleBackColor = true;
@@ -1113,12 +1143,12 @@ namespace Yaml_Creator
             // 
             this.gbSelectedPool.Controls.Add(this.tableLayoutPanel2);
             this.gbSelectedPool.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.gbSelectedPool.Location = new System.Drawing.Point(286, 2);
+            this.gbSelectedPool.Location = new System.Drawing.Point(285, 2);
             this.gbSelectedPool.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.gbSelectedPool.Name = "gbSelectedPool";
             this.gbSelectedPool.Padding = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.tableLayoutPanel7.SetRowSpan(this.gbSelectedPool, 2);
-            this.gbSelectedPool.Size = new System.Drawing.Size(277, 388);
+            this.gbSelectedPool.Size = new System.Drawing.Size(277, 389);
             this.gbSelectedPool.TabIndex = 3;
             this.gbSelectedPool.TabStop = false;
             this.gbSelectedPool.Text = "SelectedPool";
@@ -1143,7 +1173,7 @@ namespace Yaml_Creator
             this.tableLayoutPanel2.Controls.Add(this.nudPoolMaxTime, 1, 7);
             this.tableLayoutPanel2.Dock = System.Windows.Forms.DockStyle.Fill;
             this.tableLayoutPanel2.Location = new System.Drawing.Point(3, 17);
-            this.tableLayoutPanel2.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.tableLayoutPanel2.Margin = new System.Windows.Forms.Padding(4);
             this.tableLayoutPanel2.Name = "tableLayoutPanel2";
             this.tableLayoutPanel2.RowCount = 9;
             this.tableLayoutPanel2.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 10F));
@@ -1155,7 +1185,7 @@ namespace Yaml_Creator
             this.tableLayoutPanel2.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 10F));
             this.tableLayoutPanel2.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 31F));
             this.tableLayoutPanel2.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 60F));
-            this.tableLayoutPanel2.Size = new System.Drawing.Size(271, 369);
+            this.tableLayoutPanel2.Size = new System.Drawing.Size(271, 370);
             this.tableLayoutPanel2.TabIndex = 7;
             // 
             // groupBox4
@@ -1166,7 +1196,7 @@ namespace Yaml_Creator
             this.groupBox4.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.groupBox4.Name = "groupBox4";
             this.groupBox4.Padding = new System.Windows.Forms.Padding(3, 2, 3, 2);
-            this.groupBox4.Size = new System.Drawing.Size(130, 145);
+            this.groupBox4.Size = new System.Drawing.Size(130, 146);
             this.groupBox4.TabIndex = 7;
             this.groupBox4.TabStop = false;
             this.groupBox4.Text = "Reward 2";
@@ -1182,14 +1212,14 @@ namespace Yaml_Creator
             this.tableLayoutPanel4.Controls.Add(this.cmbReward2Diff, 0, 1);
             this.tableLayoutPanel4.Dock = System.Windows.Forms.DockStyle.Fill;
             this.tableLayoutPanel4.Location = new System.Drawing.Point(3, 17);
-            this.tableLayoutPanel4.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.tableLayoutPanel4.Margin = new System.Windows.Forms.Padding(4);
             this.tableLayoutPanel4.Name = "tableLayoutPanel4";
             this.tableLayoutPanel4.RowCount = 4;
             this.tableLayoutPanel4.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 50F));
             this.tableLayoutPanel4.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 37F));
             this.tableLayoutPanel4.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 50F));
             this.tableLayoutPanel4.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 37F));
-            this.tableLayoutPanel4.Size = new System.Drawing.Size(124, 126);
+            this.tableLayoutPanel4.Size = new System.Drawing.Size(124, 127);
             this.tableLayoutPanel4.TabIndex = 0;
             // 
             // label10
@@ -1273,7 +1303,7 @@ namespace Yaml_Creator
             this.groupBox3.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.groupBox3.Name = "groupBox3";
             this.groupBox3.Padding = new System.Windows.Forms.Padding(3, 2, 3, 2);
-            this.groupBox3.Size = new System.Drawing.Size(129, 145);
+            this.groupBox3.Size = new System.Drawing.Size(129, 146);
             this.groupBox3.TabIndex = 6;
             this.groupBox3.TabStop = false;
             this.groupBox3.Text = "Reward 1";
@@ -1288,14 +1318,14 @@ namespace Yaml_Creator
             this.tableLayoutPanel3.Controls.Add(this.cmbReward1Score, 0, 3);
             this.tableLayoutPanel3.Dock = System.Windows.Forms.DockStyle.Fill;
             this.tableLayoutPanel3.Location = new System.Drawing.Point(3, 17);
-            this.tableLayoutPanel3.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.tableLayoutPanel3.Margin = new System.Windows.Forms.Padding(4);
             this.tableLayoutPanel3.Name = "tableLayoutPanel3";
             this.tableLayoutPanel3.RowCount = 4;
             this.tableLayoutPanel3.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 50F));
             this.tableLayoutPanel3.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 37F));
             this.tableLayoutPanel3.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 50F));
             this.tableLayoutPanel3.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 37F));
-            this.tableLayoutPanel3.Size = new System.Drawing.Size(123, 126);
+            this.tableLayoutPanel3.Size = new System.Drawing.Size(123, 127);
             this.tableLayoutPanel3.TabIndex = 0;
             // 
             // label7
@@ -1467,11 +1497,11 @@ namespace Yaml_Creator
             // 
             this.groupBox1.Controls.Add(this.tableLayoutPanel6);
             this.groupBox1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.groupBox1.Location = new System.Drawing.Point(3, 234);
+            this.groupBox1.Location = new System.Drawing.Point(3, 235);
             this.groupBox1.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.groupBox1.Name = "groupBox1";
             this.groupBox1.Padding = new System.Windows.Forms.Padding(3, 2, 3, 2);
-            this.groupBox1.Size = new System.Drawing.Size(277, 156);
+            this.groupBox1.Size = new System.Drawing.Size(276, 156);
             this.groupBox1.TabIndex = 2;
             this.groupBox1.TabStop = false;
             this.groupBox1.Text = "Add Song Pool";
@@ -1487,7 +1517,7 @@ namespace Yaml_Creator
             this.tableLayoutPanel6.Controls.Add(this.txtNewPoolName, 0, 1);
             this.tableLayoutPanel6.Dock = System.Windows.Forms.DockStyle.Fill;
             this.tableLayoutPanel6.Location = new System.Drawing.Point(3, 17);
-            this.tableLayoutPanel6.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.tableLayoutPanel6.Margin = new System.Windows.Forms.Padding(4);
             this.tableLayoutPanel6.Name = "tableLayoutPanel6";
             this.tableLayoutPanel6.RowCount = 5;
             this.tableLayoutPanel6.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 50F));
@@ -1495,7 +1525,7 @@ namespace Yaml_Creator
             this.tableLayoutPanel6.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 50F));
             this.tableLayoutPanel6.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 31F));
             this.tableLayoutPanel6.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 31F));
-            this.tableLayoutPanel6.Size = new System.Drawing.Size(271, 137);
+            this.tableLayoutPanel6.Size = new System.Drawing.Size(270, 137);
             this.tableLayoutPanel6.TabIndex = 0;
             // 
             // btnAddPool
@@ -1504,7 +1534,7 @@ namespace Yaml_Creator
             this.btnAddPool.Location = new System.Drawing.Point(3, 108);
             this.btnAddPool.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.btnAddPool.Name = "btnAddPool";
-            this.btnAddPool.Size = new System.Drawing.Size(265, 27);
+            this.btnAddPool.Size = new System.Drawing.Size(264, 27);
             this.btnAddPool.TabIndex = 4;
             this.btnAddPool.Text = "Add Pool";
             this.btnAddPool.UseVisualStyleBackColor = true;
@@ -1516,7 +1546,7 @@ namespace Yaml_Creator
             this.label2.Dock = System.Windows.Forms.DockStyle.Bottom;
             this.label2.Location = new System.Drawing.Point(3, 6);
             this.label2.Name = "label2";
-            this.label2.Size = new System.Drawing.Size(265, 16);
+            this.label2.Size = new System.Drawing.Size(264, 16);
             this.label2.TabIndex = 0;
             this.label2.Text = "Name:";
             this.label2.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
@@ -1528,7 +1558,7 @@ namespace Yaml_Creator
             this.txtNewPoolIsntrument.Location = new System.Drawing.Point(3, 77);
             this.txtNewPoolIsntrument.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.txtNewPoolIsntrument.Name = "txtNewPoolIsntrument";
-            this.txtNewPoolIsntrument.Size = new System.Drawing.Size(265, 24);
+            this.txtNewPoolIsntrument.Size = new System.Drawing.Size(264, 24);
             this.txtNewPoolIsntrument.TabIndex = 3;
             this.YamlTT.SetToolTip(this.txtNewPoolIsntrument, "The instrument that must be played for songs in the new pool.");
             // 
@@ -1538,7 +1568,7 @@ namespace Yaml_Creator
             this.label3.Dock = System.Windows.Forms.DockStyle.Bottom;
             this.label3.Location = new System.Drawing.Point(3, 59);
             this.label3.Name = "label3";
-            this.label3.Size = new System.Drawing.Size(265, 16);
+            this.label3.Size = new System.Drawing.Size(264, 16);
             this.label3.TabIndex = 2;
             this.label3.Text = "Instrument:";
             this.label3.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
@@ -1549,7 +1579,7 @@ namespace Yaml_Creator
             this.txtNewPoolName.Location = new System.Drawing.Point(3, 24);
             this.txtNewPoolName.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.txtNewPoolName.Name = "txtNewPoolName";
-            this.txtNewPoolName.Size = new System.Drawing.Size(265, 22);
+            this.txtNewPoolName.Size = new System.Drawing.Size(264, 22);
             this.txtNewPoolName.TabIndex = 1;
             this.YamlTT.SetToolTip(this.txtNewPoolName, "The unique name for the new pool.");
             // 
@@ -1582,7 +1612,7 @@ namespace Yaml_Creator
             this.tableLayoutPanel8.Controls.Add(this.lbActiveSongs, 0, 2);
             this.tableLayoutPanel8.Dock = System.Windows.Forms.DockStyle.Fill;
             this.tableLayoutPanel8.Location = new System.Drawing.Point(3, 2);
-            this.tableLayoutPanel8.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.tableLayoutPanel8.Margin = new System.Windows.Forms.Padding(4);
             this.tableLayoutPanel8.Name = "tableLayoutPanel8";
             this.tableLayoutPanel8.RowCount = 5;
             this.tableLayoutPanel8.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 31F));
@@ -1643,7 +1673,7 @@ namespace Yaml_Creator
             this.tableLayoutPanel17.Controls.Add(this.txtPoolInclude, 2, 1);
             this.tableLayoutPanel17.Dock = System.Windows.Forms.DockStyle.Fill;
             this.tableLayoutPanel17.Location = new System.Drawing.Point(4, 335);
-            this.tableLayoutPanel17.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.tableLayoutPanel17.Margin = new System.Windows.Forms.Padding(4);
             this.tableLayoutPanel17.Name = "tableLayoutPanel17";
             this.tableLayoutPanel17.RowCount = 2;
             this.tableLayoutPanel8.SetRowSpan(this.tableLayoutPanel17, 2);
@@ -1749,6 +1779,188 @@ namespace Yaml_Creator
             this.btnExport.Text = "Export";
             this.btnExport.UseVisualStyleBackColor = true;
             // 
+            // lbActiveSongs
+            // 
+            this.lbActiveSongs.AllowUserToAddRows = false;
+            this.lbActiveSongs.AllowUserToDeleteRows = false;
+            this.lbActiveSongs.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            this.tableLayoutPanel8.SetColumnSpan(this.lbActiveSongs, 5);
+            this.lbActiveSongs.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.lbActiveSongs.Location = new System.Drawing.Point(3, 65);
+            this.lbActiveSongs.Name = "lbActiveSongs";
+            this.lbActiveSongs.RowHeadersVisible = false;
+            this.lbActiveSongs.RowTemplate.Height = 24;
+            this.lbActiveSongs.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
+            this.lbActiveSongs.Size = new System.Drawing.Size(559, 263);
+            this.lbActiveSongs.TabIndex = 15;
+            // 
+            // tabPage1
+            // 
+            this.tabPage1.Controls.Add(this.tableLayoutPanel18);
+            this.tabPage1.Location = new System.Drawing.Point(4, 25);
+            this.tabPage1.Name = "tabPage1";
+            this.tabPage1.Padding = new System.Windows.Forms.Padding(3);
+            this.tabPage1.Size = new System.Drawing.Size(571, 397);
+            this.tabPage1.TabIndex = 4;
+            this.tabPage1.Text = "Tracker Client";
+            this.tabPage1.UseVisualStyleBackColor = true;
+            // 
+            // tableLayoutPanel18
+            // 
+            this.tableLayoutPanel18.ColumnCount = 4;
+            this.tableLayoutPanel18.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 33.33333F));
+            this.tableLayoutPanel18.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 33.33334F));
+            this.tableLayoutPanel18.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 33.33334F));
+            this.tableLayoutPanel18.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 101F));
+            this.tableLayoutPanel18.Controls.Add(this.label34, 0, 0);
+            this.tableLayoutPanel18.Controls.Add(this.label35, 1, 0);
+            this.tableLayoutPanel18.Controls.Add(this.label36, 2, 0);
+            this.tableLayoutPanel18.Controls.Add(this.btnClientConnect, 3, 1);
+            this.tableLayoutPanel18.Controls.Add(this.txtClientAddress, 0, 1);
+            this.tableLayoutPanel18.Controls.Add(this.txtClientSlot, 1, 1);
+            this.tableLayoutPanel18.Controls.Add(this.txtClientPass, 2, 1);
+            this.tableLayoutPanel18.Controls.Add(this.tabControl1, 0, 2);
+            this.tableLayoutPanel18.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.tableLayoutPanel18.Location = new System.Drawing.Point(3, 3);
+            this.tableLayoutPanel18.Name = "tableLayoutPanel18";
+            this.tableLayoutPanel18.RowCount = 3;
+            this.tableLayoutPanel18.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 20F));
+            this.tableLayoutPanel18.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 30F));
+            this.tableLayoutPanel18.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
+            this.tableLayoutPanel18.Size = new System.Drawing.Size(565, 391);
+            this.tableLayoutPanel18.TabIndex = 0;
+            // 
+            // label34
+            // 
+            this.label34.AutoSize = true;
+            this.label34.Location = new System.Drawing.Point(3, 0);
+            this.label34.Name = "label34";
+            this.label34.Size = new System.Drawing.Size(58, 16);
+            this.label34.TabIndex = 0;
+            this.label34.Text = "Address";
+            // 
+            // label35
+            // 
+            this.label35.AutoSize = true;
+            this.label35.Location = new System.Drawing.Point(157, 0);
+            this.label35.Name = "label35";
+            this.label35.Size = new System.Drawing.Size(70, 16);
+            this.label35.TabIndex = 1;
+            this.label35.Text = "Slot Name";
+            // 
+            // label36
+            // 
+            this.label36.AutoSize = true;
+            this.label36.Location = new System.Drawing.Point(311, 0);
+            this.label36.Name = "label36";
+            this.label36.Size = new System.Drawing.Size(67, 16);
+            this.label36.TabIndex = 2;
+            this.label36.Text = "Password";
+            // 
+            // btnClientConnect
+            // 
+            this.btnClientConnect.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.btnClientConnect.Location = new System.Drawing.Point(465, 23);
+            this.btnClientConnect.Name = "btnClientConnect";
+            this.btnClientConnect.Size = new System.Drawing.Size(97, 24);
+            this.btnClientConnect.TabIndex = 3;
+            this.btnClientConnect.Text = "Connect";
+            this.btnClientConnect.UseVisualStyleBackColor = true;
+            // 
+            // txtClientAddress
+            // 
+            this.txtClientAddress.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.txtClientAddress.Location = new System.Drawing.Point(3, 23);
+            this.txtClientAddress.Name = "txtClientAddress";
+            this.txtClientAddress.Size = new System.Drawing.Size(148, 22);
+            this.txtClientAddress.TabIndex = 4;
+            // 
+            // txtClientSlot
+            // 
+            this.txtClientSlot.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.txtClientSlot.Location = new System.Drawing.Point(157, 23);
+            this.txtClientSlot.Name = "txtClientSlot";
+            this.txtClientSlot.Size = new System.Drawing.Size(148, 22);
+            this.txtClientSlot.TabIndex = 5;
+            // 
+            // txtClientPass
+            // 
+            this.txtClientPass.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.txtClientPass.Location = new System.Drawing.Point(311, 23);
+            this.txtClientPass.Name = "txtClientPass";
+            this.txtClientPass.Size = new System.Drawing.Size(148, 22);
+            this.txtClientPass.TabIndex = 6;
+            // 
+            // tabControl1
+            // 
+            this.tableLayoutPanel18.SetColumnSpan(this.tabControl1, 4);
+            this.tabControl1.Controls.Add(this.tabPage2);
+            this.tabControl1.Controls.Add(this.tabPage3);
+            this.tabControl1.Controls.Add(this.tabPage4);
+            this.tabControl1.Controls.Add(this.tabPage5);
+            this.tabControl1.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.tabControl1.Location = new System.Drawing.Point(3, 53);
+            this.tabControl1.Name = "tabControl1";
+            this.tabControl1.SelectedIndex = 0;
+            this.tabControl1.Size = new System.Drawing.Size(559, 335);
+            this.tabControl1.TabIndex = 7;
+            // 
+            // tabPage2
+            // 
+            this.tabPage2.Controls.Add(this.tableLayoutPanel19);
+            this.tabPage2.Location = new System.Drawing.Point(4, 25);
+            this.tabPage2.Name = "tabPage2";
+            this.tabPage2.Padding = new System.Windows.Forms.Padding(3);
+            this.tabPage2.Size = new System.Drawing.Size(551, 306);
+            this.tabPage2.TabIndex = 0;
+            this.tabPage2.Text = "Text Client";
+            this.tabPage2.UseVisualStyleBackColor = true;
+            // 
+            // tableLayoutPanel19
+            // 
+            this.tableLayoutPanel19.ColumnCount = 2;
+            this.tableLayoutPanel19.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 100F));
+            this.tableLayoutPanel19.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 80F));
+            this.tableLayoutPanel19.Controls.Add(this.txtClientMessageInput, 0, 1);
+            this.tableLayoutPanel19.Controls.Add(this.btnClientSend, 1, 1);
+            this.tableLayoutPanel19.Controls.Add(this.rtbClientChat, 0, 0);
+            this.tableLayoutPanel19.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.tableLayoutPanel19.Location = new System.Drawing.Point(3, 3);
+            this.tableLayoutPanel19.Name = "tableLayoutPanel19";
+            this.tableLayoutPanel19.RowCount = 2;
+            this.tableLayoutPanel19.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
+            this.tableLayoutPanel19.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 30F));
+            this.tableLayoutPanel19.Size = new System.Drawing.Size(545, 300);
+            this.tableLayoutPanel19.TabIndex = 0;
+            // 
+            // txtClientMessageInput
+            // 
+            this.txtClientMessageInput.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.txtClientMessageInput.Location = new System.Drawing.Point(3, 273);
+            this.txtClientMessageInput.Name = "txtClientMessageInput";
+            this.txtClientMessageInput.Size = new System.Drawing.Size(459, 22);
+            this.txtClientMessageInput.TabIndex = 0;
+            // 
+            // btnClientSend
+            // 
+            this.btnClientSend.Location = new System.Drawing.Point(468, 273);
+            this.btnClientSend.Name = "btnClientSend";
+            this.btnClientSend.Size = new System.Drawing.Size(74, 23);
+            this.btnClientSend.TabIndex = 1;
+            this.btnClientSend.Text = "Send";
+            this.btnClientSend.UseVisualStyleBackColor = true;
+            // 
+            // rtbClientChat
+            // 
+            this.rtbClientChat.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(64)))), ((int)(((byte)(64)))), ((int)(((byte)(64)))));
+            this.tableLayoutPanel19.SetColumnSpan(this.rtbClientChat, 2);
+            this.rtbClientChat.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.rtbClientChat.Location = new System.Drawing.Point(3, 3);
+            this.rtbClientChat.Name = "rtbClientChat";
+            this.rtbClientChat.Size = new System.Drawing.Size(539, 264);
+            this.rtbClientChat.TabIndex = 2;
+            this.rtbClientChat.Text = "";
+            // 
             // tableLayoutPanel1
             // 
             this.tableLayoutPanel1.ColumnCount = 1;
@@ -1788,7 +2000,7 @@ namespace Yaml_Creator
             this.tableLayoutPanel16.Controls.Add(this.btnGenYaml, 2, 0);
             this.tableLayoutPanel16.Dock = System.Windows.Forms.DockStyle.Fill;
             this.tableLayoutPanel16.Location = new System.Drawing.Point(0, 0);
-            this.tableLayoutPanel16.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.tableLayoutPanel16.Margin = new System.Windows.Forms.Padding(4);
             this.tableLayoutPanel16.Name = "tableLayoutPanel16";
             this.tableLayoutPanel16.RowCount = 1;
             this.tableLayoutPanel16.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
@@ -1847,32 +2059,66 @@ namespace Yaml_Creator
             this.YamlTT.InitialDelay = 500;
             this.YamlTT.ReshowDelay = 100;
             // 
-            // lbActiveSongs
+            // tabPage4
             // 
-            this.lbActiveSongs.AllowUserToAddRows = false;
-            this.lbActiveSongs.AllowUserToDeleteRows = false;
-            this.lbActiveSongs.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            this.tableLayoutPanel8.SetColumnSpan(this.lbActiveSongs, 5);
-            this.lbActiveSongs.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.lbActiveSongs.Location = new System.Drawing.Point(3, 65);
-            this.lbActiveSongs.Name = "lbActiveSongs";
-            this.lbActiveSongs.RowTemplate.Height = 24;
-            this.lbActiveSongs.Size = new System.Drawing.Size(559, 263);
-            this.lbActiveSongs.TabIndex = 15;
-            this.lbActiveSongs.RowHeadersVisible = false;
-            this.lbActiveSongs.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
-            this.lbActiveSongs.MultiSelect = true;
-            this.lbActiveSongs.AutoGenerateColumns = false;
-            this.lbActiveSongs.Columns.Clear();
-            this.lbActiveSongs.Columns.Add(new DataGridViewCheckBoxColumn { Width = 30 });
-            this.lbActiveSongs.Columns.Add(new DataGridViewTextBoxColumn { AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill });
-            this.lbActiveSongs.ReadOnly = false;
-            this.lbActiveSongs.Columns[0].ReadOnly = false;
-            this.lbActiveSongs.Columns[1].ReadOnly = true;
-            this.lbActiveSongs.EditMode = DataGridViewEditMode.EditOnEnter;
-            this.lbActiveSongs.AllowUserToResizeRows = false;
-            this.lbActiveSongs.RowHeadersWidthSizeMode = DataGridViewRowHeadersWidthSizeMode.DisableResizing;
-            this.lbActiveSongs.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.DisableResizing;
+            this.tabPage4.Controls.Add(this.rtbClientItems);
+            this.tabPage4.Location = new System.Drawing.Point(4, 25);
+            this.tabPage4.Name = "tabPage4";
+            this.tabPage4.Size = new System.Drawing.Size(551, 306);
+            this.tabPage4.TabIndex = 2;
+            this.tabPage4.Text = "Items";
+            this.tabPage4.UseVisualStyleBackColor = true;
+            // 
+            // tabPage5
+            // 
+            this.tabPage5.Controls.Add(this.rtbClientHints);
+            this.tabPage5.Location = new System.Drawing.Point(4, 25);
+            this.tabPage5.Name = "tabPage5";
+            this.tabPage5.Size = new System.Drawing.Size(551, 306);
+            this.tabPage5.TabIndex = 3;
+            this.tabPage5.Text = "Hints";
+            this.tabPage5.UseVisualStyleBackColor = true;
+            // 
+            // rtbClientItems
+            // 
+            this.rtbClientItems.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(64)))), ((int)(((byte)(64)))), ((int)(((byte)(64)))));
+            this.rtbClientItems.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.rtbClientItems.Location = new System.Drawing.Point(0, 0);
+            this.rtbClientItems.Name = "rtbClientItems";
+            this.rtbClientItems.Size = new System.Drawing.Size(551, 306);
+            this.rtbClientItems.TabIndex = 1;
+            this.rtbClientItems.Text = "";
+            // 
+            // rtbClientHints
+            // 
+            this.rtbClientHints.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(64)))), ((int)(((byte)(64)))), ((int)(((byte)(64)))));
+            this.rtbClientHints.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.rtbClientHints.Location = new System.Drawing.Point(0, 0);
+            this.rtbClientHints.Name = "rtbClientHints";
+            this.rtbClientHints.Size = new System.Drawing.Size(551, 306);
+            this.rtbClientHints.TabIndex = 1;
+            this.rtbClientHints.Text = "";
+            // 
+            // tabPage3
+            // 
+            this.tabPage3.Controls.Add(this.rtbClientLocations);
+            this.tabPage3.Location = new System.Drawing.Point(4, 25);
+            this.tabPage3.Name = "tabPage3";
+            this.tabPage3.Padding = new System.Windows.Forms.Padding(3);
+            this.tabPage3.Size = new System.Drawing.Size(551, 306);
+            this.tabPage3.TabIndex = 1;
+            this.tabPage3.Text = "Available Locations";
+            this.tabPage3.UseVisualStyleBackColor = true;
+            // 
+            // rtbClientLocations
+            // 
+            this.rtbClientLocations.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(64)))), ((int)(((byte)(64)))), ((int)(((byte)(64)))));
+            this.rtbClientLocations.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.rtbClientLocations.Location = new System.Drawing.Point(3, 3);
+            this.rtbClientLocations.Name = "rtbClientLocations";
+            this.rtbClientLocations.Size = new System.Drawing.Size(545, 300);
+            this.rtbClientLocations.TabIndex = 1;
+            this.rtbClientLocations.Text = "";
             // 
             // MainForm
             // 
@@ -1949,11 +2195,21 @@ namespace Yaml_Creator
             this.tableLayoutPanel8.PerformLayout();
             this.tableLayoutPanel17.ResumeLayout(false);
             this.tableLayoutPanel17.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.lbActiveSongs)).EndInit();
+            this.tabPage1.ResumeLayout(false);
+            this.tableLayoutPanel18.ResumeLayout(false);
+            this.tableLayoutPanel18.PerformLayout();
+            this.tabControl1.ResumeLayout(false);
+            this.tabPage2.ResumeLayout(false);
+            this.tableLayoutPanel19.ResumeLayout(false);
+            this.tableLayoutPanel19.PerformLayout();
             this.tableLayoutPanel1.ResumeLayout(false);
             this.panel1.ResumeLayout(false);
             this.tableLayoutPanel16.ResumeLayout(false);
             this.tableLayoutPanel16.PerformLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.lbActiveSongs)).EndInit();
+            this.tabPage4.ResumeLayout(false);
+            this.tabPage5.ResumeLayout(false);
+            this.tabPage3.ResumeLayout(false);
             this.ResumeLayout(false);
 
         }
@@ -2079,6 +2335,27 @@ namespace Yaml_Creator
         private System.Windows.Forms.NumericUpDown nudPoolMaxTime;
         private System.Windows.Forms.Button btnSeedStats;
         private System.Windows.Forms.DataGridView lbActiveSongs;
+        private TabPage tabPage1;
+        private TableLayoutPanel tableLayoutPanel18;
+        private Label label34;
+        private Label label35;
+        private Label label36;
+        private Button btnClientConnect;
+        private TextBox txtClientAddress;
+        private TextBox txtClientSlot;
+        private TextBox txtClientPass;
+        private TabControl tabControl1;
+        private TabPage tabPage2;
+        private TableLayoutPanel tableLayoutPanel19;
+        private TextBox txtClientMessageInput;
+        private Button btnClientSend;
+        private RichTextBox rtbClientChat;
+        private TabPage tabPage4;
+        private RichTextBox rtbClientItems;
+        private TabPage tabPage5;
+        private RichTextBox rtbClientHints;
+        private TabPage tabPage3;
+        private RichTextBox rtbClientLocations;
     }
 }
 

@@ -43,6 +43,18 @@ namespace Yaml_Creator
             Directory.CreateDirectory(OutputFolder);
             txtPoolExclude.ReadOnly = true;
             txtPoolInclude.ReadOnly = true;
+            this.lbActiveSongs.Columns.Clear();
+            this.lbActiveSongs.Columns.Add(new DataGridViewCheckBoxColumn { Width = 30 });
+            this.lbActiveSongs.Columns.Add(new DataGridViewTextBoxColumn { AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill });
+            this.lbActiveSongs.ReadOnly = false;
+            this.lbActiveSongs.Columns[0].ReadOnly = false;
+            this.lbActiveSongs.Columns[1].ReadOnly = true;
+            this.lbActiveSongs.EditMode = DataGridViewEditMode.EditOnEnter;
+            this.lbActiveSongs.AllowUserToResizeRows = false;
+            this.lbActiveSongs.RowHeadersWidthSizeMode = DataGridViewRowHeadersWidthSizeMode.DisableResizing;
+            this.lbActiveSongs.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.DisableResizing;
+
+            InitializeClientComponents();
         }
 
         private void Form1_Load(object sender, EventArgs e)
