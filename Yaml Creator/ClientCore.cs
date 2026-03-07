@@ -55,7 +55,8 @@ namespace Yaml_Creator
         {
             if (!ClientConnected) return;
             EmptyChatQueue();
-            UpdateReceivedItems();
+            if (_hasItemUpdate || _hasHintUpdate)
+                UpdateReceivedItems();
             if (_hasItemUpdate)
             {
                 _hasItemUpdate = false;

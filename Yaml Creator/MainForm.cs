@@ -365,7 +365,8 @@ namespace Yaml_Creator
                 ctxMenu.Show(btnExport, new Point(0, btnExport.Height));
             };
 
-            btnGenYaml.Click += SaveYaml;
+            btnGenYaml.Click += (_, __) => GenerateYamlClick(SongDataSaveType.compressed);
+            btnGenYaml.MouseDown += GenerateRightClick;
 
             btnSeedStats.Click += ShowSeedStats;
         }
@@ -473,6 +474,19 @@ namespace Yaml_Creator
             ctxMenu.Show(lbActiveSongs, new Point(e.X, e.Y));
         }
 
+        public void GenerateRightClick(object sender, MouseEventArgs e)
+        {
+            if (e.Button != MouseButtons.Right)
+                return;
+
+            ctxMenu.Items.Clear();
+            ctxMenu.Items.Add("Generate Uncompressed", null, (_, __) => GenerateYamlClick(SongDataSaveType.standard));
+            ctxMenu.Items.Add("Generate With Song Json", null, (_, __) => GenerateYamlClick(SongDataSaveType.file));
+            ctxMenu.Items.Add("Generate With Compressed Song Json", null, (_, __) => GenerateYamlClick(SongDataSaveType.fileCompressed));
+            ctxMenu.Show(btnGenYaml, new Point(e.X, e.Y));
+
+        }
+
         private void SaveSongData(bool AsHash)
         {
             var songDict = ExportFile.ToDictionary(x => x.core.SongChecksum, x => x.Compress());
@@ -492,51 +506,83 @@ namespace Yaml_Creator
             }
         }
 
+        private enum SongDataSaveType { standard, compressed, file, fileCompressed }
+
         private const int MaxRecommendedSongs = 500;
-        private void SaveYaml(object sender, EventArgs e)
+        private void GenerateYamlClick(SongDataSaveType type)
         {
             if (String.IsNullOrWhiteSpace(YAML.name))
-                MessageBox.Show("You must enter a slot name!");
-            else if (YAML.YAYARG.song_pools.Count < 1)
-                MessageBox.Show("You must create at least one song pool! Go to the song pool tab to create one!");
-            else if (YAML.YAYARG.song_pools.Select(x => x.Value.amount_in_pool).Sum() < YAML.YAYARG.starting_songs + 1)
-                MessageBox.Show("Not enough songs in your song pools. Add more songs to your pools");
-            else
             {
-                ValidateIncludeExcludeList();
-                var ExportedSongList = ExportFile;
-                if (ExportedSongList.Length > MaxRecommendedSongs)
-                    RemoveUnneededSongs(out ExportedSongList);
-                if (ExportedSongList.Length > MaxRecommendedSongs)
-                {
-                    var Confirmation = MessageBox.Show(
-                        $"Your seed contains {ExportedSongList.Length} valid songs, which exceeds the recommended maximum of {MaxRecommendedSongs}.\n\n" +
-                        $"Very large song lists can create excessively large YAML files and data packets. This may cause generation failures, " +
-                        $"connection issues, or instability; especially in large multiworld games or sessions hosted on the Archipelago website.\n\n" +
-                        $"It is strongly recommended that you reduce your song list to a smaller, AP-focused setlist.\n\n" +
-                        $"Click OK to proceed and accept these risks, or Cancel to go back.",
-                        "MAX SONG LIMIT EXCEEDED",
-                        MessageBoxButtons.OKCancel,
-                        MessageBoxIcon.Warning);
-                    if (Confirmation != DialogResult.OK)
-                        return;
-                }
+                MessageBox.Show("You must enter a slot name!");
+                return;
+            }
+            else if (YAML.YAYARG.song_pools.Count < 1)
+            {
+                MessageBox.Show("You must create at least one song pool! Go to the song pool tab to create one!");
+                return;
+            }
+            else if (YAML.YAYARG.song_pools.Select(x => x.Value.amount_in_pool).Sum() < YAML.YAYARG.starting_songs + 1)
+            {
+                MessageBox.Show("Not enough songs in your song pools. Add more songs to your pools");
+                return;
+            }
+            ValidateIncludeExcludeList();
+            var ExportedSongList = ExportFile;
+            if (ExportedSongList.Length > MaxRecommendedSongs && (type == SongDataSaveType.compressed || type == SongDataSaveType.fileCompressed))
+                RemoveUnneededSongs(out ExportedSongList);
+            if (ExportedSongList.Length > MaxRecommendedSongs)
+            {
+                var Confirmation = MessageBox.Show(
+                    $"Your seed contains {ExportedSongList.Length} valid songs, which exceeds the recommended maximum of {MaxRecommendedSongs}.\n\n" +
+                    $"Very large song lists can create excessively large YAML files and data packets. This may cause generation failures, " +
+                    $"connection issues, or instability; especially in large multiworld games or sessions hosted on the Archipelago website.\n\n" +
+                    $"It is strongly recommended that you reduce your song list to a smaller, AP-focused setlist.\n\n" +
+                    $"Click OK to proceed and accept these risks, or Cancel to go back.",
+                    "MAX SONG LIMIT EXCEEDED",
+                    MessageBoxButtons.OKCancel,
+                    MessageBoxIcon.Warning);
+                if (Confirmation != DialogResult.OK)
+                    return;
+            }
 
-                YAML.YAYARG.songList = SongDataConverter.ConvertSongDataToBase64(ExportedSongList);
-
+            string DataFilePath = string.Empty;
+            if (type == SongDataSaveType.file || type == SongDataSaveType.fileCompressed)
+            {
+                var songDict = ExportedSongList.ToDictionary(x => x.core.SongChecksum, x => x.Compress());
+                string Json = JsonConvert.SerializeObject(songDict, Formatting.Indented);
                 using (SaveFileDialog saveDialog = new SaveFileDialog())
                 {
                     saveDialog.InitialDirectory = OutputFolder;
-                    saveDialog.FileName = $"{YAML.name}_YAYARG.yaml";
-                    saveDialog.Filter = "YAML files (*.yaml)|*.yaml|All files (*.*)|*.*";
-                    saveDialog.DefaultExt = "yaml";
-                    saveDialog.Title = "Save YAYARG YAML File";
+                    saveDialog.FileName = $"{YAML.name}_song_export.json";
+                    saveDialog.Filter = "JSON files (*.json)|*.json|All files (*.*)|*.*";
+                    saveDialog.DefaultExt = "json";
+                    saveDialog.Title = "Save Song Export File";
 
                     if (saveDialog.ShowDialog() == DialogResult.OK)
-                        YAMLWriter.WriteToFile(YAML, saveDialog.FileName);
+                    {
+                        DataFilePath = saveDialog.FileName;
+                        File.WriteAllText(saveDialog.FileName, Json);
+                    }
+                    else
+                        return;
                 }
             }
+
+            YAML.YAYARG.songList = string.IsNullOrWhiteSpace(DataFilePath) ? SongDataConverter.ConvertSongDataToBase64(ExportedSongList) : Path.GetFileName(DataFilePath);
+
+            using (SaveFileDialog saveDialog = new SaveFileDialog())
+            {
+                saveDialog.InitialDirectory = OutputFolder;
+                saveDialog.FileName = $"{YAML.name}_YAYARG.yaml";
+                saveDialog.Filter = "YAML files (*.yaml)|*.yaml|All files (*.*)|*.*";
+                saveDialog.DefaultExt = "yaml";
+                saveDialog.Title = "Save YAYARG YAML File";
+
+                if (saveDialog.ShowDialog() == DialogResult.OK)
+                    YAMLWriter.WriteToFile(YAML, saveDialog.FileName);
+            }
         }
+        
 
         private void RemoveUnneededSongs(out SongExportExtendedData[] UsedSongs)
         {
