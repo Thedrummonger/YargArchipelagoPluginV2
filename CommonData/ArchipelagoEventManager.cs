@@ -39,6 +39,9 @@ namespace YargArchipelagoPlugin
             if (!parent.IsSessionConnected || parent.seedConfig is null || !parent.seedConfig.SendDlOnSongFail())
                 return;
 
+            if (SettingsManager.Settings.NoFailMode.Value || gameManager.IsPractice || gameManager.PlayerHasFailed)
+                return;
+
             parent.DeathLinkService?.SendDeathLink(new DeathLink(parent.GetSession().Players.ActivePlayer.Name, $"Failed Song {gameManager.Song.Name} by {gameManager.Song.Artist}"));
         }
 
