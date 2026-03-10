@@ -27,6 +27,8 @@ namespace YargArchipelagoPlugin
 
         public static ConfigEntry<CommonData.ItemLog> DefaultItemLog;
         public static ConfigEntry<bool> DefaultShowChat;
+
+        public static ConfigEntry<bool> ShowConnectionDialogOnStartup;
         public void Awake()
         {
             var patcher = new Harmony(pluginGuid);
@@ -44,6 +46,8 @@ namespace YargArchipelagoPlugin
             DefaultShowChat = Config.Bind("Chat", "DefaultShowChat", false, "The default Show Chat setting for new connections.");
             DefaultItemLog = Config.Bind("Chat", "DefaultItemLog", CommonData.ItemLog.ToMe, "The default Item Log setting for new connections.");
 
+            ShowConnectionDialogOnStartup = Config.Bind("Misc", "ShowConnectionDialogOnStartup", false, "Should the connection dialog be opened automatically on launch.");
+
         }
 
         private void Update()
@@ -55,16 +59,24 @@ namespace YargArchipelagoPlugin
             if (kb == null)
                 return;
 
-            if (requireCtrl.Value && !(kb.leftCtrlKey.isPressed || kb.rightCtrlKey.isPressed)) return;
-            if (requireShift.Value && !(kb.leftShiftKey.isPressed || kb.rightShiftKey.isPressed)) return;
-            if (requireAlt.Value && !(kb.leftAltKey.isPressed || kb.rightAltKey.isPressed)) return;
+            bool DialogModifiersSatisfied =
+                (!requireCtrl.Value || kb.leftCtrlKey.isPressed || kb.rightCtrlKey.isPressed) &&
+                (!requireShift.Value || kb.leftShiftKey.isPressed || kb.rightShiftKey.isPressed) &&
+                (!requireAlt.Value || kb.leftAltKey.isPressed || kb.rightAltKey.isPressed);
 
-            if (kb[toggleKey.Value].wasPressedThisFrame)
+            if (DialogModifiersSatisfied && kb[toggleKey.Value].wasPressedThisFrame)
                 ToggleArchipelagoDialog();
+
+            var DevModifiersSatisfied = Keyboard.current != null &&
+                Keyboard.current.ctrlKey.isPressed &&
+                Keyboard.current.shiftKey.isPressed &&
+                Keyboard.current.altKey.isPressed;
+
+            if (DevModifiersSatisfied && Keyboard.current.tKey.wasPressedThisFrame)
+                APToastManager.TestToasts();
         }
         public static void ToggleArchipelagoDialog()
         {
-            //YargAPUtils.TestFlags();
             var dialog = GetOrCreateApDialog();
             dialog.Show = !dialog.Show;
         }

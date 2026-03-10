@@ -146,15 +146,13 @@ namespace YargArchipelagoPlugin
         [HarmonyPatch(typeof(ToastManager), "ShowToast")]
         [HarmonyPrefix]
         public static bool ToastManager_ShowToast(ToastManager __instance, object type, string body, Action onClick) =>
-            !YargAPUtils.HandleAPToasts(__instance, type, body, onClick);
-
-        private static readonly bool IsUsingMenuButton = true;
+            !APToastManager.HandleAPToasts(Convert.ToInt32(type), body, onClick, __instance);
 
         [HarmonyPatch(typeof(MainMenu), "Start")]
         [HarmonyPostfix]
         public static void AddAPButton(MainMenu __instance)
         {
-            if (FirstAwake && !IsUsingMenuButton)
+            if (FirstAwake && ArchipelagoPlugin.ShowConnectionDialogOnStartup.Value)
                 ArchipelagoPlugin.ToggleArchipelagoDialog();
             FirstAwake = false;
 

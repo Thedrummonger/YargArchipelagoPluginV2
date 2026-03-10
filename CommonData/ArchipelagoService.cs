@@ -104,8 +104,8 @@ namespace YargArchipelagoPlugin
                 Archipelago.MultiClient.Net.Enums.ItemsHandlingFlags.AllItems, new Version(0, 6, 1), password: connectionDetails.Password);
             if (Result is LoginFailure failure)
             {
-                ToastManager.ToastError($"Failed to connect!\n{connectionDetails.SlotName}@{connectionDetails.Address}:\n" +
-                    $"{string.Join("\n", failure.Errors)}".FlagAPToast());
+                APToastManager.ToastError($"Failed to connect!\n{connectionDetails.SlotName}@{connectionDetails.Address}:\n" +
+                    $"{string.Join("\n", failure.Errors)}");
                 IsConnecting = false;
                 return;
             }
@@ -122,16 +122,16 @@ namespace YargArchipelagoPlugin
                 if (SlotData.APWorldVersion.Minor != ClientVersion.Minor) MatchingVersion = false;
                 if (!MatchingVersion)
                 {
-                    ToastManager.ToastError($"Version Missmatch!\nWorld Version {SlotData.APWorldVersion}\nClient Version {ClientVersion}".FlagAPToast());
+                    APToastManager.ToastError($"Version Missmatch!\nWorld Version {SlotData.APWorldVersion}\nClient Version {ClientVersion}");
                     ValidData = false;
                 }
             }
             catch (Exception ex)
             {
-                ToastManager.ToastError($"Failed to parse slot data!\n" +
+                APToastManager.ToastError($"Failed to parse slot data!\n" +
                     $"{connectionDetails.SlotName}@{connectionDetails.Address}:\n" +
                     $"{ex.Message}\n" +
-                    $"{ex.GetType()}".FlagAPToast());
+                    $"{ex.GetType()}");
                 ValidData = false;
             }
 
@@ -154,7 +154,7 @@ namespace YargArchipelagoPlugin
             UpdateDeathLinkTags();
             BuildSongLookup();
 
-            ToastManager.ToastSuccess($"Connected Archipelago!\n{connectionDetails.SlotName}@{connectionDetails.Address}".FlagAPToast());
+            APToastManager.ToastSuccess($"Connected Archipelago!\n{connectionDetails.SlotName}@{connectionDetails.Address}");
             File.WriteAllText(Path.Combine(CommonData.DataFolder, "Debug.json"), JsonConvert.SerializeObject(SlotData, Formatting.Indented));
             connectionDetails.Save();
             IsConnecting = false;

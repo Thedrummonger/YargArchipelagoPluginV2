@@ -158,73 +158,6 @@ namespace YargArchipelagoPlugin
             return false;
         }
 
-        public static (UnityEngine.Color color, UnityEngine.Sprite icon) ResolveToastVisuals(ToastManager manager, int typeValue)
-        {
-            // For some reason YARG has to make everything private so we have to hack out the type value of the original toast.
-            string typeName;
-            switch (typeValue)
-            {
-                case 0: typeName = "General"; break;
-                case 1: typeName = "Information"; break;
-                case 2: typeName = "Success"; break;
-                case 3: typeName = "Warning"; break;
-                case 4: typeName = "Error"; break;
-                default: typeName = "General"; break;
-            }
-            var colorField = AccessTools.Field(typeof(ToastManager), "_" + typeName.ToLower() + "Color");
-            var iconField = AccessTools.Field(typeof(ToastManager), "_icon" + typeName);
-            var color = (UnityEngine.Color)colorField.GetValue(manager);
-            var icon = (UnityEngine.Sprite)iconField.GetValue(manager);
-
-            return (color, icon);
-        }
-
-        public enum APToastFlags
-        {
-            [Description("[AP]"), APAssets.APIcon(APAssets.APIcon.White)]
-            Message,
-            [Description("[APP]"), APAssets.APIcon(APAssets.APIcon.Color)]
-            GoodItem,
-            [Description("[APU]"), APAssets.APIcon(APAssets.APIcon.Blue)]
-            JunkItem,
-        }
-        private static readonly Dictionary<string, APToastFlags> ToastPrefixes = Enum.GetValues(typeof(APToastFlags))
-            .Cast<APToastFlags>().ToDictionary(x => x.GetDescription(),x => x,StringComparer.OrdinalIgnoreCase);
-
-        public static string FlagAPToast(this string key, APToastFlags value = APToastFlags.Message) => string.Concat(value.GetDescription(), key);
-
-        public static void TestFlags()
-        {
-            var Flags = Enum.GetValues(typeof(APToastFlags)).Cast<APToastFlags>();
-            foreach(var Flag in Flags)
-            {
-                ToastManager.ToastMessage(Flag.GetDescription() + "General");
-                ToastManager.ToastInformation(Flag.GetDescription() + "Information");
-                ToastManager.ToastSuccess(Flag.GetDescription() + "Success");
-                ToastManager.ToastWarning(Flag.GetDescription() + "Warning");
-                ToastManager.ToastError(Flag.GetDescription() + "Error");
-            }
-        }
-
-        public static bool HandleAPToasts(ToastManager manager, object type, string body, Action onClick)
-        {
-            var match = ToastPrefixes.FirstOrDefault(x => body.StartsWith(x.Key, StringComparison.OrdinalIgnoreCase));
-            if (match.Key == null) return false;
-            var flag = match.Value;
-
-            try
-            {
-                body = body.Substring(flag.GetDescription().Length).TrimStart();
-                int typeValue = Convert.ToInt32(type);
-                var (color, icon) = YargAPUtils.ResolveToastVisuals(manager, typeValue);
-                var prefab = (Toast)AccessTools.Field(typeof(ToastManager), "_toastPrefab").GetValue(manager);
-                UnityEngine.Object.Instantiate(prefab, manager.transform).Initialize("Archipelago", body, APAssets.Get(flag.GetIcon()), color, onClick);
-                return true;
-            }
-            catch (Exception ex) { Debug.LogError($"Failed to create custom toast\n{ex}"); }
-            return false;
-        }
-
         public static bool CouldProductLocationCheck(this GameManager song, APConnectionContainer container, out IEnumerable<SongAPData> APSongEntries)
         {
             APSongEntries = container.SlotData.Songs.Where(x => 
@@ -252,6 +185,94 @@ namespace YargArchipelagoPlugin
         }
     }
 
+    public static class APToastManager
+    {
+        public enum APToastType
+        {
+            General = 100,
+            Information = 101,
+            Success = 102,
+            Warning = 103,
+            Error = 104,
+            Junk = 105,
+            Useful = 106,
+            Progression = 107,
+            Trap = 108
+        }
+        private static readonly AccessTools.FieldRef<ToastManager, Toast> ToastPrefabRef =
+            AccessTools.FieldRefAccess<ToastManager, Toast>("_toastPrefab");
+
+        private static readonly AccessTools.FieldRef<ToastManager, Color> GeneralColorRef =
+            AccessTools.FieldRefAccess<ToastManager, Color>("_generalColor");
+
+        private static readonly AccessTools.FieldRef<ToastManager, Color> InformationColorRef =
+            AccessTools.FieldRefAccess<ToastManager, Color>("_informationColor");
+
+        private static readonly AccessTools.FieldRef<ToastManager, Color> SuccessColorRef =
+            AccessTools.FieldRefAccess<ToastManager, Color>("_successColor");
+
+        private static readonly AccessTools.FieldRef<ToastManager, Color> WarningColorRef =
+            AccessTools.FieldRefAccess<ToastManager, Color>("_warningColor");
+
+        private static readonly AccessTools.FieldRef<ToastManager, Color> ErrorColorRef =
+            AccessTools.FieldRefAccess<ToastManager, Color>("_errorColor");
+
+        private static readonly Type ToastManagerType = typeof(ToastManager);
+
+        private static readonly Type ToastTypeEnum = ToastManagerType.GetNestedType("ToastType", BindingFlags.NonPublic);
+
+        private static readonly MethodInfo AddToastMethod =
+            AccessTools.Method(ToastManagerType, "AddToast", [ToastTypeEnum, typeof(string), typeof(Action)] );
+
+        public static void AddToast(APToastType type, string text, Action onClick = null)
+        {
+            object enumValue = Enum.ToObject(ToastTypeEnum, (int)type);
+            AddToastMethod.Invoke(null, [enumValue, text, onClick]);
+        }
+        public static void ToastMessage(string text, Action onClick = null) => AddToast(APToastType.General, text, onClick);
+        public static void ToastInformation(string text, Action onClick = null) => AddToast(APToastType.Information, text, onClick);
+        public static void ToastSuccess(string text, Action onClick = null) => AddToast(APToastType.Success, text, onClick);
+        public static void ToastWarning(string text, Action onClick = null) => AddToast(APToastType.Warning, text, onClick);
+        public static void ToastError(string text, Action onClick = null) => AddToast(APToastType.Error, text, onClick);
+        public static void ToastJunkItem(string text, Action onClick = null) => AddToast(APToastType.Junk, text, onClick);
+        public static void ToastUsefulItem(string text, Action onClick = null) => AddToast(APToastType.Useful, text, onClick);
+        public static void ToastProgressionItem(string text, Action onClick = null) => AddToast(APToastType.Progression, text, onClick);
+        public static void ToastTrapItem(string text, Action onClick = null) => AddToast(APToastType.Trap, text, onClick);
+
+        public static bool HandleAPToasts(int type, string body, Action onClick, ToastManager manager)
+        {
+            if (type < 100) return false;
+            var ToastType = (APToastType)type;
+
+            var (text, color, icon) = ToastType switch
+            {
+                APToastType.General => ("Archipelago", GeneralColorRef(manager), APAssets.Get(APAssets.APIcon.White)),
+                APToastType.Information => ("Archipelago", InformationColorRef(manager), APAssets.Get(APAssets.APIcon.White)),
+                APToastType.Success => ("Archipelago", SuccessColorRef(manager), APAssets.Get(APAssets.APIcon.White)),
+                APToastType.Warning => ("Archipelago", WarningColorRef(manager), APAssets.Get(APAssets.APIcon.White)),
+                APToastType.Error => ("Archipelago", ErrorColorRef(manager), APAssets.Get(APAssets.APIcon.White)),
+                APToastType.Junk => ("Archipelago", Color.cyan, APAssets.Get(APAssets.APIcon.Blue)),
+                APToastType.Useful => ("Archipelago", Color.slateBlue, APAssets.Get(APAssets.APIcon.Color)),
+                APToastType.Progression => ("Archipelago", Color.plum, APAssets.Get(APAssets.APIcon.Color)),
+                APToastType.Trap => ("Archipelago", Color.salmon, APAssets.Get(APAssets.APIcon.Blue)),
+                _ => throw new ArgumentException($"Invalid toast type {type}!")
+            };
+
+            var toast = UnityEngine.Object.Instantiate(ToastPrefabRef(manager), manager.transform);
+            toast.Initialize(text, body, icon, color, onClick);
+            return true;
+        }
+
+        public static void TestToasts()
+        {
+            ToastMessage("Message");
+            ToastJunkItem("Junk");
+            ToastUsefulItem("Useful");
+            ToastProgressionItem("Progression");
+            ToastTrapItem("Trap");
+        }
+    }
+
     public static class APAssets
     {
         public enum APIcon
@@ -262,31 +283,16 @@ namespace YargArchipelagoPlugin
             White
         }
 
-        [AttributeUsage(AttributeTargets.Field)]
-        public sealed class APIconAttribute : Attribute
-        {
-            public APIcon Icon { get; }
-            public APIconAttribute(APIcon icon) { Icon = icon; }
-        }
-        public static APIcon GetIcon(this APToastFlags value)
-        {
-            return value.GetType()?.GetField(value.ToString())?.GetCustomAttributes(typeof(APIconAttribute), false)?
-                .Cast<APIconAttribute>()?.FirstOrDefault()?.Icon?? APIcon.White;
-        }
-
         static Sprite _black, _blue, _color, _white;
 
-        public static Sprite Get(APIcon icon)
+        public static Sprite Get(APIcon icon) => icon switch
         {
-            switch (icon)
-            {
-                case APIcon.Black: return _black ?? (_black = Load("black-icon.png"));
-                case APIcon.Blue: return _blue ?? (_blue = Load("blue-icon.png"));
-                case APIcon.Color: return _color ?? (_color = Load("color-icon.png"));
-                case APIcon.White: return _white ?? (_white = Load("white-icon.png"));
-                default: return null;
-            }
-        }
+            APIcon.Black => _black ??= Load("black-icon.png"),
+            APIcon.Blue => _blue ??= Load("blue-icon.png"),
+            APIcon.Color => _color ??= Load("color-icon.png"),
+            APIcon.White => _white ??= Load("white-icon.png"),
+            _ => null,
+        };
         static MethodInfo _loadImage;
         static Sprite Load(string suffix)
         {
@@ -305,7 +311,7 @@ namespace YargArchipelagoPlugin
 
             var tex = new Texture2D(2, 2, TextureFormat.RGBA32, false);
 
-            (_loadImage ?? (_loadImage = GetLoadImageMI())).Invoke(null, new object[] { tex, data, false });
+            (_loadImage ??= GetLoadImageMI()).Invoke(null, [tex, data, false]);
 
             return Sprite.Create(tex, new Rect(0, 0, tex.width, tex.height), new Vector2(.5f, .5f), 100f);
         }
@@ -315,7 +321,7 @@ namespace YargArchipelagoPlugin
             var t = Type.GetType("UnityEngine.ImageConversion, UnityEngine.ImageConversionModule")
                  ?? Type.GetType("UnityEngine.ImageConversion, UnityEngine");
 
-            return t.GetMethod("LoadImage", BindingFlags.Public | BindingFlags.Static, null, new[] { typeof(Texture2D), typeof(byte[]), typeof(bool) }, null);
+            return t.GetMethod("LoadImage", BindingFlags.Public | BindingFlags.Static, null, [typeof(Texture2D), typeof(byte[]), typeof(bool)], null);
         }
     }
 }

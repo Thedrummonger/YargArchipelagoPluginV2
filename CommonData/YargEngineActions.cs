@@ -249,16 +249,16 @@ namespace YargArchipelagoPlugin
         private static void ShowMacGuffinStatus(int Current, int Need, string Title)
         {
             if (Current < Need)
-                ToastManager.ToastError($"{Title} goal not met!\nHas: {Current}\nNeed:{Need}".FlagAPToast());
+                APToastManager.ToastError($"{Title} goal not met!\nHas: {Current}\nNeed:{Need}");
             else
-                ToastManager.ToastSuccess($"{Title} goal met!\nHas: {Current}\nNeed:{Need}".FlagAPToast());
+                APToastManager.ToastSuccess($"{Title} goal met!\nHas: {Current}\nNeed:{Need}");
         }
 
         private static void ShowGoalRecieveMessage(APConnectionContainer container, bool Recieved, BaseYargAPItem recieveInfo)
         {
             if (!Recieved)
             {
-                ToastManager.ToastError($"Your goal song unlock item has not been found!".FlagAPToast());
+                APToastManager.ToastError($"Your goal song unlock item has not been found!");
                 return;
             }
             var Team = container.GetSession().Players.ActivePlayer.Team;
@@ -344,7 +344,7 @@ namespace YargArchipelagoPlugin
                     default:
                         return;
                 }
-                ToastManager.ToastInformation($"DeathLink Received!\n\n{deathLink?.Source ?? "Debug"} {deathLink?.Cause ?? "Command"}".FlagAPToast());
+                APToastManager.ToastInformation($"DeathLink Received!\n\n{deathLink?.Source ?? "Debug"} {deathLink?.Cause ?? "Command"}");
             }
             catch (Exception e)
             {

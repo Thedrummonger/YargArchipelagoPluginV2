@@ -114,11 +114,7 @@ namespace YargArchipelagoPlugin
             else if (message is ItemSendLogMessage ItemLog && ShouldRelayItemSend(ItemLog)) Relay = true;
             else if ((message is PlayerSpecificLogMessage || message is ServerChatLogMessage) && parent.seedConfig.InGameAPChat) Relay = true;
 
-            var Flag = GetMessageToastFlag(message, out var wasProgressive);
-            if (Relay && wasProgressive)
-                ToastManager.ToastSuccess(message.ToYargColoredString().FlagAPToast(Flag));
-            else if (Relay) 
-                ToastManager.ToastMessage(message.ToYargColoredString().FlagAPToast(Flag));
+            APToastManager.AddToast(GetMessageToastFlag(message), message.ToYargColoredString());
 
             bool ShouldRelayItemSend(ItemSendLogMessage IL)
             {
@@ -128,17 +124,19 @@ namespace YargArchipelagoPlugin
             }
         }
 
-        private YargAPUtils.APToastFlags GetMessageToastFlag(LogMessage message, out bool WasProgressive)
+        private APToastManager.APToastType GetMessageToastFlag(LogMessage message)
         {
-            WasProgressive = false;
             if (message is ItemSendLogMessage itemSendLog)
             {
-                WasProgressive = itemSendLog.Item.Flags.HasFlag(Archipelago.MultiClient.Net.Enums.ItemFlags.Advancement);
-                if (WasProgressive || itemSendLog.Item.Flags.HasFlag(Archipelago.MultiClient.Net.Enums.ItemFlags.NeverExclude))
-                    return YargAPUtils.APToastFlags.GoodItem;
-                return YargAPUtils.APToastFlags.JunkItem;
+                if (itemSendLog.Item.Flags.HasFlag(Archipelago.MultiClient.Net.Enums.ItemFlags.Advancement))
+                    return APToastManager.APToastType.Progression;
+                if (itemSendLog.Item.Flags.HasFlag(Archipelago.MultiClient.Net.Enums.ItemFlags.NeverExclude))
+                    return APToastManager.APToastType.Useful;
+                if (itemSendLog.Item.Flags.HasFlag(Archipelago.MultiClient.Net.Enums.ItemFlags.Trap))
+                    return APToastManager.APToastType.Trap;
+                return APToastManager.APToastType.Junk;
             }
-            return YargAPUtils.APToastFlags.Message;
+            return APToastManager.APToastType.General;
         }
 
         public void UpdateChatHistory(LogMessage message) => ArchipelagoConnectionDialog.ChatHistory.Add(message);
@@ -149,7 +147,7 @@ namespace YargArchipelagoPlugin
                 return;
             if (!parent.GetSession().Socket.Connected)
             {
-                ToastManager.ToastWarning($"Lost Connection to Archipelago".FlagAPToast());
+                APToastManager.ToastWarning($"Lost Connection to Archipelago");
                 parent.Disconnect();
             }
         }
@@ -206,16 +204,16 @@ namespace YargArchipelagoPlugin
             switch (Item.Type)
             {
                 case StaticItems.StarPower:
-                    ToastManager.ToastInformation($"{FromPlayer.Name} sent you Star Power!".FlagAPToast());
+                    APToastManager.ToastInformation($"{FromPlayer.Name} sent you Star Power!");
                     YargEngineActions.ApplyStarPowerItem(parent);
                     break;
                 case StaticItems.TrapRestart:
                     parent.ResetBuffer();
-                    ToastManager.ToastWarning($"{FromPlayer.Name} sent you a Restart Trap!".FlagAPToast());
+                    APToastManager.ToastWarning($"{FromPlayer.Name} sent you a Restart Trap!");
                     YargEngineActions.ForceRestartSong(parent);
                     break;
                 case StaticItems.TrapRockMeter:
-                    ToastManager.ToastWarning($"{FromPlayer.Name} sent you a Rock Meter Trap!".FlagAPToast());
+                    APToastManager.ToastWarning($"{FromPlayer.Name} sent you a Rock Meter Trap!");
                     YargEngineActions.ApplyRockMetertrapItem(parent);
                     break;
             }
@@ -243,7 +241,7 @@ namespace YargArchipelagoPlugin
                 YargEngineActions.PreventSongFail(engineManager);
                 var ToUse = Pending.First();
                 var Player = ToUse.GetPlayerInfo(parent);
-                ToastManager.ToastSuccess($"{Player.Name} cheered you on!".FlagAPToast());
+                APToastManager.ToastSuccess($"{Player.Name} cheered you on!");
                 parent.seedConfig.ApItemsUsed.Add(ToUse);
                 parent.seedConfig.Save();
                 IsPreventingSongFail = false;
