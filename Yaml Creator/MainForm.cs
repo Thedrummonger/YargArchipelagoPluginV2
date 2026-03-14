@@ -376,6 +376,7 @@ namespace Yaml_Creator
             var lines = new List<string>();
             var validInSeed = new HashSet<SongExportExtendedData>();
             int totalSongCount = 0;
+            double totalWorstCaseTime = 0;
 
             foreach (var pool in YAML.YAYARG.song_pools)
             {
@@ -395,10 +396,14 @@ namespace Yaml_Creator
                 var (count, avg, _) = GetLengthStats(songs);
                 var playTime = FormatSeconds(avg * pool.Value.amount_in_pool);
 
+                double worstCaseTime = GetWorstCaseTime(songs, (int)pool.Value.amount_in_pool);
+                totalWorstCaseTime += worstCaseTime;
+
                 lines.Add($"{"Songs in pool",-20} {pool.Value.amount_in_pool}");
                 lines.Add($"{"Valid candidates",-20} {count}");
                 lines.Add($"{"Avg song length",-20} {FormatSeconds(avg)}");
                 lines.Add($"{"Est. play time",-20} {playTime}");
+                lines.Add($"{"Worst case time",-20} {FormatSeconds(worstCaseTime)}");
                 lines.Add("");
             }
 
@@ -406,6 +411,7 @@ namespace Yaml_Creator
             var allPlay = FormatSeconds(allAvg * totalSongCount);
 
             lines.Insert(0, "");
+            lines.Insert(0, $"{"Worst case time",-20} {FormatSeconds(totalWorstCaseTime)}");
             lines.Insert(0, $"{"Est. play time",-20} {allPlay}");
             lines.Insert(0, $"{"Avg song length",-20} {FormatSeconds(allAvg)}");
             lines.Insert(0, $"{"Valid candidates",-20} {allCount}");
@@ -413,6 +419,11 @@ namespace Yaml_Creator
             lines.Insert(0, $"Overall Seed Stats");
 
             this.ShowTextDialog("Seed Stats", lines);
+        }
+
+        private double GetWorstCaseTime(IEnumerable<SongExportExtendedData> songs, int countNeeded)
+        {
+            return songs.OrderByDescending(x => x.core.Time).Take(countNeeded).Sum(x => x.core.Time);
         }
 
         private string FormatSeconds(double seconds)
