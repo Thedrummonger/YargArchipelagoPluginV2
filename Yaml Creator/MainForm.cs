@@ -528,8 +528,19 @@ namespace Yaml_Creator
             }
             ValidateIncludeExcludeList();
             var ExportedSongList = ExportFile;
+
+            SongDistributor distributor = new SongDistributor().WithAvailableSongs(ExportFile.Where(x => !YAML.YAYARG.song_exclusion_list.Contains(x.core.SongChecksum)))
+                .WithReuseSongs(YAML.YAYARG.reuse_songs).WithInclusionLists(YAML.YAYARG.inclusions_per_pool).WithExclusionLists(YAML.YAYARG.exclusions_per_pool)
+                .WithPools(YAML.YAYARG.song_pools).WithGoalSong(YAML.YAYARG.goal_song_plando, YAML.YAYARG.goal_pool_plando);
+
+
             if (ExportedSongList.Length > MaxRecommendedSongs && (type == SongDataSaveType.compressed || type == SongDataSaveType.fileCompressed))
                 RemoveUnneededSongs(out ExportedSongList);
+
+            if (ExportedSongList.Length > MaxRecommendedSongs && (type == SongDataSaveType.compressed || type == SongDataSaveType.fileCompressed) && 
+                distributor.CreateTrimmedSetlistforYAML(out var trim))
+                    ExportedSongList = trim;
+
             if (ExportedSongList.Length > MaxRecommendedSongs)
             {
                 var Confirmation = MessageBox.Show(

@@ -95,6 +95,7 @@
       <DependentUpon>MainForm.cs</DependentUpon>
     </Compile>
     <Compile Include="RichTextBoxExtensions.cs" />
+    <Compile Include="SongDistribution.cs" />
     <Compile Include="ValueSelectForm.cs">
       <SubType>Form</SubType>
     </Compile>

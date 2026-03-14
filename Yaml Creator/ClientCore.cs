@@ -383,7 +383,9 @@ namespace Yaml_Creator
 
         private Color GetColor(Archipelago.MultiClient.Net.Models.Hint hint)
         {
-            var AdvancementItem = Archipelago.MultiClient.Net.Colors.ColorUtils.GetColor(hint).Value;
+            var PalletColor = Archipelago.MultiClient.Net.Colors.ColorUtils.GetColor(hint);
+            if (PalletColor is null) return Color.White;
+            var AdvancementItem = PalletColor.Value;
             var APColor = Archipelago.MultiClient.Net.Colors.BuiltInPalettes.Dark[AdvancementItem];
             return Color.FromArgb(APColor.R, APColor.G, APColor.B);
         }
