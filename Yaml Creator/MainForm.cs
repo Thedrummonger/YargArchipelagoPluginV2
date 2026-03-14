@@ -396,7 +396,7 @@ namespace Yaml_Creator
                 var (count, avg, _) = GetLengthStats(songs);
                 var playTime = FormatSeconds(avg * pool.Value.amount_in_pool);
 
-                double worstCaseTime = GetWorstCaseTime(songs, (int)pool.Value.amount_in_pool);
+                double worstCaseTime = GetWorstCaseTime(songs, (int)pool.Value.amount_in_pool + pool.Value.random_variance);
                 totalWorstCaseTime += worstCaseTime;
 
                 lines.Add($"{"Songs in pool",-20} {pool.Value.amount_in_pool}");
