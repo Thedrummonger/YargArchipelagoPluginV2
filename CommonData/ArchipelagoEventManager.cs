@@ -160,11 +160,7 @@ namespace YargArchipelagoPlugin
             PendingTrapsFiller = true;
         }
 
-        public void FlagSongLibraryForUpdate()
-        {
-            if (parent.IsInSong(out _, out _) || !YargEngineActions.UpdateRecommendedSongsMenu())
-                APPatches.HasAvailableAPSongUpdate = true;
-        }
+        public static void FlagSongLibraryForUpdate() => APPatches.HasAvailableAPSongUpdate = true;
 
         public bool PendingTrapsFiller = false;
         private static readonly TimeSpan fillerBuffer = TimeSpan.FromSeconds(5);

@@ -572,7 +572,7 @@ namespace YargArchipelagoPlugin
             container.seedConfig.ApItemsUsed.Add(_item);
             container.seedConfig.Save();
             RemoveBlockerDialog();
-            YargEngineActions.UpdateRecommendedSongsMenu();
+            ArchipelagoEventManager.FlagSongLibraryForUpdate();
             var SongData = SelectedSong.GetYargSongEntry(container);
             var Display = SongData is null ? SelectedSong.GetActiveHash(container) : $"{SongData.Name} by {SongData.Artist}";
             YargEngineActions.ShowPoolData(container, $"New Requirements for {Display}", new SongPool { instrument = SelectedSong.GetPool(container.SlotData).instrument, completion_requirements = NewReqs });
@@ -717,7 +717,7 @@ namespace YargArchipelagoPlugin
             container.seedConfig.ApItemsUsed.Add(_item);
             container.seedConfig.Save();
             RemoveBlockerDialog();
-            YargEngineActions.UpdateRecommendedSongsMenu();
+            ArchipelagoEventManager.FlagSongLibraryForUpdate();
             DialogManager.Instance.ShowMessage($"Song Replaced", $"Replaced\n{ToReplace}\n\nwith\n{Replacement}\n\nIn Pool\n{toReplace.PoolName}");
         }
     }
@@ -771,7 +771,7 @@ namespace YargArchipelagoPlugin
                 return;
             }
             APToastManager.ToastSuccess($"Purchased one {Item.GetDescription()}");
-            YargEngineActions.UpdateRecommendedSongsMenu();
+            ArchipelagoEventManager.FlagSongLibraryForUpdate();
         }
     }
 }

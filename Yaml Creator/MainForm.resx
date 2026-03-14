@@ -120,6 +120,18 @@
   <metadata name="YamlTT.TrayLocation" type="System.Drawing.Point, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
     <value>132, 17</value>
   </metadata>
+  <data name="chkExportSongListJsonWithYaml.ToolTip" xml:space="preserve">
+    <value>Exports your song list as a seperate JSON file. The {slotName}_song_export.json file must be placed in the 
+"YAYARG Song Data" folder located in the root Archipelago directory of the user generating the seed.</value>
+  </data>
+  <data name="chkPregenSongs.ToolTip" xml:space="preserve">
+    <value>Pregenerates a random subset of songs, only big enough to fill your pools, when you export the yaml.
+This will drastically reduce your song list size, but will result in the same song list each gen until you re-export your yaml.</value>
+  </data>
+  <data name="chkRemoveUnplacable.ToolTip" xml:space="preserve">
+    <value>Removes songs from your songlist that do not fit into any of your pools when exporting your song list to the YAML
+This will reduce your song list size, but you will be unable to safely edit your pools manually after the YAML is exported</value>
+  </data>
   <metadata name="YamlTT.TrayLocation" type="System.Drawing.Point, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
     <value>132, 17</value>
   </metadata>

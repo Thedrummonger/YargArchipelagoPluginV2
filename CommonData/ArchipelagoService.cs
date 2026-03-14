@@ -194,7 +194,7 @@ namespace YargArchipelagoPlugin
             SlotData = null;
             seedConfig = null;
             Session = null;
-            eventManager.FlagSongLibraryForUpdate();
+            ArchipelagoEventManager.FlagSongLibraryForUpdate();
         }
 
         private bool _Listening = false;

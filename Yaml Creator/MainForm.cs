@@ -10,7 +10,6 @@ using System.Runtime.CompilerServices;
 using System.Text;
 using System.Windows.Forms;
 using YargArchipelagoPlugin;
-using static System.Windows.Forms.VisualStyles.VisualStyleElement.ProgressBar;
 using static Yaml_Creator.SongData;
 using static Yaml_Creator.Utility;
 using static YargArchipelagoCommon.CommonData;
@@ -29,6 +28,7 @@ namespace Yaml_Creator
         public MainForm()
         {
             InitializeComponent();
+            YamlTT.AutoPopDelay = int.MaxValue;
 
             if (File.Exists(cache))
             {
@@ -38,6 +38,7 @@ namespace Yaml_Creator
             if (YAML is null)
                 YAML = new YAMLCore();
 
+            SetDataSources();
             LoadYamlToControls();
             CreateListeners();
             Directory.CreateDirectory(OutputFolder);
@@ -55,6 +56,19 @@ namespace Yaml_Creator
             this.lbActiveSongs.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.DisableResizing;
 
             InitializeClientComponents();
+        }
+
+        private void SetDataSources()
+        {
+            cmbEnergyLink.DataSource = Utility.GetEnumDataSource<EnergyLinkType>();
+            cmbDeathLink.DataSource = Utility.GetEnumDataSource<DeathLinkType>();
+            cmbReward1Diff.DataSource = Utility.GetEnumDataSource<SupportedDifficulty>();
+            cmbReward1Score.DataSource = Utility.GetEnumDataSource<CompletionReq>();
+            cmbReward2Diff.DataSource = Utility.GetEnumDataSource<SupportedDifficulty>();
+            cmbReward2Score.DataSource = Utility.GetEnumDataSource<CompletionReq>();
+            txtNewPoolIsntrument.DataSource = Utility.GetEnumDataSource<SupportedInstrument>();
+            cmbAccessibility.DataSource = Utility.GetEnumDataSource<YamlAccessibility>();
+            lbSongPoolList.DataSource = YAML.YAYARG.song_pools.Select(x => new SongPoolContainer(x.Key, x.Value)).ToArray();
         }
 
         private void Form1_Load(object sender, EventArgs e)
@@ -265,8 +279,6 @@ namespace Yaml_Creator
             nudFameAmount.ValueChanged += (s, e) => YAML.YAYARG.fame_point_amount = (int)nudFameAmount.Value;
             chkGoalItemNeeded.CheckedChanged += (s, e) => YAML.YAYARG.goal_song_item_needed = chkGoalItemNeeded.Checked;
             //Link Options 
-            cmbEnergyLink.DataSource = Utility.GetEnumDataSource<EnergyLinkType>();
-            cmbDeathLink.DataSource = Utility.GetEnumDataSource<DeathLinkType>();
             cmbEnergyLink.SelectedIndexChanged += (s, e) => YAML.YAYARG.energy_link = (cmbEnergyLink.SelectedItem as DisplayItem<EnergyLinkType>)?.Value ?? EnergyLinkType.disabled;
             cmbDeathLink.SelectedIndexChanged += (s, e) => YAML.YAYARG.death_link = (cmbDeathLink.SelectedItem as DisplayItem<DeathLinkType>)?.Value ?? DeathLinkType.disabled;
             //Goal Plando
@@ -301,11 +313,10 @@ namespace Yaml_Creator
             nudRockTrap.ValueChanged += (s, e) => YAML.YAYARG.rock_meter_trap = (int)nudRockTrap.Value;
             nudNothingItem.ValueChanged += (s, e) => YAML.YAYARG.nothing_item = (int)nudNothingItem.Value;
             nudFailPrevention.ValueChanged += (s, e) => YAML.YAYARG.fail_prevention = (int)nudFailPrevention.Value;
+
+            nudProgressionBalancing.ValueChanged += (s, e) => YAML.YAYARG.progression_balancing = (int)nudProgressionBalancing.Value;
+            cmbAccessibility.SelectedIndexChanged += (s, e) => YAML.YAYARG.accessibility = (YamlAccessibility)cmbAccessibility.SelectedIndex;
             //Song Pools
-            cmbReward1Diff.DataSource = Utility.GetEnumDataSource<SupportedDifficulty>();
-            cmbReward1Score.DataSource = Utility.GetEnumDataSource<CompletionReq>();
-            cmbReward2Diff.DataSource = Utility.GetEnumDataSource<SupportedDifficulty>();
-            cmbReward2Score.DataSource = Utility.GetEnumDataSource<CompletionReq>();
             // Song Pool controls
             nudAmountInPool.ValueChanged += (s, e) => SavePoolValues();
             nudPoolRandomVariance.ValueChanged += (s, e) => SavePoolValues();
@@ -320,13 +331,11 @@ namespace Yaml_Creator
 
             btnListValidSongs.Click += ListValidSongs;
 
-            lbSongPoolList.DataSource = YAML.YAYARG.song_pools.Select(x => new SongPoolContainer(x.Key, x.Value)).ToArray();
             lbSongPoolList.SelectedIndexChanged += (s, e) => 
             { 
                 SelectedSongPool = lbSongPoolList.SelectedItem is SongPoolContainer kvp ? kvp : null;  
                 LoadSongPool();
             };
-            txtNewPoolIsntrument.DataSource = Utility.GetEnumDataSource<SupportedInstrument>();
             lbActiveSongs.CurrentCellDirtyStateChanged += (s, e) => {
                 if (lbActiveSongs.IsCurrentCellDirty) lbActiveSongs.CommitEdit(DataGridViewDataErrorContexts.Commit);
             };
@@ -365,7 +374,7 @@ namespace Yaml_Creator
                 ctxMenu.Show(btnExport, new Point(0, btnExport.Height));
             };
 
-            btnGenYaml.Click += (_, __) => GenerateYamlClick(SongDataSaveType.compressed);
+            btnGenYaml.Click += (_, __) => GenerateYamlClick();
             btnGenYaml.MouseDown += GenerateRightClick;
 
             btnSeedStats.Click += ShowSeedStats;
@@ -490,12 +499,6 @@ namespace Yaml_Creator
             if (e.Button != MouseButtons.Right)
                 return;
 
-            ctxMenu.Items.Clear();
-            ctxMenu.Items.Add("Generate Uncompressed", null, (_, __) => GenerateYamlClick(SongDataSaveType.standard));
-            ctxMenu.Items.Add("Generate With Song Json", null, (_, __) => GenerateYamlClick(SongDataSaveType.file));
-            ctxMenu.Items.Add("Generate With Compressed Song Json", null, (_, __) => GenerateYamlClick(SongDataSaveType.fileCompressed));
-            ctxMenu.Show(btnGenYaml, new Point(e.X, e.Y));
-
         }
 
         private void SaveSongData(bool AsHash)
@@ -520,7 +523,7 @@ namespace Yaml_Creator
         private enum SongDataSaveType { standard, compressed, file, fileCompressed }
 
         private const int MaxRecommendedSongs = 500;
-        private void GenerateYamlClick(SongDataSaveType type)
+        private void GenerateYamlClick()
         {
             if (String.IsNullOrWhiteSpace(YAML.name))
             {
@@ -540,17 +543,19 @@ namespace Yaml_Creator
             ValidateIncludeExcludeList();
             var ExportedSongList = ExportFile;
 
-            SongDistributor distributor = new SongDistributor().WithAvailableSongs(ExportFile.Where(x => !YAML.YAYARG.song_exclusion_list.Contains(x.core.SongChecksum)))
-                .WithReuseSongs(YAML.YAYARG.reuse_songs).WithInclusionLists(YAML.YAYARG.inclusions_per_pool).WithExclusionLists(YAML.YAYARG.exclusions_per_pool)
-                .WithPools(YAML.YAYARG.song_pools).WithGoalSong(YAML.YAYARG.goal_song_plando, YAML.YAYARG.goal_pool_plando);
+            if (chkRemoveUnplacable.Checked)
+                ExportedSongList = RemoveUnneededSongs(ExportFile);
 
-
-            if (ExportedSongList.Length > MaxRecommendedSongs && (type == SongDataSaveType.compressed || type == SongDataSaveType.fileCompressed))
-                RemoveUnneededSongs(out ExportedSongList);
-
-            if (ExportedSongList.Length > MaxRecommendedSongs && (type == SongDataSaveType.compressed || type == SongDataSaveType.fileCompressed) && 
-                distributor.CreateTrimmedSetlistforYAML(out var trim))
+            if (chkPregenSongs.Checked)
+            {
+                SongDistributor distributor = new SongDistributor().WithAvailableSongs(ExportFile.Where(x => !YAML.YAYARG.song_exclusion_list.Contains(x.core.SongChecksum)))
+                    .WithReuseSongs(YAML.YAYARG.reuse_songs).WithInclusionLists(YAML.YAYARG.inclusions_per_pool).WithExclusionLists(YAML.YAYARG.exclusions_per_pool)
+                    .WithPools(YAML.YAYARG.song_pools).WithGoalSong(YAML.YAYARG.goal_song_plando, YAML.YAYARG.goal_pool_plando);
+                if (distributor.CreateTrimmedSetlistforYAML(out var trim))
                     ExportedSongList = trim;
+                else
+                    return;
+            }
 
             if (ExportedSongList.Length > MaxRecommendedSongs)
             {
@@ -568,7 +573,7 @@ namespace Yaml_Creator
             }
 
             string DataFilePath = string.Empty;
-            if (type == SongDataSaveType.file || type == SongDataSaveType.fileCompressed)
+            if (chkExportSongListJsonWithYaml.Checked)
             {
                 var songDict = ExportedSongList.ToDictionary(x => x.core.SongChecksum, x => x.Compress());
                 string Json = JsonConvert.SerializeObject(songDict, Formatting.Indented);
@@ -606,9 +611,9 @@ namespace Yaml_Creator
         }
         
 
-        private void RemoveUnneededSongs(out SongExportExtendedData[] UsedSongs)
+        private SongExportExtendedData[] RemoveUnneededSongs(SongExportExtendedData[] CurrentSongs)
         {
-            UsedSongs = ExportFile.Where(IsUsableBySeed).ToArray();
+            return CurrentSongs.Where(IsUsableBySeed).ToArray();
 
             bool IsUsableBySeed(SongExportExtendedData song)
             {
@@ -764,6 +769,12 @@ namespace Yaml_Creator
             nudRockTrap.Value = YAML.YAYARG.rock_meter_trap;
             nudNothingItem.Value = YAML.YAYARG.nothing_item;
             nudFailPrevention.Value = YAML.YAYARG.fail_prevention;
+
+            nudProgressionBalancing.Value = YAML.YAYARG.progression_balancing;
+
+            cmbDeathLink.SelectedIndex = (int)YAML.YAYARG.death_link;
+            cmbEnergyLink.SelectedIndex = (int)YAML.YAYARG.energy_link;
+            cmbAccessibility.SelectedIndex = (int)YAML.YAYARG.accessibility;
         }
 
         private void ValidateIncludeExcludeList()

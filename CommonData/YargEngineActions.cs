@@ -51,16 +51,6 @@ namespace YargArchipelagoPlugin
             return SongData;
         }
 
-        public static bool UpdateRecommendedSongsMenu()
-        {
-            var Menu = UnityEngine.Object.FindFirstObjectByType<MusicLibraryMenu>();
-            if (Menu == null || !Menu.gameObject.activeInHierarchy)
-                return false;
-
-            Menu.APRefreshAndReselect(true);
-            return true;
-        }
-
         private static int GetListViewIndex(List<ViewType> listView, string Key)
         {
 #if STABLE

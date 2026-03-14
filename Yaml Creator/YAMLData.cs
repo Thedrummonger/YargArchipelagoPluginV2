@@ -12,10 +12,15 @@ namespace Yaml_Creator
         public string game = "YAYARG";
         public YARGSettings YAYARG = new YARGSettings();
     }
+    public enum YamlAccessibility
+    {
+        full,
+        minimal
+    }
     public class YARGSettings
     {
         public int progression_balancing = 50;
-        public string accessibility = "full";
+        public YamlAccessibility accessibility = YamlAccessibility.full;
         public string songList = "";
         public Dictionary<string, YAMLSongPool> song_pools = new Dictionary<string, YAMLSongPool>();
         public HashSet<string> song_exclusion_list = new HashSet<string>();

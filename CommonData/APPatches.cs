@@ -76,8 +76,22 @@ namespace YargArchipelagoPlugin
         [HarmonyPostfix]
         public static void MusicLibraryMenu_OnEnable(MusicLibraryMenu __instance)
         {
-            if (HasAvailableAPSongUpdate)
-                HasAvailableAPSongUpdate = !YargEngineActions.UpdateRecommendedSongsMenu();
+            if (!HasAvailableAPSongUpdate)
+                return;
+
+            HasAvailableAPSongUpdate = false;
+            __instance.RefreshAndReselect();
+        }
+
+        [HarmonyPatch(typeof(MusicLibraryMenu), "Update")]
+        [HarmonyPostfix]
+        public static void MusicLibraryMenu_Update(MusicLibraryMenu __instance)
+        {
+            if (!HasAvailableAPSongUpdate)
+                return;
+
+            HasAvailableAPSongUpdate = false;
+            __instance.RefreshAndReselect();
         }
 
         [HarmonyPatch(typeof(MusicLibraryMenu), "CreateNormalViewList")]
