@@ -38,6 +38,7 @@ namespace Yaml_Creator
             if (YAML is null)
                 YAML = new YAMLCore();
 
+            ValidateYAML();
             SetDataSources();
             LoadYamlToControls();
             CreateListeners();
@@ -56,6 +57,8 @@ namespace Yaml_Creator
             this.lbActiveSongs.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.DisableResizing;
 
             InitializeClientComponents();
+
+            File.WriteAllText(cache, JsonConvert.SerializeObject(YAML));
         }
 
         private void SetDataSources()
@@ -694,7 +697,7 @@ namespace Yaml_Creator
             else
             {
                 var Name = txtNewPoolName.Text.Trim();
-                YAML.YAYARG.song_pools.Add(Name, Utility.NewSongPool(instrument.Value, 0, 5));
+                YAML.YAYARG.song_pools.Add(Name, Utility.NewSongPool(instrument.Value));
                 SongPoolListUpdated();
                 RegenerateGoalPoolList();
                 lbSongPoolList.SelectedItem = lbSongPoolList.Items.Cast<SongPoolContainer>()?.FirstOrDefault(x => x.Name == Name);
@@ -736,13 +739,18 @@ namespace Yaml_Creator
             YAML.YAYARG.songList = string.Empty;
             File.WriteAllText(cache, JsonConvert.SerializeObject(YAML));
         }
+
+        private void ValidateYAML()
+        {
+            YAML.YAYARG.song_pack_size = Utility.Clamp(YAML.YAYARG.song_pack_size, 2, 999);
+        }
         private void LoadYamlToControls()
         {
             txtSlotName.Text = YAML.name??"";
 
             // Song Check Settings
             nudSongExtra.Value = YAML.YAYARG.song_check_extra;
-            nudSongPack.Value = Utility.Clamp(YAML.YAYARG.song_pack_size, 2, 999) ;
+            nudSongPack.Value = YAML.YAYARG.song_pack_size;
             nudSongPackPercentage.Value = YAML.YAYARG.song_pack_percentage;
             nudSongPack.Enabled = YAML.YAYARG.song_pack_percentage > 0;
             nudStartingSongs.Value = YAML.YAYARG.starting_songs;
