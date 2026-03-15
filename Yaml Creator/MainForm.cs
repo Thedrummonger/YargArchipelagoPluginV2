@@ -694,7 +694,7 @@ namespace Yaml_Creator
             else
             {
                 var Name = txtNewPoolName.Text.Trim();
-                YAML.YAYARG.song_pools.Add(Name, Utility.NewSongPool(instrument.Value));
+                YAML.YAYARG.song_pools.Add(Name, Utility.NewSongPool(instrument.Value, 0, 5));
                 SongPoolListUpdated();
                 RegenerateGoalPoolList();
                 lbSongPoolList.SelectedItem = lbSongPoolList.Items.Cast<SongPoolContainer>()?.FirstOrDefault(x => x.Name == Name);
