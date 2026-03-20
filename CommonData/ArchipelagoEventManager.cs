@@ -282,13 +282,13 @@ namespace YargArchipelagoPlugin
     }
     public static partial class ExtraAPFunctionalityHelper
     {
-        public const long minEnergyLinkScale = 20000;
-        public const long maxEnergyLinkScale = 1000000;
+        public const long minEnergyLinkScale = 10_000;
+        public const long maxEnergyLinkScale = 500_000;
         public static Dictionary<StaticItems, long> PriceDict = new Dictionary<StaticItems, long>
         {
-            { StaticItems.SwapRandom, 30_000_000_000 },
-            { StaticItems.SwapPick, 35_000_000_000 },
-            { StaticItems.LowerDifficulty, 32_000_000_000 }
+            { StaticItems.SwapRandom, 15_000_000_000 },
+            { StaticItems.SwapPick, 17_000_000_000 },
+            { StaticItems.LowerDifficulty, 16_000_000_000 }
         };
 
         public static string EnergyLinkKey(ArchipelagoSession session) => $"EnergyLink{session.Players.ActivePlayer.Team}";
