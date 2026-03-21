@@ -208,8 +208,12 @@ namespace YargArchipelagoPlugin
             var Items = C.GetAllAquiredActionItems().Where(x => x.Type == Type && !C.seedConfig.ApItemsUsed.Contains(x));
             if (Items.Any())
             {
+                string Title = $"- Use {Type.GetDescription()}";
+#if NIGHTLY
+                Title += $" [{Items.Count()}]";
+#endif
                 var ToUse = Items.First();
-                L.Insert(insertIndex++, new CategoryViewType($"- Use {Type.GetDescription()}", Items.Count(), 
+                L.Insert(insertIndex++, new CategoryViewType(Title, Items.Count(), 
                     Array.Empty<SongEntry>(), () => Show(C, ToUse)));
             }
             return insertIndex;
