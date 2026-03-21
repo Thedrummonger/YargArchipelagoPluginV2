@@ -91,7 +91,7 @@ namespace YargArchipelagoPlugin
                 return;
 
             HasAvailableAPSongUpdate = false;
-            __instance.RefreshAndReselect();
+            __instance.APRefreshAndReselect(true);
         }
 
         [HarmonyPatch(typeof(MusicLibraryMenu), "CreateNormalViewList")]
@@ -192,5 +192,25 @@ namespace YargArchipelagoPlugin
             ((List<NavigatableBehaviour>)YargEngineActions.NavigationGroup_navigatables.GetValue(g))
                 .Sort((x, y) => x.transform.GetSiblingIndex() - y.transform.GetSiblingIndex());
         }
+
+#if NIGHTLY
+        [HarmonyPatch(typeof(MusicLibraryMenu), "OnEnable")]
+        [HarmonyPostfix]
+        public static void MusicLibraryMenu_OnEnable_Postfix(MusicLibraryMenu __instance)
+        {
+            // kill song-based reselection
+            Traverse.Create(typeof(MusicLibraryMenu)).Field("CurrentlyPlaying").SetValue(null);
+            Traverse.Create(__instance).Field("_currentSong").SetValue(null);
+            Traverse.Create(typeof(MusicLibraryMenu)).Field("_forceGoToCurrentlyPlaying").SetValue(false);
+            Traverse.Create(typeof(MusicLibraryMenu)).Field("_forceGoToSong").SetValue(null);
+
+            var viewList = __instance.ViewList;
+            if (viewList == null || viewList.Count == 0)
+                return;
+
+            int lastIndex = Traverse.Create(typeof(MusicLibraryMenu)).Field("_savedIndex").GetValue<int>();
+            __instance.SelectedIndex = Mathf.Clamp(lastIndex, 0, viewList.Count - 1);
+        }
+#endif
     }
 }
