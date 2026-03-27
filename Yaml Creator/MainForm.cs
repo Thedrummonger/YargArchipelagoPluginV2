@@ -622,11 +622,11 @@ namespace Yaml_Creator
             {
                 if (YAML.YAYARG.goal_song_plando == song.core.SongChecksum)
                     return true;
-                if (YAML.YAYARG.inclusions_per_pool.Any(x => x.Value.Contains(song.core.SongChecksum)))
+                if (YAML.YAYARG.inclusions_per_pool.ContainsKey(song.core.SongChecksum))
                     return true;
                 if (YAML.YAYARG.song_exclusion_list.Contains(song.core.SongChecksum))
                     return false;
-                return YAML.YAYARG.song_pools.Values.Any(p => song.core.ValidForPool(p));
+                return YAML.YAYARG.song_pools.Values.Any(song.core.ValidForPool);
             }
         }
 
