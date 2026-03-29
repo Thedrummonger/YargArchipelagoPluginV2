@@ -82,19 +82,26 @@ namespace YargArchipelagoPlugin
             target = null;
             return false;
         }
-        private static readonly Instrument[] YARGHighTierDrums = new Instrument[] { Instrument.EliteDrums, Instrument.ProDrums };
-        private static readonly SupportedInstrument[] APDrums = new SupportedInstrument[] { SupportedInstrument.FourLaneDrums, SupportedInstrument.ProDrums, SupportedInstrument.FiveLaneDrums };
+
+        static readonly HashSet<Instrument> YargBaseDrums = [Instrument.FourLaneDrums, Instrument.FiveLaneDrums];
+        static readonly HashSet<SupportedInstrument> APBaseDrums = [SupportedInstrument.FourLaneDrums, SupportedInstrument.FiveLaneDrums];
+
+        static readonly HashSet<Instrument> YargProDrums = [Instrument.ProDrums, Instrument.EliteDrums];
+        static readonly HashSet<SupportedInstrument> APAllDrums = [SupportedInstrument.ProDrums, .. APBaseDrums];
+
         public static bool PlayedValidInsturmentForCheck(Instrument YargInstrument, SupportedInstrument CheckInstrument)
         {
-            HashSet<SupportedInstrument> PlayedInstruments = new HashSet<SupportedInstrument>();
+            HashSet<SupportedInstrument> PlayedInstruments = [];
 
-            if (YARGHighTierDrums.Contains(YargInstrument))
-                foreach(var i in APDrums)
+            // Make four lane and five lane charts interchangable because thats how yarg treats them.
+            if (YargBaseDrums.Contains(YargInstrument))
+                foreach(var i in APBaseDrums)
+                    PlayedInstruments.Add(i);   
+
+            // Pro and Elite drums can clear any Drum chart
+            if (YargProDrums.Contains(YargInstrument))
+                foreach (var i in APAllDrums)
                     PlayedInstruments.Add(i);
-
-            // Yarg allows you to play five lane drum charts with four lane kits naturally, so for now we'll allow them to be completed with four lane kits.
-            if (YargInstrument == Instrument.FourLaneDrums)
-                PlayedInstruments.Add(SupportedInstrument.FiveLaneDrums);
 
             if (IsSupportedInstrument(YargInstrument, out var Played))
                 PlayedInstruments.Add(Played.Value);   
