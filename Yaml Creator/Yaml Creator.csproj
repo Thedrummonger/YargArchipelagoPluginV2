@@ -85,9 +85,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="ClientCore.cs">
-      <SubType>Form</SubType>
-    </Compile>
+    <Compile Include="ClientCore.cs" />
     <Compile Include="CrossPlatformFileLoader.cs" />
     <Compile Include="MainForm.cs">
       <SubType>Form</SubType>
