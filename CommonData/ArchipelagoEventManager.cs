@@ -39,10 +39,18 @@ namespace YargArchipelagoPlugin
             if (!parent.IsSessionConnected || parent.seedConfig is null || !parent.seedConfig.SendDlOnSongFail())
                 return;
 
-            if (SettingsManager.Settings.NoFailMode.Value || gameManager.IsPractice || gameManager.PlayerHasFailed)
+            if (IsNoFail() || gameManager.IsPractice || gameManager.PlayerHasFailed)
                 return;
 
             parent.DeathLinkService?.SendDeathLink(new DeathLink(parent.GetSession().Players.ActivePlayer.Name, $"Failed Song {gameManager.Song.Name} by {gameManager.Song.Artist}"));
+        }
+        public static bool IsNoFail()
+        {
+#if STABLE
+            return SettingsManager.Settings.NoFailMode.Value;
+#else
+            return SettingsManager.Settings.NoFail.Value == YARG.Gameplay.HUD.NoFailMode.On;
+#endif
         }
 
         public void TryCheckSongLocations(GameManager gameManager)
