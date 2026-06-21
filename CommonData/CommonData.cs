@@ -153,8 +153,23 @@ namespace YargArchipelagoCommon
             public long SendingPlayerLocation;
             public string SendingPlayerGame;
 
-            public PlayerInfo GetPlayerInfo(APConnectionContainer container) => 
-                container.IsSessionConnected ? container.GetSession().Players.GetPlayerInfo(SendingPlayerSlot) : null;
+            private PlayerInfo GetPlayerCache = null;
+            public PlayerInfo GetPlayerInfo(BaseConnectionContainer container)
+            {
+                if (!container.IsSessionConnected) return null;
+                GetPlayerCache ??= container.GetSession().Players.GetPlayerInfo(SendingPlayerSlot);
+                return GetPlayerCache;
+            }
+            public string GetLocationsName(BaseConnectionContainer container)
+            {
+                if (!container.IsSessionConnected) return null;
+                return container.GetSession().Locations.GetLocationNameFromId(SendingPlayerLocation, SendingPlayerGame);
+            }
+            public string GetItemInfo(BaseConnectionContainer container)
+            {
+                if (!container.IsSessionConnected) return null;
+                return container.GetSession().Items.GetItemName(ItemID, container.GetSession().ConnectionInfo.Game);
+            }
         }
 
         public class StaticYargAPItem : BaseYargAPItem
@@ -377,7 +392,7 @@ namespace YargArchipelagoCommon
                     SongName = $"[{PoolName}] {SongName}";
                 return SongName;
             }
-            public virtual bool IsSongUnlocked(APConnectionContainer connectionContainer)
+            public virtual bool IsSongUnlocked(BaseConnectionContainer connectionContainer)
             {
                 var HasUnlockItem = connectionContainer.ReceivedSongUnlockItems.ContainsKey(UnlockItemID);
                 var HasInstrument = connectionContainer.ReceivedInstruments.ContainsKey(GetPool(connectionContainer.SlotData).instrument);
@@ -386,7 +401,7 @@ namespace YargArchipelagoCommon
 
             public abstract bool VisableInSongMenu(APConnectionContainer connectionContainer);
 
-            public abstract bool HasAvailableLocations(APConnectionContainer connectionContainer);
+            public abstract bool HasAvailableLocations(BaseConnectionContainer connectionContainer);
             public abstract bool HasAvailableLocations(ArchipelagoSession session);
         }
 
@@ -394,7 +409,7 @@ namespace YargArchipelagoCommon
         {
             public long ExtraLocationID { get; set; }
             public long CompletionLocationID { get; set; }
-            public override bool HasAvailableLocations(APConnectionContainer connectionContainer) => HasAvailableLocations(connectionContainer.GetSession());
+            public override bool HasAvailableLocations(BaseConnectionContainer connectionContainer) => HasAvailableLocations(connectionContainer.GetSession());
             public override bool HasAvailableLocations(ArchipelagoSession session)
             {
                 if (!session.Locations.AllLocationsChecked.Contains(MainLocationID))
@@ -435,11 +450,11 @@ namespace YargArchipelagoCommon
                 };
             }
 
-            public override bool HasAvailableLocations(APConnectionContainer connectionContainer) => HasAvailableLocations(connectionContainer.GetSession());
+            public override bool HasAvailableLocations(BaseConnectionContainer connectionContainer) => HasAvailableLocations(connectionContainer.GetSession());
             public override bool HasAvailableLocations(ArchipelagoSession session) => 
                 !session.Locations.AllLocationsChecked.Contains(MainLocationID);
 
-            public override bool IsSongUnlocked(APConnectionContainer connectionContainer)
+            public override bool IsSongUnlocked(BaseConnectionContainer connectionContainer)
             {
                 if (!base.IsSongUnlocked(connectionContainer))
                     return false;

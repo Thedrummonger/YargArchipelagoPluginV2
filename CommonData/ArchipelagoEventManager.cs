@@ -162,10 +162,13 @@ namespace YargArchipelagoPlugin
 
         public void UpdateAPData()
         {
-            parent.UpdateReceivedItems();
+            parent.UpdateReceivedItems(parent.logger.LogWarning);
             parent.UpdateCheckedLocations();
             FlagSongLibraryForUpdate();
             PendingTrapsFiller = true;
+
+            if (parent.ApItemsRecieved.Any(x => x.Type == StaticItems.Victory))
+                parent.GetSession().SetGoalAchieved();
         }
 
         public static void FlagSongLibraryForUpdate() => APPatches.HasAvailableAPSongUpdate = true;

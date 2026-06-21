@@ -1,5 +1,6 @@
 ﻿using Archipelago.MultiClient.Net;
 using Archipelago.MultiClient.Net.BounceFeatures.DeathLink;
+using Archipelago.MultiClient.Net.Enums;
 using BepInEx.Logging;
 using Cysharp.Threading.Tasks;
 using HarmonyLib;
@@ -20,15 +21,62 @@ using static YargArchipelagoCommon.CommonData;
 
 namespace YargArchipelagoPlugin
 {
-    public class APConnectionContainer
+    public class BaseConnectionContainer 
     {
+        public ArchipelagoSession Session;
         public ArchipelagoSession GetSession() => Session;
-        private ArchipelagoSession Session;
-        public BepInEx.Logging.ManualLogSource logger;
-        private Random SeededRNG = null;
+        public YargSlotData SlotData;
+        public bool ClientConnected => Session?.Socket != null && Session.Socket.Connected;
         public Dictionary<long, BaseYargAPItem> ReceivedSongUnlockItems { get; } = new Dictionary<long, BaseYargAPItem>();
         public Dictionary<SupportedInstrument, BaseYargAPItem> ReceivedInstruments { get; } = new Dictionary<SupportedInstrument, BaseYargAPItem>();
         public HashSet<StaticYargAPItem> ApItemsRecieved { get; } = new HashSet<StaticYargAPItem>();
+
+        public Dictionary<StaticItems, ItemFlags> ItemPriorities = new Dictionary<StaticItems, ItemFlags>();
+        public bool HasActiveSession => GetSession() != null;
+        public bool IsSessionConnected => HasActiveSession && Session.Socket.Connected;
+
+        public bool GoalItemInPool(out bool Recieved, out BaseYargAPItem recieveInfo)
+        {
+            recieveInfo = null;
+            Recieved = false;
+            if (!IsSessionConnected) return false;
+            Recieved = ReceivedSongUnlockItems.TryGetValue(SlotData.GoalData.UnlockItemID, out recieveInfo);
+            // If we have not recieved the item, it was not in our starting items so it is in the pool
+            // If we have recieved it from someone other than the server, it was in the pool.
+            bool inPool = !Recieved || recieveInfo.SendingPlayerSlot > 0;
+            return inPool;
+        }
+
+        public void UpdateReceivedItems(Action<string> Logger)
+        {
+            Dictionary<StaticItems, int> ServerLocProxy = new Dictionary<StaticItems, int>();
+            foreach (var i in Session.Items.AllItemsReceived)
+            {
+                if (StaticItemsById.TryGetValue(i.ItemId, out var item))
+                {
+                    if (i.Player.Slot == 0)
+                    {
+                        if (!ServerLocProxy.ContainsKey(item)) ServerLocProxy[item] = 0;
+                        ServerLocProxy[item]++;
+                    }
+                    ApItemsRecieved.Add(new StaticYargAPItem(item, i.ItemId, i.Player.Slot, i.Player.Slot == 0 ? ServerLocProxy[item] : i.LocationId, i.LocationGame));
+                    if (!ItemPriorities.ContainsKey(item))
+                        ItemPriorities[item] = i.Flags;
+                }
+                else if (InstrumentItemsById.TryGetValue(i.ItemId, out var instrument))
+                    ReceivedInstruments[instrument] = new BaseYargAPItem(i.ItemId, i.Player.Slot, i.LocationId, i.LocationGame);
+                else if (SlotData.SongUnlockIds.Contains(i.ItemId))
+                    ReceivedSongUnlockItems[i.ItemId] = new BaseYargAPItem(i.ItemId, i.Player.Slot, i.LocationId, i.LocationGame);
+                else
+                    Logger($"Received unknown item {i.ItemName} [{i.ItemId}]");
+            }
+        }
+    }
+    public class APConnectionContainer : BaseConnectionContainer
+    {
+        private Random SeededRNG = null;
+
+        public BepInEx.Logging.ManualLogSource logger;
         public HashSet<StaticYargAPItem> GetAllAquiredActionItems()
         {
             HashSet<StaticYargAPItem> Recieved = ApItemsRecieved;
@@ -63,12 +111,7 @@ namespace YargArchipelagoPlugin
         private readonly ArchipelagoEventManager eventManager;
 
         public PersistantData seedConfig { get; private set; } = null;
-
-        public bool HasActiveSession => Session != null;
-        public bool IsSessionConnected => HasActiveSession && Session.Socket.Connected;
         public bool IsConnecting { get; private set; } = false;
-
-        public YargSlotData SlotData { get; private set; }
 
         public SyncTimer APSyncTimer { get; private set; }
         public APConnectionContainer(ManualLogSource logSource)
@@ -258,42 +301,6 @@ namespace YargArchipelagoPlugin
         {
             foreach (var i in Session.Locations.AllLocationsChecked)
                 CheckedLocations.Add(i);
-        }
-
-        public void UpdateReceivedItems()
-        {
-            Dictionary<StaticItems, int> ServerLocProxy = new Dictionary<StaticItems, int>();
-            foreach (var i in Session.Items.AllItemsReceived)
-            {
-                if (StaticItemsById.TryGetValue(i.ItemId, out var item))
-                {
-                    if (i.Player.Slot == 0)
-                    {
-                        if (!ServerLocProxy.ContainsKey(item)) ServerLocProxy[item] = 0;
-                        ServerLocProxy[item]++;
-                    }
-                    ApItemsRecieved.Add(new StaticYargAPItem(item, i.ItemId, i.Player.Slot, i.Player.Slot == 0 ? ServerLocProxy[item] : i.LocationId, i.LocationGame));
-                    if (item == StaticItems.Victory) Session.SetGoalAchieved();
-                }
-                else if (InstrumentItemsById.TryGetValue(i.ItemId, out var instrument))
-                    ReceivedInstruments[instrument] = new BaseYargAPItem(i.ItemId, i.Player.Slot, i.LocationId, i.LocationGame);
-                else if (SlotData.SongUnlockIds.Contains(i.ItemId))
-                    ReceivedSongUnlockItems[i.ItemId] = new BaseYargAPItem(i.ItemId, i.Player.Slot, i.LocationId, i.LocationGame);
-                else
-                    logger.LogWarning($"Received unknown item {i.ItemName} [{i.ItemId}]");
-            }
-        }
-
-        public bool GoalItemInPool(out bool Recieved, out BaseYargAPItem recieveInfo)
-        {
-            recieveInfo = null;
-            Recieved = false;
-            if (!IsSessionConnected) return false;
-            Recieved = ReceivedSongUnlockItems.TryGetValue(SlotData.GoalData.UnlockItemID, out recieveInfo);
-            // If we have not recieved the item, it was not in our starting items so it is in the pool
-            // If we have recieved it from someone other than the server, it was in the pool.
-            bool inPool = !Recieved || recieveInfo.SendingPlayerSlot > 0;
-            return inPool;
         }
 
         public void UpdateDeathLinkTags()
