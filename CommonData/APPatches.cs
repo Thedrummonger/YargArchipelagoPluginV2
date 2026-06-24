@@ -193,7 +193,6 @@ namespace YargArchipelagoPlugin
                 .Sort((x, y) => x.transform.GetSiblingIndex() - y.transform.GetSiblingIndex());
         }
 
-#if NIGHTLY
         [HarmonyPatch(typeof(MusicLibraryMenu), "OnEnable")]
         [HarmonyPostfix]
         public static void MusicLibraryMenu_OnEnable_Postfix(MusicLibraryMenu __instance)
@@ -211,6 +210,5 @@ namespace YargArchipelagoPlugin
             int lastIndex = Traverse.Create(typeof(MusicLibraryMenu)).Field("_savedIndex").GetValue<int>();
             __instance.SelectedIndex = Mathf.Clamp(lastIndex, 0, viewList.Count - 1);
         }
-#endif
     }
 }

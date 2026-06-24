@@ -46,11 +46,7 @@ namespace YargArchipelagoPlugin
         }
         public static bool CanFailSong()
         {
-#if STABLE
-            return !SettingsManager.Settings.NoFailMode.Value;
-#else
             return SettingsManager.Settings.NoFail.Value == YARG.Gameplay.HUD.NoFailMode.Off;
-#endif
         }
 
         public void TryCheckSongLocations(GameManager gameManager)

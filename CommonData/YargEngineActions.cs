@@ -53,42 +53,25 @@ namespace YargArchipelagoPlugin
 
         private static int GetListViewIndex(List<ViewType> listView, string Key)
         {
-#if STABLE
-            var primaryField = AccessTools.Field(typeof(CategoryViewType), "_primary");
-            int insertIndex = -1;
-            for (int i = 0; i < listView.Count; i++)
-            {
-                if (listView[i] is CategoryViewType cat && (string)primaryField.GetValue(cat) == Key)
-                {
-                    insertIndex = i;
-                    break;
-                }
-            }
-            return insertIndex;
-#else
             var primaryField = AccessTools.Field(typeof(ButtonViewType), "_text");
             int insertIndex = -1;
             for (int i = 0; i < listView.Count; i++)
             {
                 if (listView[i] is ButtonViewType button && (string)primaryField.GetValue(button) == Key)
                 {
-                    insertIndex = i+1;
+                    insertIndex = i + 1;
                     break;
                 }
             }
             return insertIndex;
-#endif
         }
 
         public static void InsertAPListViewSongs(APConnectionContainer container, MusicLibraryMenu menu, List<ViewType> listView)
         {
             if (!container.IsSessionConnected) 
                 return;
-#if STABLE
-            int insertIndex = GetListViewIndex(listView, Localize.Key("Menu.MusicLibrary.AllSongs"));
-#else
+
             int insertIndex = GetListViewIndex(listView, Localize.Key("Menu.MusicLibrary.Playlists"));
-#endif
             if (insertIndex < 0) 
                 return;
 
@@ -208,10 +191,7 @@ namespace YargArchipelagoPlugin
             var Items = C.GetAllAquiredActionItems().Where(x => x.Type == Type && !C.seedConfig.ApItemsUsed.Contains(x));
             if (Items.Any())
             {
-                string Title = $"- Use {Type.GetDescription()}";
-#if NIGHTLY
-                Title += $" [{Items.Count()}]";
-#endif
+                string Title = $"- Use {Type.GetDescription()} [{Items.Count()}]";
                 var ToUse = Items.First();
                 L.Insert(insertIndex++, new CategoryViewType(Title, Items.Count(), 
                     Array.Empty<SongEntry>(), () => Show(C, ToUse)));
@@ -549,9 +529,6 @@ namespace YargArchipelagoPlugin
             );
         public static void APRefreshAndReselect(this MusicLibraryMenu menu, bool strictKeepPosition)
         {
-#if STABLE
-            menu.RefreshAndReselect();
-#else
             if (strictKeepPosition)
             {
                 int selectedIndex = _getSelectedIndex(menu);
@@ -560,7 +537,6 @@ namespace YargArchipelagoPlugin
             }
             else
                 menu.RefreshAndReselect();
-#endif
         }
 
         public static readonly FieldInfo NavigatableButton_onClick = AccessTools.Field(typeof(NavigatableButton), "_onClick");
