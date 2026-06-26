@@ -1,6 +1,6 @@
 @echo off
 
-set "MSBUILD=C:\Program Files\Microsoft Visual Studio\2022\Community\MSBuild\Current\Bin\MSBuild.exe"
+set "MSBUILD=C:\Program Files\Microsoft Visual Studio\18\Insiders\MSBuild\Current\Bin\MSBuild.exe"
 set "LINUX_PATH=\\tsclient\_home_thedrummonger\Documents\Yarg AP Release\V2"
 
 if not exist "Builds" mkdir "Builds"

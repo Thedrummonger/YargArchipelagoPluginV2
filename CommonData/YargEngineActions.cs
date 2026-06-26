@@ -66,6 +66,7 @@ namespace YargArchipelagoPlugin
             return insertIndex;
         }
 
+        private static int ButtonInd = 100;
         public static void InsertAPListViewSongs(APConnectionContainer container, MusicLibraryMenu menu, List<ViewType> listView)
         {
             if (!container.IsSessionConnected) 
@@ -75,34 +76,36 @@ namespace YargArchipelagoPlugin
             if (insertIndex < 0) 
                 return;
 
+            ButtonInd = 100;
+
             var AvailableSongs = container.GetAvailableSongs(out var AvailableMissingInst, out var AllKnownSongs);
             bool GoalSongUnlocked = container.SlotData.GoalData.IsSongUnlocked(container);
 
-            listView.Insert(insertIndex++, new CategoryViewType("ARCHIPELAGO".ToRainbowString() + " SONGS", AvailableSongs.Count(),
-                AvailableSongs.Select(x => x.GetYargSongEntry(container)).ToArray(), () => menu.APRefreshAndReselect(true)));
+            listView.Insert(insertIndex++, new ButtonViewType("ARCHIPELAGO".ToRainbowString() + " SONGS", "MusicLibraryIcons[Recommended]", 
+                () => menu.APRefreshAndReselect(true), ButtonInd++, "Refresh AP Song List"));
 
             if (GoalSongUnlocked && container.SlotData.GoalData.HasAvailableLocations(container)
                  && container.SlotData.GoalData.HadYargSongEntry(container, out var GoalSong))
             {
                 var Pool = container.SlotData.GoalData.PoolName;
-                listView.Insert(insertIndex++, new CategoryViewType($"- GOAL SONG: {Pool.ToUpper()}", 1, 
-                    new SongEntry[] { GoalSong }, () => ShowPoolData(container, Pool)));
+                listView.Insert(insertIndex++, new ButtonViewType($"GOAL SONG: {Pool.ToUpper()}", "MusicLibraryIcons[Recommended]",
+                    () => ShowPoolData(container, Pool), ButtonInd++, "Show Goal Song Pool Data"));
                 listView.Insert(insertIndex++, new SongViewType(menu, GoalSong));
             }
 
             insertIndex = PrintSongsList(container, menu, listView, AvailableSongs, insertIndex);
 
-            string MissingInstText = (container.seedConfig.ShowMissingInstruments ? "HIDE " : "SHOW") + " MISSING INSTRUMENTS";
             if (AvailableMissingInst.Any())
-                listView.Insert(insertIndex++, new CategoryViewType(MissingInstText, AvailableMissingInst.Count(), 
-                    AvailableMissingInst.Select(x => x.GetYargSongEntry(container)).ToArray(), () => ToggleShowMissingInst(container, menu)));
+                listView.Insert(insertIndex++, new SortHeaderViewType("SONGS MISSING INSTRUMENTS", AvailableMissingInst.Count(), "missing instruments",
+                    [.. AvailableMissingInst.Select(x => x.GetYargSongEntry(container))], !container.seedConfig.ShowMissingInstruments, 
+                    () => ToggleShowMissingInst(container, menu)));
 
             if (container.seedConfig.ShowMissingInstruments)
                 insertIndex = PrintSongsList(container, menu, listView, AvailableMissingInst, insertIndex, Color.red);
 
 
-            string GoalToggleText = (container.seedConfig.ShowGoalStatus ? "HIDE " : "SHOW ") + "GOAL".ToRainbowString() + " INFO";
-            listView.Insert(insertIndex++, new CategoryViewType(GoalToggleText, 0, Array.Empty<SongEntry>(), () =>
+            listView.Insert(insertIndex++, new SortHeaderViewType("GOAL".ToRainbowString() + " INFO", 0, "goal info",
+                [], !container.seedConfig.ShowGoalStatus, () =>
             {
                 container.seedConfig.ShowGoalStatus = !container.seedConfig.ShowGoalStatus;
                 container.seedConfig.Save();
@@ -111,21 +114,22 @@ namespace YargArchipelagoPlugin
 
             if (container.seedConfig.ShowGoalStatus)
             {
-                listView.Insert(insertIndex++, new CategoryViewType($"- Goal Conditions Met: {GoalSongUnlocked.ToYargColoredString()}", GoalSongUnlocked ? 1 : 0,
-                    Array.Empty<SongEntry>(), () => ShowGoalConditionStatus(container)));
+                listView.Insert(insertIndex++, new ButtonViewType($"Goal Conditions Met: {GoalSongUnlocked.ToYargColoredString()}",
+                    "MusicLibraryIcons[Recommended]", () => ShowGoalConditionStatus(container), ButtonInd++, "Show Goal Condition Status"));
                 insertIndex = AddMacGuffinEntry(StaticItems.SongCompletion, "Setlist", container.SlotData.SetlistNeededForGoal, listView, container, insertIndex);
                 insertIndex = AddMacGuffinEntry(StaticItems.FamePoint, "Fame", container.SlotData.FamePointsForGoal, listView, container, insertIndex);
 
                 if (container.GoalItemInPool(out var GoalItemRecieved, out var recieveInfo))
                     listView.Insert(insertIndex++, 
-                        new CategoryViewType($"- Goal Item {(GoalItemRecieved ? "Found".ToYargColoredString(Color.green) : "Missing".ToYargColoredString(Color.red))}", 
-                        GoalItemRecieved ? 1 : 0, Array.Empty<SongEntry>(), () => ShowGoalRecieveMessage(container, GoalItemRecieved, recieveInfo)));
-                listView.Insert(insertIndex++, new CategoryViewType($"- Reveal Goal Song", 1,
-                    Array.Empty<SongEntry>(), () => DialogManager.Instance.ShowMessage("GOAL SONG", container.SlotData.GoalData.GetDisplayName(container, true))));
+                        new ButtonViewType($"Goal Item", 
+                        "MusicLibraryIcons[Recommended]", () => ShowGoalRecieveMessage(container, GoalItemRecieved, recieveInfo), ButtonInd++, 
+                        (GoalItemRecieved ? "Found".ToYargColoredString(Color.green) : "Missing".ToYargColoredString(Color.red))));
+                listView.Insert(insertIndex++, new ButtonViewType($"Reveal Goal Song", "MusicLibraryIcons[Recommended]", 
+                    () => DialogManager.Instance.ShowMessage("GOAL SONG", container.SlotData.GoalData.GetDisplayName(container, true)), ButtonInd++, ""));
             }
 
-            string MenuToggleText = (container.seedConfig.ShowAPMenu ? "HIDE " : "SHOW ") + "ARCHIPELAGO".ToRainbowString() + " MENU";
-            listView.Insert(insertIndex++, new CategoryViewType(MenuToggleText, 0, Array.Empty<SongEntry>(), () =>
+            listView.Insert(insertIndex++, new SortHeaderViewType("ARCHIPELAGO".ToRainbowString() + " MENU", 0, "ap menu",
+                [], !container.seedConfig.ShowAPMenu, () =>
             {
                 container.seedConfig.ShowAPMenu = !container.seedConfig.ShowAPMenu;
                 container.seedConfig.Save();
@@ -142,8 +146,8 @@ namespace YargArchipelagoPlugin
                 }
 
                 if (container.seedConfig.EnergyLinkMode > EnergyLinkType.disabled || true)
-                    listView.Insert(insertIndex++, new CategoryViewType($"- Open Energy Shop", (int)container.seedConfig.EnergyLinkMode, 
-                        Array.Empty<SongEntry>(), () => EnergyLinkShop.ShowMenu(container)));
+                    listView.Insert(insertIndex++, new ButtonViewType($"Open Energy Shop", "MusicLibraryIcons[Recommended]",
+                        () => EnergyLinkShop.ShowMenu(container), ButtonInd++, "Purchase Filler Items with Energy"));
             }
         }
 
@@ -180,8 +184,8 @@ namespace YargArchipelagoPlugin
             if (Needed <= 0) return I;
             var insertIndex = I;
             var current = C.ApItemsRecieved.Count(x => x.Type == Type);
-            L.Insert(insertIndex++, new CategoryViewType($"- {Name} Goal {current}/{Needed}", current,
-                Array.Empty<SongEntry>(), () => ShowMacGuffinStatus(current, Needed, Name)));
+            L.Insert(insertIndex++, new ButtonViewType($"{Name} Goal", "MusicLibraryIcons[Recommended]",
+                () => ShowMacGuffinStatus(current, Needed, Name), ButtonInd++, $"{current}/{Needed}"));
             return insertIndex;
         }
 
@@ -191,10 +195,9 @@ namespace YargArchipelagoPlugin
             var Items = C.GetAllAquiredActionItems().Where(x => x.Type == Type && !C.seedConfig.ApItemsUsed.Contains(x));
             if (Items.Any())
             {
-                string Title = $"- Use {Type.GetDescription()} [{Items.Count()}]";
                 var ToUse = Items.First();
-                L.Insert(insertIndex++, new CategoryViewType(Title, Items.Count(), 
-                    Array.Empty<SongEntry>(), () => Show(C, ToUse)));
+                L.Insert(insertIndex++, new ButtonViewType($"Use {Type.GetDescription()}", "MusicLibraryIcons[Recommended]",
+                    () => Show(C, ToUse), ButtonInd++, $"{Items.Count()} Remaining"));
             }
             return insertIndex;
         }
@@ -212,7 +215,8 @@ namespace YargArchipelagoPlugin
                     PoolName = PoolName.ToYargColoredString(Color.Value);
 
                 var poolSongs = pool.Select(e => e.GetYargSongEntry(container)).OrderBy(s => s.Name, StringComparer.OrdinalIgnoreCase).ToArray();
-                listView.Insert(insertIndex++, new CategoryViewType($"- AP: {PoolName}", poolSongs.Length, poolSongs, () => ShowPoolData(container, pool.Key)));
+                listView.Insert(insertIndex++, new SortHeaderViewType($"AP: {PoolName}", poolSongs.Length, "ap pool",
+                    poolSongs, false, () => ShowPoolData(container, pool.Key)));
 
                 foreach (var song in poolSongs)
                     listView.Insert(insertIndex++, new SongViewType(menu, song));
