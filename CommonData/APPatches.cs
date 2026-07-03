@@ -210,5 +210,14 @@ namespace YargArchipelagoPlugin
             int lastIndex = Traverse.Create(typeof(MusicLibraryMenu)).Field("_savedIndex").GetValue<int>();
             __instance.SelectedIndex = Mathf.Clamp(lastIndex, 0, viewList.Count - 1);
         }
+
+        [HarmonyPatch( typeof(NavigationScheme.Entry), nameof(NavigationScheme.Entry.Invoke), [typeof(NavigationContext)])]
+        [HarmonyPrefix]
+        public static bool NavigationSchemeEntry_Invoke_Prefix(ref NavigationScheme.Entry __instance)
+        {
+            if (!__instance.Equals(NavigationScheme.Entry.NavigateSelect))
+                return true;
+            return NavigationGroup.CurrentNavigationGroup != null;
+        }
     }
 }

@@ -67,6 +67,8 @@ namespace YargArchipelagoPlugin
         }
 
         private static int ButtonInd = 100;
+
+        static HashSet<string> collapsedHeaders = [];
         public static void InsertAPListViewSongs(APConnectionContainer container, MusicLibraryMenu menu, List<ViewType> listView)
         {
             if (!container.IsSessionConnected) 
@@ -88,9 +90,15 @@ namespace YargArchipelagoPlugin
                  && container.SlotData.GoalData.HadYargSongEntry(container, out var GoalSong))
             {
                 var Pool = container.SlotData.GoalData.PoolName;
-                listView.Insert(insertIndex++, new ButtonViewType($"GOAL SONG: {Pool.ToUpper()}", "MusicLibraryIcons[Recommended]",
-                    () => ShowPoolData(container, Pool), ButtonInd++, "Show Goal Song Pool Data"));
-                listView.Insert(insertIndex++, new SongViewType(menu, GoalSong));
+                var GoalHidden = collapsedHeaders.Contains("GOAL");
+                listView.Insert(insertIndex++, new SortHeaderViewType($"GOAL SONG: {Pool.ToUpper()}", 1 , "Goal Song",
+                    [GoalSong], GoalHidden, () => { 
+                        if (!collapsedHeaders.Remove("GOAL")) 
+                            collapsedHeaders.Add("GOAL"); 
+                        menu.APRefreshAndReselect(true);
+                    }));
+                if (!GoalHidden)
+                    listView.Insert(insertIndex++, new SongViewType(menu, GoalSong));
             }
 
             insertIndex = PrintSongsList(container, menu, listView, AvailableSongs, insertIndex);
@@ -126,6 +134,25 @@ namespace YargArchipelagoPlugin
                         (GoalItemRecieved ? "Found".ToYargColoredString(Color.green) : "Missing".ToYargColoredString(Color.red))));
                 listView.Insert(insertIndex++, new ButtonViewType($"Reveal Goal Song", "MusicLibraryIcons[Recommended]", 
                     () => DialogManager.Instance.ShowMessage("GOAL SONG", container.SlotData.GoalData.GetDisplayName(container, true)), ButtonInd++, ""));
+            }
+
+            listView.Insert(insertIndex++, new SortHeaderViewType("POOL".ToRainbowString() + " INFO", 0, "pool info",
+                [], !container.seedConfig.ShowPoolInfo, () =>
+                {
+                    container.seedConfig.ShowPoolInfo = !container.seedConfig.ShowPoolInfo;
+                    container.seedConfig.Save();
+                    menu.APRefreshAndReselect(true);
+                }));
+
+            if (container.seedConfig.ShowPoolInfo)
+            {
+                foreach (var pool in container.SlotData.Pools)
+                {
+                    var poolName = pool.Key;
+                    var poolData = pool.Value;
+                    listView.Insert(insertIndex++, new ButtonViewType($"{poolName.ToUpper()}", "MusicLibraryIcons[Recommended]",
+                        () => ShowPoolData(container, poolName), ButtonInd++, $"Show {poolName.ToUpper()} Requirements"));
+                }
             }
 
             listView.Insert(insertIndex++, new SortHeaderViewType("ARCHIPELAGO".ToRainbowString() + " MENU", 0, "ap menu",
@@ -211,13 +238,19 @@ namespace YargArchipelagoPlugin
                 .GroupBy(e => e.PoolName))
             {
                 string PoolName = pool.Key.ToUpper();
+                bool IsCollapsed = collapsedHeaders.Contains(PoolName);
                 if (Color.HasValue)
                     PoolName = PoolName.ToYargColoredString(Color.Value);
 
                 var poolSongs = pool.Select(e => e.GetYargSongEntry(container)).OrderBy(s => s.Name, StringComparer.OrdinalIgnoreCase).ToArray();
                 listView.Insert(insertIndex++, new SortHeaderViewType($"AP: {PoolName}", poolSongs.Length, "ap pool",
-                    poolSongs, false, () => ShowPoolData(container, pool.Key)));
+                    poolSongs, IsCollapsed, () => { 
+                        if (!collapsedHeaders.Remove(PoolName)) 
+                            collapsedHeaders.Add(PoolName);
+                        menu.APRefreshAndReselect(true);
+                    }));
 
+                if (IsCollapsed) { continue; }
                 foreach (var song in poolSongs)
                     listView.Insert(insertIndex++, new SongViewType(menu, song));
             }
