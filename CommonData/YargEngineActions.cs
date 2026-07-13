@@ -98,7 +98,7 @@ namespace YargArchipelagoPlugin
                         menu.APRefreshAndReselect(true);
                     }));
                 if (!GoalHidden)
-                    listView.Insert(insertIndex++, new SongViewType(menu, GoalSong));
+                    listView.Insert(insertIndex++, new APSongViewType(menu, GoalSong));
             }
 
             insertIndex = PrintSongsList(container, menu, listView, AvailableSongs, insertIndex);
@@ -252,7 +252,7 @@ namespace YargArchipelagoPlugin
 
                 if (IsCollapsed) { continue; }
                 foreach (var song in poolSongs)
-                    listView.Insert(insertIndex++, new SongViewType(menu, song));
+                    listView.Insert(insertIndex++, new APSongViewType(menu, song));
             }
             return insertIndex;
         }

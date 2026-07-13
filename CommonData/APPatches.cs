@@ -185,6 +185,8 @@ namespace YargArchipelagoPlugin
             ((UnityEngine.UI.Button.ButtonClickedEvent)YargEngineActions.NavigatableButton_onClick.GetValue(b))
                 .AddListener(ArchipelagoPlugin.ToggleArchipelagoDialog);
 
+            var localizer = go.GetComponentInChildren<LocalizeText>(true);
+            if (localizer != null) UnityEngine.Object.Destroy(localizer);
             YargEngineActions.TrySetText(go, "Archipelago");
 
             var g = t.NavigationGroup ?? t.GetComponentInParent<NavigationGroup>();

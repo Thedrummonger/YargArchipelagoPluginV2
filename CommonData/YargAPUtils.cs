@@ -15,8 +15,11 @@ using YARG.Core.Song;
 using YARG.Core.Utility;
 using YARG.Gameplay;
 using YARG.Gameplay.Player;
+using YARG.Menu.ListMenu;
+using YARG.Menu.MusicLibrary;
 using YARG.Menu.Persistent;
 using YARG.Scores;
+using YARG.Song;
 using YargArchipelagoCommon;
 using static YargArchipelagoCommon.CommonData;
 using static YargArchipelagoPlugin.YargAPUtils;
@@ -329,6 +332,27 @@ namespace YargArchipelagoPlugin
                  ?? Type.GetType("UnityEngine.ImageConversion, UnityEngine");
 
             return t.GetMethod("LoadImage", BindingFlags.Public | BindingFlags.Static, null, [typeof(Texture2D), typeof(byte[]), typeof(bool)], null);
+        }
+    }
+
+    public class APSongViewType(MusicLibraryMenu musicLibrary, SongEntry songEntry, string context = "library") : SongViewType(musicLibrary, songEntry, context)
+    {
+        public override string GetPrimaryText(bool selected)
+        {
+            SortString str = SongEntry.Name;
+            return BaseViewType.FormatAs(str, TextType.Primary, selected);
+        }
+
+        public override string GetSecondaryText(bool selected)
+        {
+            SortString str = SongEntry.Artist;
+            return BaseViewType.FormatAs(str, TextType.Secondary, selected);
+        }
+
+        public override Sprite? GetIcon()
+        {
+            SortString str = SongEntry.Source;
+            return SongSources.SourceToIcon(str);
         }
     }
 }
