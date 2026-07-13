@@ -23,6 +23,7 @@ using YARG.Scores;
 using YARG.Settings;
 using YARG.Song;
 using YargArchipelagoCommon;
+using static YargArchipelagoCommon.CommonData;
 
 namespace YargArchipelagoPlugin
 {
@@ -35,7 +36,6 @@ namespace YargArchipelagoPlugin
         public static event Action<GameManager> OnGameManagerUpdateThrottled;
         public static event Action<GameManager> OnRecordScore;
         public static event Action<GameManager> OnSongFail;
-        public static event Action<EngineManager> OnUpdateHappiness;
         public static event Action OnSongContainersUpdated;
         public static bool HasAvailableAPSongUpdate = false;
         public static bool IgnoreScoreForNextSong = false;
@@ -61,7 +61,10 @@ namespace YargArchipelagoPlugin
 
         [HarmonyPatch(typeof(EngineManager), "UpdateHappiness", MethodType.Normal)]
         [HarmonyPrefix]
-        public static void EngineManager_UpdateHappiness(EngineManager __instance) => OnUpdateHappiness?.Invoke(__instance);
+        public static bool EngineManager_UpdateHappiness(EngineManager __instance)
+        {
+            return YargEngineActions.TryPreventSongFail(__instance);
+        }
 
         [HarmonyPatch(typeof(SongContainer), "FillContainers")]
         [HarmonyPostfix]

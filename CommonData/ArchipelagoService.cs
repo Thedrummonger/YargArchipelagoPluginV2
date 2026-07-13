@@ -260,7 +260,6 @@ namespace YargArchipelagoPlugin
             APPatches.OnRecordScore += eventManager.TryCheckSongLocations;
             APPatches.OnRecordScore += eventManager.TryCheckSongGoalSong;
             APPatches.OnSongFail += eventManager.FailedSong;
-            APPatches.OnUpdateHappiness += eventManager.TryUseSongFailPrevent;
             APPatches.OnSongContainersUpdated += BuildSongLookup;
             APPatches.OnGameManagerUpdateThrottled += eventManager.ApplyPendingTrapsFiller;
             _Listening = true;
@@ -285,7 +284,6 @@ namespace YargArchipelagoPlugin
             APPatches.OnRecordScore -= eventManager.TryCheckSongLocations;
             APPatches.OnRecordScore -= eventManager.TryCheckSongGoalSong;
             APPatches.OnSongFail -= eventManager.FailedSong;
-            APPatches.OnUpdateHappiness -= eventManager.TryUseSongFailPrevent;
             APPatches.OnSongContainersUpdated -= BuildSongLookup;
             APPatches.OnGameManagerUpdateThrottled -= eventManager.ApplyPendingTrapsFiller;
             _Listening = false;

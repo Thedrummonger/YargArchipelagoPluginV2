@@ -458,22 +458,6 @@ namespace YargArchipelagoPlugin
             if (_addHappinessMethod == null) _addHappinessMethod = typeof(EngineManager.EngineContainer).GetMethod("AddHappiness", BindingFlags.NonPublic | BindingFlags.Instance);
             _addHappinessMethod?.Invoke(container, new object[] { delta });
         }
-        /// <summary>
-        /// Adds happiness without triggering harmony patches.
-        /// </summary>
-        public static void AddHappinessRaw(this BasePlayer player, float delta) => AddHappinessRaw(player.GetEngineContainer(), delta);
-        /// <summary>
-        /// Adds happiness without triggering harmony patches.
-        /// </summary>
-        public static void AddHappinessRaw(this EngineManager.EngineContainer container, float delta)
-        {
-            if (_happinessProperty == null) _happinessProperty = typeof(EngineManager.EngineContainer).GetProperty("Happiness", BindingFlags.Public | BindingFlags.Instance);
-            if (_updateHappinessMethod == null) _updateHappinessMethod = typeof(EngineManager).GetMethod("UpdateHappiness", BindingFlags.NonPublic | BindingFlags.Instance);
-
-            float newHappiness = Mathf.Clamp(container.Happiness + delta, -3f, 1f);
-            _happinessProperty.SetValue(container, newHappiness);
-            _updateHappinessMethod?.Invoke(container.GetEngineManager(), null);
-        }
 
         /// <summary>
         /// Sets a player's happiness to a specific value.
@@ -518,6 +502,7 @@ namespace YargArchipelagoPlugin
             /// <see cref="EngineManager.EngineContainer"/> private const HAPPINESS_PER_NOTE_HIT = 1f / 168f
             const float HAPPINESS_PER_NOTE_HIT = 1f / 168f;
             const float TARGET_HAPPINESS = 0.25f;
+            if (_happinessProperty == null) _happinessProperty = typeof(EngineManager.EngineContainer).GetProperty("Happiness", BindingFlags.Public | BindingFlags.Instance);
 
             while (engineManager.Happiness < TARGET_HAPPINESS)
             {
@@ -526,7 +511,8 @@ namespace YargArchipelagoPlugin
                 if (lowestContainer == null)
                     break;
 
-                lowestContainer.AddHappinessRaw(HAPPINESS_PER_NOTE_HIT);
+                float newHappiness = Mathf.Clamp(lowestContainer.Happiness + HAPPINESS_PER_NOTE_HIT, -3f, 1f);
+                _happinessProperty.SetValue(lowestContainer, newHappiness);
             }
         }
 
@@ -599,6 +585,44 @@ namespace YargArchipelagoPlugin
                 var f = t.GetField("text", BindingFlags.Public | BindingFlags.Instance);
                 if (f != null && f.FieldType == typeof(string)) { f.SetValue(c, text); return; }
             }
+        }
+
+        public static bool IsPreventingSongFail = false;
+        public static bool TryPreventSongFail(EngineManager __instance)
+        {
+            if (__instance.Happiness > 0.0f)
+                return true;
+
+            if (!ArchipelagoPlugin.APcontainer.IsSessionConnected)
+                return true;
+
+            if (!ArchipelagoPlugin.APcontainer.IsInSong(out var gameManager, out _))
+                return true;
+
+            if (IsPreventingSongFail)
+                return false;
+
+            IsPreventingSongFail = true;
+
+            if (!gameManager.PlayerHasFailed && gameManager.CouldProductLocationCheck(ArchipelagoPlugin.APcontainer, out _))
+            {
+                var Pending = ArchipelagoPlugin.APcontainer.ApItemsRecieved
+                    .Where(x => x.Type == StaticItems.FailPrevention && !ArchipelagoPlugin.APcontainer.seedConfig.ApItemsUsed.Contains(x)).ToList();
+
+                if (Pending.Count > 0)
+                {
+                    YargEngineActions.PreventSongFail(__instance);
+                    var ToUse = Pending.First();
+                    var Player = ToUse.GetPlayerInfo(ArchipelagoPlugin.APcontainer);
+                    APToastManager.ToastSuccess($"{Player.Name} cheered you on!");
+                    ArchipelagoPlugin.APcontainer.seedConfig.ApItemsUsed.Add(ToUse);
+                    ArchipelagoPlugin.APcontainer.seedConfig.Save();
+                }
+            }
+
+            IsPreventingSongFail = false;
+
+            return true;
         }
 
     }

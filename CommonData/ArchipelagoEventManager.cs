@@ -229,29 +229,6 @@ namespace YargArchipelagoPlugin
             YargEngineActions.ApplyDeathLink(parent, deathLink);
         }
 
-        private bool IsPreventingSongFail = false;
-        internal void TryUseSongFailPrevent(EngineManager engineManager)
-        {
-            if (IsPreventingSongFail || !parent.IsSessionConnected || !parent.IsInSong(out var gameManager, out _)) return;
-
-            if (engineManager.Happiness < 0.0f && !gameManager.PlayerHasFailed && gameManager.CouldProductLocationCheck(parent, out _))
-            {
-                var Pending = parent.ApItemsRecieved
-                    .Where(x => x.Type == StaticItems.FailPrevention && !parent.seedConfig.ApItemsUsed.Contains(x)).ToList();
-                if (Pending.Count <= 0)
-                    return;
-                IsPreventingSongFail = true;
-                YargEngineActions.PreventSongFail(engineManager);
-                var ToUse = Pending.First();
-                var Player = ToUse.GetPlayerInfo(parent);
-                APToastManager.ToastSuccess($"{Player.Name} cheered you on!");
-                parent.seedConfig.ApItemsUsed.Add(ToUse);
-                parent.seedConfig.Save();
-                IsPreventingSongFail = false;
-            }
-            
-        }
-
     }
 
     public class SyncTimer
