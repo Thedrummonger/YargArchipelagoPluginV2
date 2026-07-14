@@ -311,8 +311,8 @@ namespace YargArchipelagoPlugin
                 DeathLinkService.DisableDeathLink();
         }
 
-        public List<SongAPData> GetAvailableSongs() => GetAvailableSongs(out _, out _);
-        public List<SongAPData> GetAvailableSongs(out List<SongAPData> MissingInstrument, out List<SongAPData> AllAvailable)
+        public List<SongAPData> GetAvailableSongs(Func<SongEntry, bool> Predicate = null) => GetAvailableSongs(Predicate, out _, out _);
+        public List<SongAPData> GetAvailableSongs(Func<SongEntry, bool> Predicate, out List<SongAPData> MissingInstrument, out List<SongAPData> AllAvailable)
         {
             MissingInstrument = new List<SongAPData>();
             AllAvailable = new List<SongAPData>();
@@ -324,7 +324,8 @@ namespace YargArchipelagoPlugin
                 {
                     if (!ReceivedSongUnlockItems.ContainsKey(song.UnlockItemID)) continue;
                     if (!song.HasAvailableLocations(this)) continue;
-                    if (!song.HadYargSongEntry(this, out _)) continue;
+                    if (!song.HadYargSongEntry(this, out var entry)) continue;
+                    if (Predicate != null && !Predicate(entry)) continue;
                     AllAvailable.Add(song);
                     if (HasInstrument) SongEntries.Add(song);
                     else MissingInstrument.Add(song);

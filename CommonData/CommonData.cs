@@ -1,6 +1,7 @@
 ﻿//Don't Let visual studios lie to me these are needed
 using Archipelago.MultiClient.Net;
 using Archipelago.MultiClient.Net.Helpers;
+using Archipelago.MultiClient.Net.Models;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
@@ -435,6 +436,15 @@ namespace YargArchipelagoCommon
 
             public override bool VisableInSongMenu(APConnectionContainer connectionContainer) =>
                 connectionContainer.ReceivedSongUnlockItems.ContainsKey(UnlockItemID) && HasAvailableLocations(connectionContainer);
+
+            public bool IsHinted(APConnectionContainer connectionContainer, out Hint[] Hints)
+            {
+                Hints = [];
+                if (!connectionContainer.IsSessionConnected) return false;
+                var ServerHints = connectionContainer.GetSession().Hints.GetHints();
+                Hints = [.. ServerHints.Where(x => x.LocationId == MainLocationID || x.LocationId == ExtraLocationID)];
+                return Hints.Any();
+            }
         }
 
         public class GoalData : BaseAPSong

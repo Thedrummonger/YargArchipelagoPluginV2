@@ -23,6 +23,7 @@ using YARG.Gameplay.HUD;
 using YARG.Gameplay.Player;
 using YARG.Localization;
 using YARG.Menu.Dialogs;
+using YARG.Menu.Filters;
 using YARG.Menu.MusicLibrary;
 using YARG.Menu.Navigation;
 using YARG.Menu.Persistent;
@@ -80,7 +81,7 @@ namespace YargArchipelagoPlugin
 
             ButtonInd = 100;
 
-            var AvailableSongs = container.GetAvailableSongs(out var AvailableMissingInst, out var AllKnownSongs);
+            var AvailableSongs = container.GetAvailableSongs(FiltersMenu.ActiveFilterPredicate, out var AvailableMissingInst, out var AllKnownSongs);
             bool GoalSongUnlocked = container.SlotData.GoalData.IsSongUnlocked(container);
 
             listView.Insert(insertIndex++, new ButtonViewType("ARCHIPELAGO".ToRainbowString() + " SONGS", "MusicLibraryIcons[Recommended]", 
@@ -98,7 +99,7 @@ namespace YargArchipelagoPlugin
                         menu.APRefreshAndReselect(true);
                     }));
                 if (!GoalHidden)
-                    listView.Insert(insertIndex++, new APSongViewType(menu, GoalSong));
+                    listView.Insert(insertIndex++, new APSongViewType(menu, GoalSong, false));
             }
 
             insertIndex = PrintSongsList(container, menu, listView, AvailableSongs, insertIndex);
@@ -242,9 +243,10 @@ namespace YargArchipelagoPlugin
                 if (Color.HasValue)
                     PoolName = PoolName.ToYargColoredString(Color.Value);
 
-                var poolSongs = pool.Select(e => e.GetYargSongEntry(container)).OrderBy(s => s.Name, StringComparer.OrdinalIgnoreCase).ToArray();
+                var poolSongs = pool.Select(e => (e.GetYargSongEntry(container), e)).OrderBy(s => s.Item1.Name, StringComparer.OrdinalIgnoreCase).ToArray();
+
                 listView.Insert(insertIndex++, new SortHeaderViewType($"AP: {PoolName}", poolSongs.Length, "ap pool",
-                    poolSongs, IsCollapsed, () => { 
+                    [.. poolSongs.Select(x => x.Item1)], IsCollapsed, () => { 
                         if (!collapsedHeaders.Remove(PoolName)) 
                             collapsedHeaders.Add(PoolName);
                         menu.APRefreshAndReselect(true);
@@ -252,7 +254,7 @@ namespace YargArchipelagoPlugin
 
                 if (IsCollapsed) { continue; }
                 foreach (var song in poolSongs)
-                    listView.Insert(insertIndex++, new APSongViewType(menu, song));
+                    listView.Insert(insertIndex++, new APSongViewType(menu, song.Item1, song.e.IsHinted(container, out _)));
             }
             return insertIndex;
         }

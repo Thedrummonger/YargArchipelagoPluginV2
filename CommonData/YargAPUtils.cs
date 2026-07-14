@@ -335,11 +335,13 @@ namespace YargArchipelagoPlugin
         }
     }
 
-    public class APSongViewType(MusicLibraryMenu musicLibrary, SongEntry songEntry, string context = "library") : SongViewType(musicLibrary, songEntry, context)
+    public class APSongViewType(MusicLibraryMenu musicLibrary, SongEntry songEntry, bool IsHinted, string context = "library") : SongViewType(musicLibrary, songEntry, context)
     {
         public override string GetPrimaryText(bool selected)
         {
             SortString str = SongEntry.Name;
+            if (IsHinted)
+                return $"* {BaseViewType.FormatAs(str, TextType.Primary, selected)}";
             return BaseViewType.FormatAs(str, TextType.Primary, selected);
         }
 
