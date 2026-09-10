@@ -426,7 +426,12 @@ namespace YargArchipelagoPlugin
         /// </summary>
         public static EngineManager GetEngineManager(this EngineManager.EngineContainer container)
         {
-            if (_containerEngineManagerField == null) _containerEngineManagerField = typeof(EngineManager.EngineContainer).GetField("_engineManager", BindingFlags.NonPublic | BindingFlags.Instance);
+            if (_containerEngineManagerField == null)
+            {
+                const BindingFlags flags = BindingFlags.NonPublic | BindingFlags.Instance;
+                _containerEngineManagerField = typeof(EngineManager.EngineContainer).GetField("EngineManager", flags)
+                    ?? typeof(EngineManager.EngineContainer).GetField("_engineManager", flags);
+            }
             return (EngineManager)_containerEngineManagerField?.GetValue(container);
         }
 

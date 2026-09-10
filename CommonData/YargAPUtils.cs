@@ -157,10 +157,19 @@ namespace YargArchipelagoPlugin
                 if (!PlayedValidInsturmentForCheck(player.Player.Profile.CurrentInstrument, pool.instrument)) continue;
                 if (GetSupportedDifficulty(player.Player.Profile.CurrentDifficulty) < diff) continue;
                 HadValidPlayer = true;
-                if (req == CompletionReq.FullCombo && !player.IsFc) continue;
-                bool WasGold = StarAmountHelper.GetStarsFromInt((int)player.Stars) == StarAmount.StarGold;
-                if (req == CompletionReq.GoldStar && !WasGold) continue;
-                if (player.Stars < (int)req) continue;
+                bool metRequirement = req switch
+                {
+                    CompletionReq.Clear => true,
+                    CompletionReq.OneStar => player.Stars >= 1,
+                    CompletionReq.TwoStar => player.Stars >= 2,
+                    CompletionReq.ThreeStar => player.Stars >= 3,
+                    CompletionReq.FourStar => player.Stars >= 4,
+                    CompletionReq.FiveStar => player.Stars >= 5,
+                    CompletionReq.GoldStar => StarAmountHelper.GetStarsFromInt((int)player.Stars) == StarAmount.StarGold,
+                    CompletionReq.FullCombo => player.IsFc,
+                    _ => false
+                };
+                if (!metRequirement) continue;
                 DeathLink = false;
                 return true;
             }
