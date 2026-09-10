@@ -23,11 +23,14 @@ namespace Yaml_Creator
         public static string OutputFolder = Path.Combine(Application.StartupPath, "Output");
         public static SongPoolContainer SelectedSongPool = null;
         public bool IsLoadingNewSongPool = false;
-        private const string cache = "cache";
+        private static string cache => $"{Game} cache";
         private ContextMenuStrip ctxMenu = new ContextMenuStrip();
-        public MainForm()
+        public static string Game;
+        public MainForm(string game = "YAYARG")
         {
+            Game = game;
             InitializeComponent();
+            this.Text = $"{game} YAML Creator";
             YamlTT.AutoPopDelay = int.MaxValue;
 
             if (File.Exists(cache))
@@ -63,12 +66,14 @@ namespace Yaml_Creator
 
         private void SetDataSources()
         {
+            var requirements = Utility.GetEnumDataSource<CompletionReq>().Where(x => Game != "YAYARG" || x.Value != CompletionReq.SixStar).ToList();
+
             cmbEnergyLink.DataSource = Utility.GetEnumDataSource<EnergyLinkType>();
             cmbDeathLink.DataSource = Utility.GetEnumDataSource<DeathLinkType>();
             cmbReward1Diff.DataSource = Utility.GetEnumDataSource<SupportedDifficulty>();
-            cmbReward1Score.DataSource = Utility.GetEnumDataSource<CompletionReq>();
+            cmbReward1Score.DataSource = requirements.ToList();
             cmbReward2Diff.DataSource = Utility.GetEnumDataSource<SupportedDifficulty>();
-            cmbReward2Score.DataSource = Utility.GetEnumDataSource<CompletionReq>();
+            cmbReward2Score.DataSource = requirements.ToList();
             txtNewPoolIsntrument.DataSource = Utility.GetEnumDataSource<SupportedInstrument>();
             cmbAccessibility.DataSource = Utility.GetEnumDataSource<YamlAccessibility>();
             lbSongPoolList.DataSource = YAML.YAYARG.song_pools.Select(x => new SongPoolContainer(x.Key, x.Value)).ToArray();
@@ -102,7 +107,7 @@ namespace Yaml_Creator
             {
                 MessageBox.Show(
                     "ERROR: Song data file could not be found.\n\n" +
-                    "Ensure you have launched YARG at least once with the mod loaded.",
+                    "Ensure you have launched " + Game + " at least once with the mod loaded.",
                     "File Not Found",
                     MessageBoxButtons.OK,
                     MessageBoxIcon.Error);
@@ -117,7 +122,7 @@ namespace Yaml_Creator
                     "ERROR: Song data file could not be parsed.\n\n" +
                     $"File: {path}\n\n" +
                     $"Error: {error}\n\n" +
-                    "The file may be corrupted. Try launching YARG again to regenerate it.",
+                    "The file may be corrupted. Try launching " + Game + " again to regenerate it.",
                     "Parse Error",
                     MessageBoxButtons.OK,
                     MessageBoxIcon.Error);
@@ -603,10 +608,10 @@ namespace Yaml_Creator
             using (SaveFileDialog saveDialog = new SaveFileDialog())
             {
                 saveDialog.InitialDirectory = OutputFolder;
-                saveDialog.FileName = $"{YAML.name}_YAYARG.yaml";
+                saveDialog.FileName = $"{YAML.name}_{Game}.yaml";
                 saveDialog.Filter = "YAML files (*.yaml)|*.yaml|All files (*.*)|*.*";
                 saveDialog.DefaultExt = "yaml";
-                saveDialog.Title = "Save YAYARG YAML File";
+                saveDialog.Title = $"Save {Game} YAML File";
 
                 if (saveDialog.ShowDialog() == DialogResult.OK)
                     YAMLWriter.WriteToFile(YAML, saveDialog.FileName);

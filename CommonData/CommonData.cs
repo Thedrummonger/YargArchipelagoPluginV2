@@ -128,6 +128,7 @@ namespace YargArchipelagoCommon
             ThreeStar,
             FourStar,
             FiveStar,
+            SixStar,
             GoldStar,
             FullCombo
         }

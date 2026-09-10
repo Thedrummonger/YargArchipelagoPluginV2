@@ -533,18 +533,23 @@ namespace YargArchipelagoPlugin
                 GUILayout.Label(GetDisplay(SelectedSong), GUI.skin.label);
                 GUILayout.Space(10);
                 var CurrentReqs = SelectedSong.GetCurrentCompletionRequirements(container);
+                // Six Star does not exist in YARG, but it has to exist for clone hero.
+                CompletionReq PotentialNewReq1 = CurrentReqs.reward1_req - 1 == CompletionReq.SixStar ? 
+                    CurrentReqs.reward1_req - 2 : CurrentReqs.reward1_req - 1;
+                CompletionReq PotentialNewReq2 = CurrentReqs.reward2_req - 1 == CompletionReq.SixStar ?
+                    CurrentReqs.reward2_req - 2 : CurrentReqs.reward2_req - 1;
                 if (CurrentReqs.reward1_diff > SupportedDifficulty.Easy)
                     if (GUILayout.Button($"Lower Reward 1 Difficulty: {CurrentReqs.reward1_diff.GetDescription()} -> {(CurrentReqs.reward1_diff - 1).GetDescription()}", GUILayout.Height(40)))
                         SetRequirementOverride(CurrentReqs.reward1_diff - 1, CurrentReqs.reward1_req, CurrentReqs.reward2_diff, CurrentReqs.reward2_req);
                 if (CurrentReqs.reward1_req > CompletionReq.Clear)
-                    if (GUILayout.Button($"Lower Reward 1 Score Requirement: {CurrentReqs.reward1_req.GetDescription()} -> {(CurrentReqs.reward1_req - 1).GetDescription()}", GUILayout.Height(40)))
-                        SetRequirementOverride(CurrentReqs.reward1_diff, CurrentReqs.reward1_req - 1, CurrentReqs.reward2_diff, CurrentReqs.reward2_req);
+                    if (GUILayout.Button($"Lower Reward 1 Score Requirement: {CurrentReqs.reward1_req.GetDescription()} -> {(PotentialNewReq1).GetDescription()}", GUILayout.Height(40)))
+                        SetRequirementOverride(CurrentReqs.reward1_diff, PotentialNewReq1, CurrentReqs.reward2_diff, CurrentReqs.reward2_req);
                 if (CurrentReqs.reward2_diff > SupportedDifficulty.Easy)
                     if (GUILayout.Button($"Lower Reward 2 Difficulty: {CurrentReqs.reward2_diff.GetDescription()} -> {(CurrentReqs.reward2_diff - 1).GetDescription()}", GUILayout.Height(40)))
                         SetRequirementOverride(CurrentReqs.reward1_diff, CurrentReqs.reward1_req, CurrentReqs.reward2_diff - 1, CurrentReqs.reward2_req);
                 if (CurrentReqs.reward2_req > CompletionReq.Clear)
-                    if (GUILayout.Button($"Lower Reward 2 Score Requirement: {CurrentReqs.reward2_req.GetDescription()} -> {(CurrentReqs.reward2_req - 1).GetDescription()}", GUILayout.Height(40)))
-                        SetRequirementOverride(CurrentReqs.reward1_diff, CurrentReqs.reward1_req, CurrentReqs.reward2_diff, CurrentReqs.reward2_req - 1);
+                    if (GUILayout.Button($"Lower Reward 2 Score Requirement: {CurrentReqs.reward2_req.GetDescription()} -> {(PotentialNewReq2).GetDescription()}", GUILayout.Height(40)))
+                        SetRequirementOverride(CurrentReqs.reward1_diff, CurrentReqs.reward1_req, CurrentReqs.reward2_diff, PotentialNewReq2);
             }
 
             GUILayout.Space(10);

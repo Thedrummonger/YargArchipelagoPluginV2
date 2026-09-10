@@ -48,7 +48,8 @@ namespace Yaml_Creator
 
         public static string TryGetSongExportJson(bool preferLinux = true)
         {
-            return TryGetExistingFile("SongExport.json", preferLinux);
+            string ExportFile = MainForm.Game == "Clone Hero" ? "CloneHeroSongExport.json" : "SongExport.json";
+            return TryGetExistingFile(ExportFile, preferLinux);   
         }
 
         public static string TryGetExistingFile(string fileName, bool preferLinux = true)
