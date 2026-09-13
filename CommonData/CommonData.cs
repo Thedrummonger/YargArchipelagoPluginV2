@@ -9,6 +9,7 @@ using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using UnityEngine;
 using UnityEngine.Profiling;
 using YARG.Core;
 using YARG.Core.Game;
@@ -32,6 +33,7 @@ namespace YargArchipelagoCommon
         public static string SongExportFile => Path.Combine(DataFolder, "SongExport.json");
         public static string userConfigFile => Path.Combine(DataFolder, "UserConfig.json");
         public static string SeedConfigPath => Path.Combine(DataFolder, "seeds");
+        public static Vector2 DesignResolution = new(1920f, 1080f);
 
         [AttributeUsage(AttributeTargets.Field)]
         public class ActionableAttribute : Attribute { }

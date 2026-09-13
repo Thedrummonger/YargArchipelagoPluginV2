@@ -37,6 +37,23 @@ namespace YargArchipelagoPlugin
 
             return _opaqueWindow;
         }
+
+        public static Rect DrawWindowWithScaling(int id, Rect clientRect, GUI.WindowFunction func, string text, GUIStyle style)
+        {
+            Matrix4x4 originalMatrix = GUI.matrix;
+
+            float scale = Screen.height / DesignResolution.y;
+            float scaledWidth = DesignResolution.x * scale;
+            float offsetX = (Screen.width - scaledWidth) * 0.5f;
+
+            GUI.matrix = Matrix4x4.TRS(new Vector3(offsetX, 0, 0), Quaternion.identity, new Vector3(scale, scale, 1f));
+
+            Rect windowRect = GUI.Window(id, clientRect, func, text, style);
+
+            GUI.matrix = originalMatrix;
+
+            return windowRect;
+        }
     }
 
     public class ArchipelagoConnectionDialog : MonoBehaviour
@@ -88,11 +105,11 @@ namespace YargArchipelagoPlugin
             if (!Show) return;
             if (!_hasPositioned && Show)
             {
-                _windowRect.x = (Screen.width - _windowRect.width) / 2;
-                _windowRect.y = (Screen.height - _windowRect.height) / 2;
+                _windowRect.x = (DesignResolution.x - _windowRect.width) / 2;
+                _windowRect.y = (DesignResolution.y - _windowRect.height) / 2;
                 _hasPositioned = true;
             }
-            _windowRect = GUI.Window(0xA1C4, _windowRect, DrawWindow, "Archipelago Connection", GUIStyles.OpaqueWindow());
+            _windowRect = GUIStyles.DrawWindowWithScaling(0xA1C4, _windowRect, DrawWindow, "Archipelago Connection", GUIStyles.OpaqueWindow());
         }
         private void DrawWindow(int id)
         {
@@ -449,7 +466,7 @@ namespace YargArchipelagoPlugin
         private void OnGUI()
         {
             if (!Show) return;
-            windowRect = GUI.Window(WindowId, windowRect, DrawWindow, WindowTitle, GUIStyles.OpaqueWindow());
+            windowRect = GUIStyles.DrawWindowWithScaling(WindowId, windowRect, DrawWindow, WindowTitle, GUIStyles.OpaqueWindow());
         }
 
         protected abstract void DrawWindow(int id);
