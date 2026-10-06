@@ -1,61 +1,52 @@
 ﻿using Archipelago.MultiClient.Net;
 using Archipelago.MultiClient.Net.BounceFeatures.DeathLink;
 using Archipelago.MultiClient.Net.MessageLog.Messages;
-using HarmonyLib;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Timers;
-using YARG.Core;
-using YARG.Core.Engine;
-using YARG.Core.IO;
-using YARG.Core.Song;
+#if !CLONE_HERO
 using YARG.Gameplay;
-using YARG.Menu.MusicLibrary;
-using YARG.Menu.Persistent;
-using YARG.Settings;
+#endif
 using YargArchipelagoCommon;
-using static YargArchipelagoCommon.CommonData;
+using static YargArchipelagoCommon.APWorldData;
 
-namespace YargArchipelagoPlugin
+namespace YargArchipelagoCommon
 {
     public class ArchipelagoEventManager
     {
+        public static void ApplyDeathLink(APConnectionContainer container, DeathLink deathLink)
+        {
+            try
+            {
+                container.LogInfo?.Invoke("Applying Death Link");
+                if (!EngineActions.ApplyDeathLink(container)) return;
+                APToastManager.ToastInformation($"DeathLink Received!\n\n{deathLink?.Source ?? "Debug"} {deathLink?.Cause ?? "Command"}");
+            }
+            catch (Exception e)
+            {
+                container.LogError?.Invoke($"Failed to apply deathlink\n{e}");
+            }
+        }
+
+
         public ArchipelagoEventManager (APConnectionContainer connectionContainer) { parent = connectionContainer; }
         APConnectionContainer parent;
-
-        public void Items_ItemReceived(Archipelago.MultiClient.Net.Helpers.ReceivedItemsHelper _) => 
-            parent.APSyncTimer.FlagUpdate();
-        public void Locations_CheckedLocationsUpdated(System.Collections.ObjectModel.ReadOnlyCollection<long> _) => 
-            parent.APSyncTimer.FlagUpdate();
-        public void InsertAPSongs(MusicLibraryMenu __instance, List<ViewType> __result) =>
-            YargEngineActions.InsertAPListViewSongs(parent, __instance, __result);
 
         public void SetSong(GameManager gameManager) => parent.SetCurrentSong(gameManager);
         public void SetSong() => parent.ClearCurrentSong();
 
-        public void FailedSong(GameManager gameManager)
-        {
-            if (!parent.IsSessionConnected || parent.seedConfig is null || !parent.seedConfig.SendDlOnSongFail())
-                return;
-
-            if (CanFailSong() && !gameManager.IsPractice && !gameManager.PlayerHasFailed)
-            {
-                parent.DeathLinkService?.SendDeathLink(new DeathLink(parent.GetSession().Players.ActivePlayer.Name, $"Failed Song {gameManager.Song.Name} by {gameManager.Song.Artist}"));
-            }
-        }
-        public static bool CanFailSong()
-        {
-            return SettingsManager.Settings.NoFail.Value == YARG.Gameplay.HUD.NoFailMode.Off;
-        }
-
-        public void TryCheckSongLocations(GameManager gameManager)
+        public void TryCheckSongLocations(APSongResult gameManager)
         {
             bool ShouldCheat = APPatches.IgnoreScoreForNextSong;
             APPatches.IgnoreScoreForNextSong = false;
             if (!parent.IsSessionConnected)
                 return;
-            var LocationsPlayed = parent.SlotData.Songs.Where(x => x.WasActiveSongInGame(parent, gameManager));
+
+            if (gameManager.IsPractice || gameManager.PlayerHasFailed)
+                return;
+
+            var Players = gameManager.Players;
+            var LocationsPlayed = parent.SlotData.Songs.Where(x => parent.SongHashLookup.Comparer.Equals(x.GetActiveHash(parent), gameManager.Hash));
             var DoDeathlink = false;
             List<long> LocationsToComplete = new List<long>();
             foreach (var i in LocationsPlayed)
@@ -65,14 +56,14 @@ namespace YargArchipelagoPlugin
                 if (!i.HasAvailableLocations(parent))
                     continue;
 
-                var MetStandard = gameManager.Players.MetStandardCheckRequirement(i, parent, out var deathLinkStandard) || ShouldCheat;
+                var MetStandard = Players.MetStandardCheckRequirement(i, parent, out var deathLinkStandard) || ShouldCheat;
                 if (!MetStandard && deathLinkStandard) DoDeathlink = true;
                 if (MetStandard) LocationsToComplete.Add(i.MainLocationID);
 
                 var MetExtra = true;
                 if (i.ExtraLocationID >= 0)
                 {
-                    MetExtra = gameManager.Players.MetExtraCheckRequirement(i, parent, out var deathLinkExtra) || ShouldCheat;
+                    MetExtra = Players.MetExtraCheckRequirement(i, parent, out var deathLinkExtra) || ShouldCheat;
                     if (!MetExtra && deathLinkExtra) DoDeathlink = true;
                     if (MetExtra) LocationsToComplete.Add(i.ExtraLocationID);
                 }
@@ -93,12 +84,16 @@ namespace YargArchipelagoPlugin
             if (DoDeathlink && (parent.seedConfig?.SendDlOnRequirements() ?? false))
                 parent.DeathLinkService?.SendDeathLink(
                     new DeathLink(parent.GetSession().Players.ActivePlayer.Name,
-                    $"Failed to meet the requirements playing {gameManager.Song.Name} by {gameManager.Song.Artist}"));
+                    $"Failed to meet the requirements playing {gameManager.Name}"));
         }
-        internal void TryCheckSongGoalSong(GameManager manager)
+        internal void TryCheckSongGoalSong(APSongResult manager)
         {
-            if (!parent.IsSessionConnected || !parent.SlotData.GoalData.WasActiveSongInGame(parent, manager) || !parent.SlotData.GoalData.IsSongUnlocked(parent))
+            if (!parent.IsSessionConnected || !parent.SongHashLookup.Comparer.Equals(parent.SlotData.GoalData.GetActiveHash(parent), manager.Hash) || !parent.SlotData.GoalData.IsSongUnlocked(parent))
                 return;
+
+            if (manager.IsPractice || manager.PlayerHasFailed)
+                return;
+
 
             var MetRequirements = manager.Players.MetAllCheckRequirments(parent.SlotData.GoalData, parent, out bool DL);
 
@@ -108,23 +103,23 @@ namespace YargArchipelagoPlugin
             if (DL && (parent.seedConfig?.SendDlOnRequirements()??false))
                 parent.DeathLinkService?.SendDeathLink(
                     new DeathLink(parent.GetSession().Players.ActivePlayer.Name,
-                    $"Failed to meet the requirements playing {manager.Song.Name} by {manager.Song.Artist}"));
+                    $"Failed to meet the requirements playing {manager.Name}"));
         }
 
-        public void RelayChatToYARG(LogMessage message)
+        public void RelayChat(LogMessage message)
         {
             bool Relay = false;
-            if (parent.seedConfig.InGameItemLog == CommonData.ItemLog.All && parent.seedConfig.InGameAPChat) Relay = true;
+            if (parent.seedConfig.InGameItemLog == ItemLog.All && parent.seedConfig.InGameAPChat) Relay = true;
             else if (message is ItemSendLogMessage ItemLog && ShouldRelayItemSend(ItemLog)) Relay = true;
             else if ((message is PlayerSpecificLogMessage || message is ServerChatLogMessage) && parent.seedConfig.InGameAPChat) Relay = true;
 
-            if (Relay) APToastManager.AddToast(GetMessageToastFlag(message), message.ToYargColoredString());
+            if (Relay) APToastManager.AddToast(GetMessageToastFlag(message), message.ToColoredString());
 
             bool ShouldRelayItemSend(ItemSendLogMessage IL)
             {
-                if (parent.seedConfig.InGameItemLog == CommonData.ItemLog.ToMe)
+                if (parent.seedConfig.InGameItemLog == ItemLog.ToMe)
                     return IL.IsReceiverTheActivePlayer || IL.IsSenderTheActivePlayer;
-                return parent.seedConfig.InGameItemLog == CommonData.ItemLog.All;
+                return parent.seedConfig.InGameItemLog == ItemLog.All;
             }
         }
 
@@ -143,29 +138,9 @@ namespace YargArchipelagoPlugin
             return APToastManager.APToastType.General;
         }
 
-        public void UpdateChatHistory(LogMessage message) => ArchipelagoConnectionDialog.ChatHistory.Add(message);
+        public static List<LogMessage> ChatHistory = new List<LogMessage>();
 
-        public void VerifyServerConnection()
-        {
-            if (!parent.HasActiveSession)
-                return;
-            if (!parent.GetSession().Socket.Connected)
-            {
-                APToastManager.ToastWarning($"Lost Connection to Archipelago");
-                parent.Disconnect();
-            }
-        }
-
-        public void UpdateAPData()
-        {
-            parent.UpdateReceivedItems(parent.logger.LogWarning);
-            parent.UpdateCheckedLocations();
-            FlagSongLibraryForUpdate();
-            PendingTrapsFiller = true;
-
-            if (parent.ApItemsRecieved.Any(x => x.Type == StaticItems.Victory))
-                parent.GetSession().SetGoalAchieved();
-        }
+        public void UpdateChatHistory(LogMessage message) => ChatHistory.Add(message);
 
         public static void FlagSongLibraryForUpdate() => APPatches.HasAvailableAPSongUpdate = true;
 
@@ -189,7 +164,7 @@ namespace YargArchipelagoPlugin
             }
             catch (Exception ex)
             {
-                parent.logger.LogWarning($" Failed to snapshot received items {ex}");
+                parent.LogWarning?.Invoke($" Failed to snapshot received items {ex}");
                 return;
             }
 
@@ -208,141 +183,25 @@ namespace YargArchipelagoPlugin
             {
                 case StaticItems.StarPower:
                     APToastManager.ToastInformation($"{FromPlayer.Name} sent you Star Power!");
-                    YargEngineActions.ApplyStarPowerItem(parent);
+                    EngineActions.ApplyStarPowerItem(parent);
                     break;
                 case StaticItems.TrapRestart:
-                    parent.ResetBuffer();
                     APToastManager.ToastWarning($"{FromPlayer.Name} sent you a Restart Trap!");
-                    YargEngineActions.ForceRestartSong(parent);
+                    EngineActions.ForceRestartSong(parent);
                     break;
                 case StaticItems.TrapRockMeter:
                     APToastManager.ToastWarning($"{FromPlayer.Name} sent you a Rock Meter Trap!");
-                    YargEngineActions.ApplyRockMetertrapItem(parent);
+                    EngineActions.ApplyRockMetertrapItem(parent);
                     break;
             }
         }
 
         internal void OnDeathLinkReceived(DeathLink deathLink)
         {
-            if (!parent.HasActiveSession) return;
+            if (!parent.IsSessionConnected) return;
             if (parent.seedConfig.DeathLinkMode <= DeathLinkType.disabled) return;
-            YargEngineActions.ApplyDeathLink(parent, deathLink);
+            ApplyDeathLink(parent, deathLink);
         }
 
     }
-
-    public class SyncTimer
-    {
-        public SyncTimer()
-        {
-            timer.Elapsed += SyncTimerTick;
-        }
-
-        private Timer timer = new Timer(200);
-
-        private bool ShouldUpdate = true; //Start true so we do an update when it initializes
-        public event Action ConstantCallback;
-        public event Action OnUpdateCallback;
-
-        public void StartTimer()
-        {
-            SyncTimerTick(this, null);
-            timer.Start();
-        }
-        public void StopTimer()
-        {
-            timer.Stop();
-        }
-
-        public void FlagUpdate() => ShouldUpdate = true;
-
-        public void SyncTimerTick(object sender, ElapsedEventArgs e)
-        {
-            ConstantCallback?.Invoke();
-            if (!ShouldUpdate) return;
-            ShouldUpdate = false;
-            OnUpdateCallback?.Invoke();
-        }
-    }
-    public static partial class ExtraAPFunctionalityHelper
-    {
-        public const long minEnergyLinkScale = 10_000;
-        public const long maxEnergyLinkScale = 500_000;
-        public static Dictionary<StaticItems, long> PriceDict = new Dictionary<StaticItems, long>
-        {
-            { StaticItems.SwapRandom, 15_000_000_000 },
-            { StaticItems.SwapPick, 17_000_000_000 },
-            { StaticItems.LowerDifficulty, 16_000_000_000 }
-        };
-
-        public static string EnergyLinkKey(ArchipelagoSession session) => $"EnergyLink{session.Players.ActivePlayer.Team}";
-        public static bool TryPurchaseItem(APConnectionContainer container, StaticItems Type)
-        {
-            if (!PriceDict.TryGetValue(Type, out var Price))
-                return false;
-            if (!TryUseEnergy(container, Price))
-                return false;
-            var CurCount = container.seedConfig.ApItemsPurchased.Where(x => x.Type == Type).Count();
-            container.seedConfig.ApItemsPurchased.Add(new StaticYargAPItem(Type, StaticItemIDbyValue[Type], -99, CurCount, "YAYARG"));
-            container.seedConfig.Save();
-            return true;
-        }
-
-        public static string FormatLargeNumber(long number)
-        {
-            if (number >= 1_000_000_000_000)
-                return (number / 1_000_000_000_000.0).ToString("0.##") + " Trillion";
-            if (number >= 1_000_000_000)
-                return (number / 1_000_000_000.0).ToString("0.##") + " Billion";
-            if (number >= 1_000_000)
-                return (number / 1_000_000.0).ToString("0.##") + " Million";
-            if (number >= 1_000)
-                return (number / 1_000.0).ToString("0.##") + " Thousand";
-
-            return number.ToString("N0");
-        }
-        public static void SendScoreAsEnergy(APConnectionContainer container, long BaseScore, bool WasLocationChecked)
-        {
-            if (container.seedConfig.EnergyLinkMode <= CommonData.EnergyLinkType.disabled) return;
-            if (container.seedConfig.EnergyLinkMode == CommonData.EnergyLinkType.check_song && !WasLocationChecked) return;
-            if (container.seedConfig.EnergyLinkMode == CommonData.EnergyLinkType.other_song && WasLocationChecked) return;
-
-            var Session = container.GetSession();
-            Session.DataStorage[EnergyLinkKey(Session)].Initialize(0);
-            Session.DataStorage[EnergyLinkKey(Session)] += ScaleEnergyValue(container, BaseScore);
-        }
-
-        public static long ScaleEnergyValue(APConnectionContainer container, long baseAmount)
-        {
-            int AmountOfLocationsTotal = container.GetSession().Locations.AllLocations.Count;
-            int AmountOfLocationsChecked = container.GetSession().Locations.AllLocationsChecked.Count;
-            double completionPercentage = AmountOfLocationsChecked / AmountOfLocationsTotal;
-            double scale = minEnergyLinkScale + (completionPercentage * (maxEnergyLinkScale - minEnergyLinkScale));
-            long Energy = (long)(baseAmount * scale);
-            return Energy;
-        }
-
-        public static long GetEnergy(APConnectionContainer container)
-        {
-            if (container.seedConfig.EnergyLinkMode <= CommonData.EnergyLinkType.disabled) return 0;
-            var Session = container.GetSession();
-            Session.DataStorage[EnergyLinkKey(Session)].Initialize(0);
-            return Session.DataStorage[EnergyLinkKey(Session)];
-        }
-
-        public static bool TryUseEnergy(APConnectionContainer container, long Amount)
-        {
-            if (container.seedConfig.EnergyLinkMode <= CommonData.EnergyLinkType.disabled) return false;
-            var Session = container.GetSession();
-            Session.DataStorage[EnergyLinkKey(Session)].Initialize(0);
-            if (Session.DataStorage[EnergyLinkKey(Session)] >= Amount)
-            {
-                Session.DataStorage[EnergyLinkKey(Session)] -= Amount;
-                return true;
-            }
-            return false;
-
-        }
-    }
-
 }

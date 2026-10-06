@@ -362,3 +362,6 @@ MigrationBackup/
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
 /Builds
+/YargArchipelagoPluginMain/Libraries/
+/YargArchipelagoPluginNightly/Libraries/
+/CloneHeroPlugin/Libraries/

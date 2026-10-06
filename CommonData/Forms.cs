@@ -1,4 +1,11 @@
-﻿using Archipelago.MultiClient.Net.MessageLog.Messages;
+﻿using HarmonyLib;
+using System.Reflection;
+using UnityEngine.InputSystem;
+using YARG.Core.Utility;
+using YARG.Menu.ListMenu;
+using YARG.Menu.MusicLibrary;
+using YargArchipelagoCommon;
+using Archipelago.MultiClient.Net.MessageLog.Messages;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -11,12 +18,14 @@ using YARG.Core.Song;
 using YARG.Menu.Dialogs;
 using YARG.Menu.Persistent;
 using YARG.Song;
-using static YargArchipelagoCommon.CommonData;
+using static YargArchipelagoCommon.APWorldData;
+using static YargArchipelagoCommon.GUIStyles;
 
-namespace YargArchipelagoPlugin
+namespace YargArchipelagoCommon
 {
     public static class GUIStyles
     {
+        public static Vector2 DesignResolution = new(1920f, 1080f);
         private static GUIStyle _opaqueWindow;
         private static Texture2D _bgTexture;
         public static GUIStyle OpaqueWindow()
@@ -37,11 +46,76 @@ namespace YargArchipelagoPlugin
 
             return _opaqueWindow;
         }
+
+        public static Rect DrawWindowWithScaling(int id, Rect clientRect, GUI.WindowFunction func, string text, GUIStyle style)
+        {
+            Matrix4x4 originalMatrix = GUI.matrix;
+
+            float scale = Screen.height / DesignResolution.y;
+            float scaledWidth = DesignResolution.x * scale;
+            float offsetX = (Screen.width - scaledWidth) * 0.5f;
+
+            GUI.matrix = Matrix4x4.TRS(new Vector3(offsetX, 0, 0), Quaternion.identity, new Vector3(scale, scale, 1f));
+
+            Rect windowRect = GUI.Window(id, clientRect, func, text, style);
+
+            GUI.matrix = originalMatrix;
+
+            return windowRect;
+        }
     }
 
     public class ArchipelagoConnectionDialog : MonoBehaviour
     {
-        public static List<LogMessage> ChatHistory = new List<LogMessage>();
+        internal static void UpdateUI()
+        {
+            if (!Application.isFocused)
+                return;
+
+            var kb = Keyboard.current;
+            if (kb == null)
+                return;
+
+            bool DialogModifiersSatisfied =
+                (!ArchipelagoPlugin.RequireCtrl.Value || kb.leftCtrlKey.isPressed || kb.rightCtrlKey.isPressed) &&
+                (!ArchipelagoPlugin.RequireShift.Value || kb.leftShiftKey.isPressed || kb.rightShiftKey.isPressed) &&
+                (!ArchipelagoPlugin.RequireAlt.Value || kb.leftAltKey.isPressed || kb.rightAltKey.isPressed);
+
+            if (DialogModifiersSatisfied && kb[ArchipelagoPlugin.ToggleKey.Value].wasPressedThisFrame)
+                Toggle();
+
+            var DevModifiersSatisfied = Keyboard.current != null &&
+                Keyboard.current.ctrlKey.isPressed &&
+                Keyboard.current.shiftKey.isPressed &&
+                Keyboard.current.altKey.isPressed;
+        }
+
+        public static void Toggle()
+        {
+            var dialog = GetOrCreateApDialog();
+            dialog.Show = !dialog.Show;
+        }
+
+        private static ArchipelagoConnectionDialog GetOrCreateApDialog()
+        {
+            if (ArchipelagoConnectionDialog.Instance != null)
+                return ArchipelagoConnectionDialog.Instance;
+
+            var DialogObject = new GameObject("ArchipelagoConnectionDialog");
+            DontDestroyOnLoad(DialogObject);
+            var dialog = DialogObject.AddComponent<ArchipelagoConnectionDialog>();
+            dialog.Initialize(ArchipelagoPlugin.APcontainer);
+            return dialog;
+        }
+
+        public static void ShowSeedMessage(SeedInfoMessage message) =>
+            DialogManager.Instance.ShowMessage(message.Title, message.Body);
+
+        public static void ShowMissingSongs(IEnumerable<string> missing) =>
+            DialogManager.Instance.ShowMessage("The following songs were in your AP seed but missing from yarg!",
+                APUtils.TruncateString(string.Join(", ", missing), 1000));
+
+
 
         public static ArchipelagoConnectionDialog Instance { get; private set; }
 
@@ -88,11 +162,11 @@ namespace YargArchipelagoPlugin
             if (!Show) return;
             if (!_hasPositioned && Show)
             {
-                _windowRect.x = (Screen.width - _windowRect.width) / 2;
-                _windowRect.y = (Screen.height - _windowRect.height) / 2;
+                _windowRect.x = (DesignResolution.x - _windowRect.width) / 2;
+                _windowRect.y = (DesignResolution.y - _windowRect.height) / 2;
                 _hasPositioned = true;
             }
-            _windowRect = GUI.Window(0xA1C4, _windowRect, DrawWindow, "Archipelago Connection", GUIStyles.OpaqueWindow());
+            _windowRect = GUIStyles.DrawWindowWithScaling(0xA1C4, _windowRect, DrawWindow, "Archipelago Connection", GUIStyles.OpaqueWindow());
         }
         private void DrawWindow(int id)
         {
@@ -141,12 +215,11 @@ namespace YargArchipelagoPlugin
             if (connectionContainer.IsSessionConnected)
             {
                 connectionContainer.Disconnect();
-                APToastManager.ToastInformation($"Disconnected from AP");
             }
             else
             {
                 APToastManager.ToastInformation($"Connecting to {connectionDetails.SlotName}@{connectionDetails.Address}");
-                connectionContainer.Connect(connectionDetails);
+                connectionContainer.Connect(connectionDetails, UnityEngine.InputSystem.Keyboard.current?.ctrlKey.isPressed ?? false);
             }
         }
 
@@ -161,9 +234,9 @@ namespace YargArchipelagoPlugin
             }
 
             GUILayout.BeginVertical();
-            int startIndex = Mathf.Max(0, ChatHistory.Count - 500);
-            for (int i = startIndex; i < ChatHistory.Count; i++)
-                GUILayout.Label(ChatHistory[i].ToYargColoredString(), richTextStyle);
+            int startIndex = Mathf.Max(0, ArchipelagoEventManager.ChatHistory.Count - 500);
+            for (int i = startIndex; i < ArchipelagoEventManager.ChatHistory.Count; i++)
+                GUILayout.Label(ArchipelagoEventManager.ChatHistory[i].ToColoredString(), richTextStyle);
             GUILayout.EndVertical();
 
             if (Event.current.type == EventType.Repaint)
@@ -174,12 +247,12 @@ namespace YargArchipelagoPlugin
             float maxScroll = Mathf.Max(0, _contentHeight - 190);
             bool isAtBottom = _chatScrollPosition.y >= maxScroll - 10;
 
-            if (ChatHistory.Count > _lastChatCount)
+            if (ArchipelagoEventManager.ChatHistory.Count > _lastChatCount)
             {
                 if (isAtBottom || _lastChatCount == 0)
                     _chatScrollPosition.y = float.MaxValue;
 
-                _lastChatCount = ChatHistory.Count;
+                _lastChatCount = ArchipelagoEventManager.ChatHistory.Count;
             }
 
             GUILayout.Space(10);
@@ -262,7 +335,7 @@ namespace YargArchipelagoPlugin
                 if (GUILayout.Button(deathLinkText, GUILayout.Height(20)))
                     if (isConnected)
                     {
-                        connectionContainer.seedConfig.DeathLinkMode = YargAPUtils.CycleEnum(connectionContainer.seedConfig.DeathLinkMode);
+                        connectionContainer.seedConfig.DeathLinkMode = EnumDescriptions.Next(connectionContainer.seedConfig.DeathLinkMode);
                         connectionContainer.seedConfig.Save();
                     }
                 GUILayout.EndVertical();
@@ -274,7 +347,7 @@ namespace YargArchipelagoPlugin
                 if (GUILayout.Button(deathLinkTriggerText, GUILayout.Height(20)))
                     if (isConnected)
                     {
-                        connectionContainer.seedConfig.DeathLinkTrigger = YargAPUtils.CycleEnum(connectionContainer.seedConfig.DeathLinkTrigger);
+                        connectionContainer.seedConfig.DeathLinkTrigger = EnumDescriptions.Next(connectionContainer.seedConfig.DeathLinkTrigger);
                         connectionContainer.seedConfig.Save();
                     }
                 GUILayout.EndVertical();
@@ -287,7 +360,7 @@ namespace YargArchipelagoPlugin
                 if (GUILayout.Button(energyLinkText, GUILayout.Height(20)))
                     if (isConnected)
                     {
-                        connectionContainer.seedConfig.EnergyLinkMode = YargAPUtils.CycleEnum(connectionContainer.seedConfig.EnergyLinkMode);
+                        connectionContainer.seedConfig.EnergyLinkMode = EnumDescriptions.Next(connectionContainer.seedConfig.EnergyLinkMode);
                         connectionContainer.seedConfig.Save();
                     }
                 GUILayout.EndVertical();
@@ -302,7 +375,7 @@ namespace YargArchipelagoPlugin
                 if (GUILayout.Button(itemLogText, GUILayout.Height(20)))
                     if (isConnected)
                     {
-                        connectionContainer.seedConfig.InGameItemLog = YargAPUtils.CycleEnum(connectionContainer.seedConfig.InGameItemLog);
+                        connectionContainer.seedConfig.InGameItemLog = EnumDescriptions.Next(connectionContainer.seedConfig.InGameItemLog);
                         connectionContainer.seedConfig.Save();
                     }
                 GUILayout.EndVertical();
@@ -336,6 +409,30 @@ namespace YargArchipelagoPlugin
 
     public static class FormHelpers
     {
+        public static void ShowGoalConditionStatus(APConnectionContainer container) =>
+            ArchipelagoConnectionDialog.ShowSeedMessage(SeedInfo.GetGoalConditionStatus(container));
+
+        public static void ShowMacGuffinStatus(int current, int needed, string name)
+        {
+            var message = SeedInfo.GetGoalProgress(current, needed, name);
+            APToastManager.AddToast(current < needed ? APToastManager.APToastType.Error : APToastManager.APToastType.Success,
+                $"{message.Title}\n{message.Body}");
+        }
+
+        public static void ShowGoalRecieveMessage(APConnectionContainer container, bool received)
+        {
+            var message = SeedInfo.GetGoalReceiveMessage(container);
+            if (!received) APToastManager.ToastError(message.Body);
+            else ArchipelagoConnectionDialog.ShowSeedMessage(message);
+        }
+
+        public static void ShowPoolData(APConnectionContainer container, string poolName)
+        {
+            if (!container.SlotData.Pools.ContainsKey(poolName)) return;
+            ArchipelagoConnectionDialog.ShowSeedMessage(SeedInfo.GetPoolInfo(container, poolName));
+        }
+
+
         public static (int CurrentPage, string CurrentFilter) DisplayItemList<T>(IEnumerable<T> Objects, int DisplayCount, int Page, string Title, string LastFilter, Func<T, string> GetDisplay, Action<T> OnClick)
         {
             GUILayout.Label(Title, GUI.skin.label);
@@ -355,7 +452,7 @@ namespace YargArchipelagoPlugin
             }
             GUILayout.EndHorizontal();
 
-            var FilteredObjects = FilterItems(Objects, CurrentFilter, GetDisplay);
+            var FilteredObjects = APUtils.FilterItems(Objects, CurrentFilter, GetDisplay);
             int totalPages = Mathf.Max(1, Mathf.CeilToInt(FilteredObjects.Count() / (float)DisplayCount));
             var currentPage = Mathf.Clamp(SelectedPage, 0, totalPages - 1);
             var Pages = FilteredObjects.Skip(currentPage * DisplayCount).Take(DisplayCount);
@@ -383,34 +480,6 @@ namespace YargArchipelagoPlugin
 
             GUILayout.EndHorizontal();
             return (currentPage, CurrentFilter);
-        }
-
-        public static void ClearFilters() => _filterCache.Clear();
-        private static readonly Dictionary<(Type, string), object> _filterCache = new Dictionary<(Type, string), object>();
-        public static T[] FilterItems<T>(IEnumerable<T> Objects, string filterText, Func<T, string> GetDisplay)
-        {
-            var cacheKey = (typeof(T), filterText);
-            if (_filterCache.TryGetValue(cacheKey, out var cachedResult))
-                return (T[])cachedResult;
-
-            var result = Objects
-                .Where(s => GetDisplay(s).IndexOf(filterText, StringComparison.OrdinalIgnoreCase) >= 0)
-                .OrderBy(s => GetDisplay(s), StringComparer.OrdinalIgnoreCase)
-                .ToArray();
-
-            _filterCache[cacheKey] = result;
-
-            return result;
-        }
-
-        public static BaseAPSong[] GetEditableSongs(APConnectionContainer container)
-        {
-            HashSet<BaseAPSong> Available = new HashSet<BaseAPSong>();
-            foreach (var s in container.SlotData.Songs.Where(x => x.VisableInSongMenu(container)))
-                Available.Add(s);
-            if (container.SlotData.GoalData.VisableInSongMenu(container))
-                Available.Add(container.SlotData.GoalData);
-            return Available.ToArray();
         }
 
         /// <summary>
@@ -449,14 +518,14 @@ namespace YargArchipelagoPlugin
         private void OnGUI()
         {
             if (!Show) return;
-            windowRect = GUI.Window(WindowId, windowRect, DrawWindow, WindowTitle, GUIStyles.OpaqueWindow());
+            windowRect = GUIStyles.DrawWindowWithScaling(WindowId, windowRect, DrawWindow, WindowTitle, GUIStyles.OpaqueWindow());
         }
 
         protected abstract void DrawWindow(int id);
 
         protected virtual void Initialize(APConnectionContainer container, Rect size, bool Center = true)
         {
-            FormHelpers.ClearFilters();
+            APUtils.ClearFilters();
             BlockerDialog = FormHelpers.ShowBlockerDialog();
             this.container = container;
             CurrentInstance = (T)this;
@@ -507,7 +576,7 @@ namespace YargArchipelagoPlugin
         protected override string WindowTitle => "Lower Difficulty";
         public static void ShowMenu(APConnectionContainer container, StaticYargAPItem item)
         {
-            if (FormHelpers.GetEditableSongs(container).Length == 0)
+            if (FillerItems.GetEditableSongs(container).Length == 0)
             {
                 APToastManager.ToastError($"No Available Songs!");
                 return;
@@ -525,7 +594,7 @@ namespace YargArchipelagoPlugin
             GUILayout.BeginVertical();
 
             if (SelectedSong is null)
-                (currentPage, CurrentFilter) = FormHelpers.DisplayItemList(FormHelpers.GetEditableSongs(container), 5, currentPage, "SELECT SONG TO LOWER DIFFICULTY", CurrentFilter, GetDisplay, OnSongSelect);
+                (currentPage, CurrentFilter) = FormHelpers.DisplayItemList(FillerItems.GetEditableSongs(container), 5, currentPage, "SELECT SONG TO LOWER DIFFICULTY", CurrentFilter, GetDisplay, OnSongSelect);
             else
             {
                 GUILayout.Label("SELECT A DIFFICULTY VALUE TO LOWER", GUI.skin.label);
@@ -533,11 +602,8 @@ namespace YargArchipelagoPlugin
                 GUILayout.Label(GetDisplay(SelectedSong), GUI.skin.label);
                 GUILayout.Space(10);
                 var CurrentReqs = SelectedSong.GetCurrentCompletionRequirements(container);
-                // Six Star does not exist in YARG, but it has to exist for clone hero.
-                CompletionReq PotentialNewReq1 = CurrentReqs.reward1_req - 1 == CompletionReq.SixStar ? 
-                    CurrentReqs.reward1_req - 2 : CurrentReqs.reward1_req - 1;
-                CompletionReq PotentialNewReq2 = CurrentReqs.reward2_req - 1 == CompletionReq.SixStar ?
-                    CurrentReqs.reward2_req - 2 : CurrentReqs.reward2_req - 1;
+                CompletionReq PotentialNewReq1 = FillerItems.LowerScoreRequirement(CurrentReqs.reward1_req);
+                CompletionReq PotentialNewReq2 = FillerItems.LowerScoreRequirement(CurrentReqs.reward2_req);
                 if (CurrentReqs.reward1_diff > SupportedDifficulty.Easy)
                     if (GUILayout.Button($"Lower Reward 1 Difficulty: {CurrentReqs.reward1_diff.GetDescription()} -> {(CurrentReqs.reward1_diff - 1).GetDescription()}", GUILayout.Height(40)))
                         SetRequirementOverride(CurrentReqs.reward1_diff - 1, CurrentReqs.reward1_req, CurrentReqs.reward2_diff, CurrentReqs.reward2_req);
@@ -573,25 +639,16 @@ namespace YargArchipelagoPlugin
                 reward1_req = reward1Req,
                 reward2_req = reward2Req
             };
-            container.seedConfig.AdjustedDifficulties[SelectedSong.UniqueKey] = NewReqs;
-            container.seedConfig.ApItemsUsed.Add(_item);
-            container.seedConfig.Save();
+            var message = FillerItems.SetRequirementOverride(container, _item, SelectedSong, NewReqs);
             RemoveBlockerDialog();
-            ArchipelagoEventManager.FlagSongLibraryForUpdate();
-            var SongData = SelectedSong.GetYargSongEntry(container);
-            var Display = SongData is null ? SelectedSong.GetActiveHash(container) : $"{SongData.Name} by {SongData.Artist}";
-            YargEngineActions.ShowPoolData(container, $"New Requirements for {Display}", new SongPool { instrument = SelectedSong.GetPool(container.SlotData).instrument, completion_requirements = NewReqs });
+            ArchipelagoConnectionDialog.ShowSeedMessage(message);
             CloseMenu();
         }
 
         private void OnSongSelect(BaseAPSong data)
         {
             var CurrentReqs = data.GetCurrentCompletionRequirements(container);
-            var CanLower1Diff = CurrentReqs.reward1_diff > SupportedDifficulty.Easy;
-            var CanLower2Diff = CurrentReqs.reward2_diff > SupportedDifficulty.Easy;
-            var CanLower1Req = CurrentReqs.reward1_req > CompletionReq.Clear;
-            var CanLower2Req = CurrentReqs.reward2_req > CompletionReq.Clear;
-            if (!CanLower1Diff && !CanLower2Diff && !CanLower1Req && !CanLower2Req)
+            if (!FillerItems.CanLowerRequirements(CurrentReqs))
             {
                 APToastManager.ToastError($"Unable to lower the requirements of this song any further!");
                 return;
@@ -617,7 +674,7 @@ namespace YargArchipelagoPlugin
 
         public static void ShowMenu(APConnectionContainer container, StaticYargAPItem item)
         {
-            if (FormHelpers.GetEditableSongs(container).Length == 0)
+            if (FillerItems.GetEditableSongs(container).Length == 0)
             {
                 APToastManager.ToastError($"No Available Songs!");
                 return;
@@ -637,7 +694,7 @@ namespace YargArchipelagoPlugin
             GUILayout.BeginVertical();
 
             if (selectedSongToReplace is null)
-                (currentPage, CurrentFilter) = FormHelpers.DisplayItemList(FormHelpers.GetEditableSongs(container), 5, currentPage, "SELECT SONG TO REPLACE", CurrentFilter, GetDisplay, OnSongToReplaceSelected);
+                (currentPage, CurrentFilter) = FormHelpers.DisplayItemList(FillerItems.GetEditableSongs(container), 5, currentPage, "SELECT SONG TO REPLACE", CurrentFilter, GetDisplay, OnSongToReplaceSelected);
             else
                 (currentPage, CurrentFilter) = FormHelpers.DisplayItemList(GetValidReplacements(selectedSongToReplace), 5, currentPage, "SELECT REPLACEMENT", CurrentFilter, GetDisplay, OnReplacementSelected);
 
@@ -682,32 +739,9 @@ namespace YargArchipelagoPlugin
 
         private SongEntry[] GetValidReplacements(BaseAPSong song)
         {
-            if (ValidEntryCache.ContainsKey(song))
-                return ValidEntryCache[song];
-
-            var Pool = song.GetPool(container.SlotData);
-            var UsedSongs = new HashSet<string>();
-            foreach (var item in container.SlotData.SongsByInstrument[Pool.instrument])
-            {
-                //Add both the original hash and proxy hash if it exists. Even if it's proxied, we probably
-                //shouldn't place a core song onto another song as a proxy. This might change in the future.
-                UsedSongs.Add(item.Hash);
-                if (item.HasProxy(container, out var proxyHash))
-                    UsedSongs.Add(proxyHash);
-
-            }
-            var AllYargSongs =  YargEngineActions.GetYargSongExportData();
-            var ValidReplcements = AllYargSongs.Where(x => x.Value.TryGetDifficulty(Pool.instrument, out var difficulty) && DifficultyInRange(difficulty) && !UsedSongs.Contains(x.Key));
-            ValidEntryCache[song] = ValidReplcements.Select(x => x.Value.YargSongEntry).ToArray();
-            return ValidReplcements.Select(x => x.Value.YargSongEntry).ToArray();
-
-            bool DifficultyInRange(int difficulty)
-            {
-                // Let the user manually pick a song outside of their diffuclty range if they want
-                if (_item.Type == StaticItems.SwapPick) 
-                    return true;
-                return difficulty <= Pool.max_difficulty && difficulty >= Pool.min_difficulty;
-            }
+            if (!ValidEntryCache.ContainsKey(song))
+                ValidEntryCache[song] = FillerItems.GetValidReplacements(container, song, _item.Type);
+            return ValidEntryCache[song];
         }
 
         private string GetDisplay(SongEntry songEntry) => $"{songEntry.Name} by {songEntry.Artist}";
@@ -716,14 +750,9 @@ namespace YargArchipelagoPlugin
 
         private void PerformSwap(BaseAPSong toReplace, SongEntry replacement)
         {
-            string ToReplace = toReplace.GetDisplayName(container, false);
-            string Replacement = $"{replacement.Name} by {replacement.Artist}";
-            container.seedConfig.SongProxies[toReplace.UniqueKey] = Convert.ToBase64String(replacement.Hash.HashBytes);
-            container.seedConfig.ApItemsUsed.Add(_item);
-            container.seedConfig.Save();
+            var message = FillerItems.PerformSwap(container, _item, toReplace, replacement);
             RemoveBlockerDialog();
-            ArchipelagoEventManager.FlagSongLibraryForUpdate();
-            DialogManager.Instance.ShowMessage($"Song Replaced", $"Replaced\n{ToReplace}\n\nwith\n{Replacement}\n\nIn Pool\n{toReplace.PoolName}");
+            ArchipelagoConnectionDialog.ShowSeedMessage(message);
         }
     }
 
@@ -779,4 +808,105 @@ namespace YargArchipelagoPlugin
             ArchipelagoEventManager.FlagSongLibraryForUpdate();
         }
     }
+
+    public static partial class APToastManager
+    {
+        private static readonly AccessTools.FieldRef<ToastManager, Toast> ToastPrefabRef =
+            AccessTools.FieldRefAccess<ToastManager, Toast>("_toastPrefab");
+
+        private static readonly AccessTools.FieldRef<ToastManager, Color> GeneralColorRef =
+            AccessTools.FieldRefAccess<ToastManager, Color>("_generalColor");
+
+        private static readonly AccessTools.FieldRef<ToastManager, Color> InformationColorRef =
+            AccessTools.FieldRefAccess<ToastManager, Color>("_informationColor");
+
+        private static readonly AccessTools.FieldRef<ToastManager, Color> SuccessColorRef =
+            AccessTools.FieldRefAccess<ToastManager, Color>("_successColor");
+
+        private static readonly AccessTools.FieldRef<ToastManager, Color> WarningColorRef =
+            AccessTools.FieldRefAccess<ToastManager, Color>("_warningColor");
+
+        private static readonly AccessTools.FieldRef<ToastManager, Color> ErrorColorRef =
+            AccessTools.FieldRefAccess<ToastManager, Color>("_errorColor");
+
+        private static readonly Type ToastManagerType = typeof(ToastManager);
+
+        private static readonly Type ToastTypeEnum = ToastManagerType.GetNestedType("ToastType", BindingFlags.NonPublic);
+
+        private static readonly MethodInfo AddToastMethod =
+            AccessTools.Method(ToastManagerType, "AddToast", [ToastTypeEnum, typeof(string), typeof(Action)] );
+
+        public static void AddToast(APToastType type, string text, Action onClick = null)
+        {
+            object enumValue = Enum.ToObject(ToastTypeEnum, (int)type);
+            AddToastMethod.Invoke(null, [enumValue, text, onClick]);
+        }
+        public static bool HandleAPToasts(int type, string body, Action onClick, ToastManager manager)
+        {
+            if (type < 100) return false;
+            var ToastType = (APToastType)type;
+
+            var (text, color, icon) = ToastType switch
+            {
+                APToastType.General => ("Archipelago", GeneralColorRef(manager), GetIcon(ToastType)),
+                APToastType.Information => ("Archipelago", InformationColorRef(manager), GetIcon(ToastType)),
+                APToastType.Success => ("Archipelago", SuccessColorRef(manager), GetIcon(ToastType)),
+                APToastType.Warning => ("Archipelago", WarningColorRef(manager), GetIcon(ToastType)),
+                APToastType.Error => ("Archipelago", ErrorColorRef(manager), GetIcon(ToastType)),
+                APToastType.Junk => ("Archipelago", Color.cyan, GetIcon(ToastType)),
+                APToastType.Useful => ("Archipelago", Color.slateBlue, GetIcon(ToastType)),
+                APToastType.Progression => ("Archipelago", Color.plum, GetIcon(ToastType)),
+                APToastType.Trap => ("Archipelago", Color.salmon, GetIcon(ToastType)),
+                _ => throw new ArgumentException($"Invalid toast type {type}!")
+            };
+
+            var toast = UnityEngine.Object.Instantiate(ToastPrefabRef(manager), manager.transform);
+            toast.Initialize(text, body, icon, color, onClick);
+            return true;
+        }
+
+
+    }
+
+
+    public class APSongViewType(MusicLibraryMenu musicLibrary, SongEntry songEntry, bool IsHinted, string context = "library") : SongViewType(musicLibrary, songEntry, context)
+    {
+        public override string GetPrimaryText(bool selected)
+        {
+            SortString str = SongEntry.Name;
+            if (IsHinted)
+                return $"* {BaseViewType.FormatAs(str, TextType.Primary, selected)}";
+            return BaseViewType.FormatAs(str, TextType.Primary, selected);
+        }
+
+        public override string GetSecondaryText(bool selected)
+        {
+            SortString str = SongEntry.Artist;
+            return BaseViewType.FormatAs(str, TextType.Secondary, selected);
+        }
+
+        public override Sprite GetIcon()
+        {
+            SortString str = SongEntry.Source;
+            return SongSources.SourceToIcon(str);
+        }
+    }
+
+
+    public static partial class APAssets
+    {
+        private static MethodInfo _loadImage;
+
+        private static void LoadImage(Texture2D texture, byte[] data) =>
+            (_loadImage ??= GetLoadImageMI()).Invoke(null, new object[] { texture, data, false });
+
+        static MethodInfo GetLoadImageMI()
+        {
+            var t = Type.GetType("UnityEngine.ImageConversion, UnityEngine.ImageConversionModule")
+                 ?? Type.GetType("UnityEngine.ImageConversion, UnityEngine");
+
+            return t.GetMethod("LoadImage", BindingFlags.Public | BindingFlags.Static, null, [typeof(Texture2D), typeof(byte[]), typeof(bool)], null);
+        }
+    }
+
 }

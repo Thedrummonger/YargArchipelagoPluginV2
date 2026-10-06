@@ -23,18 +23,22 @@ using YARG.Scores;
 using YARG.Settings;
 using YARG.Song;
 using YargArchipelagoCommon;
-using static YargArchipelagoCommon.CommonData;
+using static YargArchipelagoCommon.APWorldData;
 
-namespace YargArchipelagoPlugin
+namespace YargArchipelagoCommon
 {
     [HarmonyPatch]
     public static class APPatches
     {
+
+        public static void InsertAPSongs(MusicLibraryMenu menu, List<ViewType> result) =>
+            EngineActions.InsertAPListViewSongs(ArchipelagoPlugin.APcontainer, menu, result);
+
         public static event Action<MusicLibraryMenu, List<ViewType>> OnCreateNormalView;
         public static event Action<GameManager> OnSongStarted;
         public static event Action OnSongEnded;
         public static event Action<GameManager> OnGameManagerUpdateThrottled;
-        public static event Action<GameManager> OnRecordScore;
+        public static event Action<APSongResult> OnRecordScore;
         public static event Action<GameManager> OnSongFail;
         public static event Action OnSongContainersUpdated;
         public static bool HasAvailableAPSongUpdate = false;
@@ -53,7 +57,7 @@ namespace YargArchipelagoPlugin
         [HarmonyPatch(typeof(GameManager), "RecordScores")]
         [HarmonyPostfix]
         public static void GameManager_RecordScores_Postfix(GameManager __instance, ReplayInfo replayInfo) =>
-            OnRecordScore?.Invoke(__instance);
+            OnRecordScore?.Invoke(EngineActions.GetSongResults(__instance));
 
         [HarmonyPatch(typeof(GameManager), "OnSongFailed")]
         [HarmonyPrefix]
@@ -63,14 +67,14 @@ namespace YargArchipelagoPlugin
         [HarmonyPrefix]
         public static bool EngineManager_UpdateHappiness(EngineManager __instance)
         {
-            return YargEngineActions.TryPreventSongFail(__instance);
+            return EngineActions.TryPreventSongFail(__instance);
         }
 
         [HarmonyPatch(typeof(SongContainer), "FillContainers")]
         [HarmonyPostfix]
         public static void SongContainer_FillContainers()
         {
-            YargEngineActions.DumpAvailableSongs();
+            EngineActions.DumpAvailableSongs();
             OnSongContainersUpdated?.Invoke();
         }
 
@@ -129,13 +133,13 @@ namespace YargArchipelagoPlugin
                 endSongMethod?.Invoke(__instance, new object[] { });
             }
             if (Modifiers && Keyboard.current.rKey.wasPressedThisFrame)
-                YargEngineActions.ForceRestartSong(ArchipelagoPlugin.APcontainer);
+                EngineActions.ForceRestartSong(ArchipelagoPlugin.APcontainer);
             if (Modifiers && Keyboard.current.sKey.wasPressedThisFrame)
-                YargEngineActions.ApplyStarPowerItem(ArchipelagoPlugin.APcontainer);
+                EngineActions.ApplyStarPowerItem(ArchipelagoPlugin.APcontainer);
             if (Modifiers && Keyboard.current.mKey.wasPressedThisFrame)
-                YargEngineActions.ApplyRockMetertrapItem(ArchipelagoPlugin.APcontainer);
+                EngineActions.ApplyRockMetertrapItem(ArchipelagoPlugin.APcontainer);
             if (Modifiers && Keyboard.current.dKey.wasPressedThisFrame)
-                YargEngineActions.ApplyDeathLink(ArchipelagoPlugin.APcontainer, null);
+                ArchipelagoEventManager.ApplyDeathLink(ArchipelagoPlugin.APcontainer, null);
         }
         [HarmonyPatch(typeof(DevWatermark), "Start")]
         [HarmonyPrefix]
@@ -170,10 +174,10 @@ namespace YargArchipelagoPlugin
         public static void AddAPButton(MainMenu __instance)
         {
             if (FirstAwake && ArchipelagoPlugin.ShowConnectionDialogOnStartup.Value)
-                ArchipelagoPlugin.ToggleArchipelagoDialog();
+                ArchipelagoConnectionDialog.Toggle();
             FirstAwake = false;
 
-            var t = YargEngineActions.FindNav(__instance.gameObject, "Profiles") ?? 
+            var t = EngineActions.FindNav(__instance.gameObject, "Profiles") ??
                 __instance.GetComponentInChildren<NavigatableButton>(true);
             var p = t.transform.parent;
             if (p.Find("AP_MenuEntry")) return;
@@ -184,17 +188,17 @@ namespace YargArchipelagoPlugin
             go.SetActive(true);
 
             var b = go.GetComponent<NavigatableButton>();
-            YargEngineActions.NavigatableButton_onClick.SetValue(b, new UnityEngine.UI.Button.ButtonClickedEvent());
-            ((UnityEngine.UI.Button.ButtonClickedEvent)YargEngineActions.NavigatableButton_onClick.GetValue(b))
-                .AddListener(ArchipelagoPlugin.ToggleArchipelagoDialog);
+            EngineActions.NavigatableButton_onClick.SetValue(b, new UnityEngine.UI.Button.ButtonClickedEvent());
+            ((UnityEngine.UI.Button.ButtonClickedEvent)EngineActions.NavigatableButton_onClick.GetValue(b))
+                .AddListener(ArchipelagoConnectionDialog.Toggle);
 
             var localizer = go.GetComponentInChildren<LocalizeText>(true);
             if (localizer != null) UnityEngine.Object.Destroy(localizer);
-            YargEngineActions.TrySetText(go, "Archipelago");
+            EngineActions.TrySetText(go, "Archipelago");
 
             var g = t.NavigationGroup ?? t.GetComponentInParent<NavigationGroup>();
             g.AddNavigatable(b);
-            ((List<NavigatableBehaviour>)YargEngineActions.NavigationGroup_navigatables.GetValue(g))
+            ((List<NavigatableBehaviour>)EngineActions.NavigationGroup_navigatables.GetValue(g))
                 .Sort((x, y) => x.transform.GetSiblingIndex() - y.transform.GetSiblingIndex());
         }
 

@@ -1,25 +1,21 @@
-﻿using BepInEx;
+using BepInEx;
 using BepInEx.Configuration;
 using BepInEx.Logging;
+using BepInEx.Unity.IL2CPP;
 using HarmonyLib;
 using UnityEngine;
-using UnityEngine.InputSystem;
 
 namespace YargArchipelagoCommon
 {
     [BepInPlugin(pluginGuid, pluginName, pluginVersion)]
-    public class ArchipelagoPlugin : BaseUnityPlugin
+    public class ArchipelagoPlugin : BasePlugin
     {
-        public const string pluginGuid = "thedrummonger.yarg.archipelago";
-        public const string pluginVersion = Versions.Yarg;
-#if NIGHTLY
-        public const string pluginName = "YARG Nightly Archipelago Plugin";
-#else
-        public const string pluginName = "YARG Archipelago Plugin";
-#endif
+        public const string pluginGuid = "thedrummonger.clonehero.archipelago";
+        public const string pluginName = "Clone Hero Archipelago Plugin";
+        public const string pluginVersion = Versions.CloneHero;
         internal static ManualLogSource PluginLog;
         public static APConnectionContainer APcontainer;
-        public static ConfigEntry<Key> ToggleKey;
+        public static ConfigEntry<KeyCode> ToggleKey;
         public static ConfigEntry<bool> RequireCtrl;
         public static ConfigEntry<bool> RequireShift;
         public static ConfigEntry<bool> RequireAlt;
@@ -27,17 +23,18 @@ namespace YargArchipelagoCommon
         public static ConfigEntry<bool> DefaultShowChat;
         public static ConfigEntry<bool> ShowConnectionDialogOnStartup;
         private static int _lastTickFrame = -1;
-        public static void ApplyPatches() => new Harmony(ArchipelagoPlugin.pluginGuid).PatchAll(typeof(APPatches).Assembly);
+        public static void ApplyPatches() => new Harmony(pluginGuid).PatchAll(typeof(APPatches).Assembly);
 
-        public void Awake()
+        public override void Load()
         {
-            PluginLog = Logger;
+            PluginLog = Log;
+            CloneHeroMappings.Initialize();
             PluginLog.LogInfo("Starting AP");
             APcontainer = new APConnectionContainer(PluginLog, AddListeners, RemoveListeners);
-            ToggleKey = Config.Bind("Hotkeys", "ToggleDialogKey", Key.F10, "Keyboard key used to toggle the connection dialog.");
-            RequireCtrl = Config.Bind("Hotkeys", "ToggleDialogRequireCtrl", false, "Require Ctrl to be held.");
-            RequireShift = Config.Bind("Hotkeys", "ToggleDialogRequireShift", false, "Require Shift to be held.");
-            RequireAlt = Config.Bind("Hotkeys", "ToggleDialogRequireAlt", false, "Require Alt to be held.");
+            ToggleKey = Config.Bind("Hotkeys", "ToggleDialogKey", KeyCode.F10, "Keyboard key used to toggle the connection dialog.");
+            RequireCtrl = Config.Bind("Hotkeys", "RequireCtrl", false, "Require Ctrl to be held.");
+            RequireShift = Config.Bind("Hotkeys", "RequireShift", false, "Require Shift to be held.");
+            RequireAlt = Config.Bind("Hotkeys", "RequireAlt", false, "Require Alt to be held.");
             DefaultShowChat = Config.Bind("Chat", "DefaultShowChat", false, "The default Show Chat setting for new connections.");
             DefaultItemLog = Config.Bind("Chat", "DefaultItemLog", ItemLog.ToMe, "The default Item Log setting for new connections.");
             ShowConnectionDialogOnStartup = Config.Bind("Misc", "ShowConnectionDialogOnStartup", false, "Should the connection dialog be opened automatically on launch.");
@@ -47,7 +44,7 @@ namespace YargArchipelagoCommon
         private static void AddListeners(ArchipelagoEventManager eventManager)
         {
             APPatches.OnCreateNormalView += APPatches.InsertAPSongs;
-            APPatches.OnSongFail += EngineActions.FailedSong;
+            APPatches.OnRecordScore += EngineActions.FailedSong;
             APPatches.OnSongContainersUpdated += APcontainer.BuildSongLookup;
             APPatches.OnRecordScore += eventManager.TryCheckSongLocations;
             APPatches.OnRecordScore += eventManager.TryCheckSongGoalSong;
@@ -59,7 +56,7 @@ namespace YargArchipelagoCommon
         private static void RemoveListeners(ArchipelagoEventManager eventManager)
         {
             APPatches.OnCreateNormalView -= APPatches.InsertAPSongs;
-            APPatches.OnSongFail -= EngineActions.FailedSong;
+            APPatches.OnRecordScore -= EngineActions.FailedSong;
             APPatches.OnSongContainersUpdated -= APcontainer.BuildSongLookup;
             APPatches.OnRecordScore -= eventManager.TryCheckSongLocations;
             APPatches.OnRecordScore -= eventManager.TryCheckSongGoalSong;
@@ -68,7 +65,6 @@ namespace YargArchipelagoCommon
             APPatches.OnGameManagerUpdateThrottled -= eventManager.ApplyPendingTrapsFiller;
         }
 
-        private void Update() => Tick();
 
         internal static void Tick()
         {

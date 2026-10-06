@@ -1,0 +1,27 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net6.0</TargetFramework>
+    <RootNamespace>CloneHeroPlugin</RootNamespace>
+    <AssemblyName>CloneHeroPlugin</AssemblyName>
+    <LangVersion>latest</LangVersion>
+    <DefineConstants>$(DefineConstants);CLONE_HERO</DefineConstants>
+    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="..\CommonData\Versions.cs" Link="Versions.cs" />
+    <Compile Include="..\CommonData\SongExportData.cs" Link="SongExportData.cs" />
+    <Compile Include="..\CommonData\CommonData.cs" Link="CommonData.cs" />
+    <Compile Include="..\CommonData\BaseConnectionContainer.cs" Link="BaseConnectionContainer.cs" />
+    <Compile Include="..\CommonData\ArchipelagoService.cs" Link="ArchipelagoService.cs" />
+    <Compile Include="..\CommonData\ArchipelagoEventManager.cs" Link="ArchipelagoEventManager.cs" />
+    <Compile Include="..\CommonData\APUtils.cs" Link="APUtils.cs" />
+    <Compile Include="..\CommonData\PluginUtils.cs" Link="PluginUtils.cs" />
+    <EmbeddedResource Include="..\Assets\*-icon.png" Link="Assets\%(Filename)%(Extension)" />
+    <Reference Include="Libraries\*.dll">
+      <Private>false</Private>
+    </Reference>
+    <Reference Update="Libraries\Archipelago.MultiClient.Net.dll;Libraries\Archipelago.Newtonsoft.Json.dll">
+      <Private>true</Private>
+    </Reference>
+  </ItemGroup>
+</Project>

@@ -1,16 +1,16 @@
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 18
-VisualStudioVersion = 18.8.11925.187 insiders
+VisualStudioVersion = 18.8.11925.187
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "YargArchipelagoPluginNightly", "YargArchipelagoPluginNightly\YargArchipelagoPluginNightly.csproj", "{DB54BC6E-B414-40D4-A3BA-98EB7262EE78}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "YargArchipelagoPluginStable", "YargArchipelagoPluginMain\YargArchipelagoPluginStable.csproj", "{ECF27AAC-07BE-43BB-8ED9-1C938308F853}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tests", "Tests\Tests.csproj", "{316CCD80-DA3C-4463-B903-665438246192}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Yaml Creator", "Yaml Creator\Yaml Creator.csproj", "{BEC8970F-703A-4FA5-AE86-3E0B937E20E3}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Clone Hero Yaml Creator", "Clone Hero Yaml Creator\Clone Hero Yaml Creator.csproj", "{8069F43D-40EA-4AF0-8EEC-345A967EED5D}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CloneHeroPlugin", "CloneHeroPlugin\CloneHeroPlugin.csproj", "{98B8E34A-2984-4F34-800C-D80A2E6F704B}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -26,10 +26,6 @@ Global
 		{ECF27AAC-07BE-43BB-8ED9-1C938308F853}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{ECF27AAC-07BE-43BB-8ED9-1C938308F853}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{ECF27AAC-07BE-43BB-8ED9-1C938308F853}.Release|Any CPU.Build.0 = Release|Any CPU
-		{316CCD80-DA3C-4463-B903-665438246192}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{316CCD80-DA3C-4463-B903-665438246192}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{316CCD80-DA3C-4463-B903-665438246192}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{316CCD80-DA3C-4463-B903-665438246192}.Release|Any CPU.Build.0 = Release|Any CPU
 		{BEC8970F-703A-4FA5-AE86-3E0B937E20E3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{BEC8970F-703A-4FA5-AE86-3E0B937E20E3}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{BEC8970F-703A-4FA5-AE86-3E0B937E20E3}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -38,6 +34,10 @@ Global
 		{8069F43D-40EA-4AF0-8EEC-345A967EED5D}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{8069F43D-40EA-4AF0-8EEC-345A967EED5D}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{8069F43D-40EA-4AF0-8EEC-345A967EED5D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{98B8E34A-2984-4F34-800C-D80A2E6F704B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{98B8E34A-2984-4F34-800C-D80A2E6F704B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{98B8E34A-2984-4F34-800C-D80A2E6F704B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{98B8E34A-2984-4F34-800C-D80A2E6F704B}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

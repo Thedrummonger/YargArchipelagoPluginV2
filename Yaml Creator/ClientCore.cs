@@ -12,8 +12,7 @@ using System.Runtime.InteropServices.ComTypes;
 using System.Text;
 using System.Windows.Forms;
 using YargArchipelagoCommon;
-using YargArchipelagoPlugin;
-using static YargArchipelagoCommon.CommonData;
+using static YargArchipelagoCommon.APWorldData;
 
 namespace Yaml_Creator
 {
@@ -30,7 +29,12 @@ namespace Yaml_Creator
 
         private void InitializeClientComponents()
         {
-            ClientConnection = new ClientSession();
+            ClientConnection = new ClientSession
+            {
+                LogInfo = message => Debug.WriteLine(message),
+                LogWarning = message => Debug.WriteLine(message),
+                LogError = message => Debug.WriteLine(message)
+            };
             CreateClientListeners();
             rtbClientItems.Resize += listView1_Resize;
             rtbClientItems.ItemSelectionChanged += (s, e) => { e.Item.Selected = false; };
@@ -55,7 +59,7 @@ namespace Yaml_Creator
             if (!ClientConnection.ClientConnected) return;
             EmptyChatQueue();
             if (ClientConnection._hasItemUpdate || ClientConnection._hasHintUpdate)
-                ClientConnection.UpdateReceivedItems((s) => Debug.WriteLine(s));
+                ClientConnection.UpdateReceivedItems();
             if (ClientConnection._hasItemUpdate)
             {
                 ClientConnection._hasItemUpdate = false;
@@ -90,7 +94,8 @@ namespace Yaml_Creator
             if (ClientConnection.GoalItemInPool(out var recieved, out var recieveInfo))
             {
                 lbSeedStatus.Items.Add($"Goal Song Item Found: {recieved}");
-                lbSeedStatus.Items.Add($"From: {recieveInfo.GetPlayerInfo(ClientConnection).Name} at {recieveInfo.GetLocationsName(ClientConnection)} playing {recieveInfo.SendingPlayerGame}");
+                if (recieveInfo is not null)
+                    lbSeedStatus.Items.Add($"From: {recieveInfo.GetPlayerInfo(ClientConnection).Name} at {recieveInfo.GetLocationsName(ClientConnection)} playing {recieveInfo.SendingPlayerGame}");
                 lbSeedStatus.Items.Add($"===================================================");
             }
         }
@@ -292,11 +297,14 @@ namespace Yaml_Creator
         private bool ConnectClient()
         {
             if (string.IsNullOrWhiteSpace(txtClientAddress.Text) || string.IsNullOrWhiteSpace(txtClientSlot.Text)) return false;
-            var (Ip, Port) = YargAPUtils.ParseIpAddress(txtClientAddress.Text);
-            if (Ip is null || Port < 0) return false;
-            rtbClientChat.AppendMessages($"Connecting to {txtClientSlot.Text}@{Ip}:{Port}");
-            var TempSession = ArchipelagoSessionFactory.CreateSession(Ip, Port);
-            var Result = TempSession.TryConnectAndLogin("YAYARG", txtClientSlot.Text, Archipelago.MultiClient.Net.Enums.ItemsHandlingFlags.AllItems, new Version(0, 6, 1), password: txtClientPass.Text);
+            if (!ConnectionDetails.TryParseAddress(txtClientAddress.Text, out var address, out var error))
+            {
+                rtbClientChat.AppendMessages(error);
+                return false;
+            }
+            rtbClientChat.AppendMessages($"Connecting to {txtClientSlot.Text}@{address}");
+            var TempSession = ArchipelagoSessionFactory.CreateSession(address);
+            var Result = TempSession.TryConnectAndLogin(APWorldData.Game, txtClientSlot.Text, Archipelago.MultiClient.Net.Enums.ItemsHandlingFlags.AllItems, Version.Parse(Versions.Archipelago), password: txtClientPass.Text);
             if (Result is LoginFailure F)
             {
                 rtbClientChat.AppendMessages($"Failed to Connect to {txtClientSlot.Text}@{txtClientAddress.Text}", string.Join("\n", F.Errors));
@@ -304,7 +312,7 @@ namespace Yaml_Creator
             }
             rtbClientChat.AppendMessages($"Connected to {txtClientSlot.Text}@{txtClientAddress.Text}");
             ClientConnection.Session = TempSession;
-            ClientConnection.SlotData = YargSlotData.Parse(ClientConnection.GetSession().DataStorage.GetSlotData());
+            ClientConnection.SlotData = APSlotData.Parse(ClientConnection.GetSession().DataStorage.GetSlotData());
             CreateAPListeners();
             ClientConnection._hasItemUpdate = true;
             ClientConnection._hasHintUpdate = true;

@@ -85,6 +85,21 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="..\CommonData\CommonData.cs">
+      <Link>CommonData.cs</Link>
+    </Compile>
+    <Compile Include="..\CommonData\BaseConnectionContainer.cs">
+      <Link>BaseConnectionContainer.cs</Link>
+    </Compile>
+    <Compile Include="..\CommonData\APUtils.cs">
+      <Link>APUtils.cs</Link>
+    </Compile>
+    <Compile Include="..\CommonData\SongExportData.cs">
+      <Link>SongExportData.cs</Link>
+    </Compile>
+    <Compile Include="..\CommonData\Versions.cs">
+      <Link>Versions.cs</Link>
+    </Compile>
     <Compile Include="ClientCore.cs" />
     <Compile Include="CrossPlatformFileLoader.cs" />
     <Compile Include="MainForm.cs">
@@ -105,6 +120,8 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="SongData.cs" />
     <Compile Include="SongDataConverter.cs" />
+    <Compile Include="Tools\CrossGameDictionary.cs" />
+    <Compile Include="Tools\MissingSongsRepair.cs" />
     <Compile Include="Utility.cs" />
     <Compile Include="YAMLData.cs" />
     <Compile Include="YAMLWriter.cs" />
@@ -136,12 +153,6 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\YargArchipelagoPluginNightly\YargArchipelagoPluginNightly.csproj">
-      <Project>{db54bc6e-b414-40d4-a3ba-98eb7262ee78}</Project>
-      <Name>YargArchipelagoPluginNightly</Name>
-    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
     <BootstrapperPackage Include=".NETFramework,Version=v4.7.2">

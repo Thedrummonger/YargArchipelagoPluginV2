@@ -6,7 +6,8 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using static Yaml_Creator.SongData;
 using static Yaml_Creator.SongDataConverter;
-using static YargArchipelagoCommon.CommonData;
+using YargArchipelagoCommon;
+using static YargArchipelagoCommon.APWorldData;
 
 namespace Yaml_Creator
 {

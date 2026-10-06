@@ -94,14 +94,26 @@
     <Compile Include="..\CommonData\ArchipelagoService.cs">
       <Link>ArchipelagoService.cs</Link>
     </Compile>
+    <Compile Include="..\CommonData\SongExportData.cs">
+      <Link>SongExportData.cs</Link>
+    </Compile>
+    <Compile Include="..\CommonData\Versions.cs">
+      <Link>Versions.cs</Link>
+    </Compile>
     <Compile Include="..\CommonData\CommonData.cs">
       <Link>CommonData.cs</Link>
+    </Compile>
+    <Compile Include="..\CommonData\BaseConnectionContainer.cs">
+      <Link>BaseConnectionContainer.cs</Link>
+    </Compile>
+    <Compile Include="..\CommonData\APUtils.cs">
+      <Link>APUtils.cs</Link>
     </Compile>
     <Compile Include="..\CommonData\Forms.cs">
       <Link>Forms.cs</Link>
     </Compile>
-    <Compile Include="..\CommonData\YargAPUtils.cs">
-      <Link>YargAPUtils.cs</Link>
+    <Compile Include="..\CommonData\PluginUtils.cs">
+      <Link>PluginUtils.cs</Link>
     </Compile>
     <Compile Include="..\CommonData\YargEngineActions.cs">
       <Link>YargEngineActions.cs</Link>

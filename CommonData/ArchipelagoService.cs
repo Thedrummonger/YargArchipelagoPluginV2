@@ -2,99 +2,268 @@
 using Archipelago.MultiClient.Net.BounceFeatures.DeathLink;
 using Archipelago.MultiClient.Net.Enums;
 using BepInEx.Logging;
-using Cysharp.Threading.Tasks;
-using HarmonyLib;
+using Archipelago.MultiClient.Net.Helpers;
+using Archipelago.MultiClient.Net.MessageLog.Messages;
 using Newtonsoft.Json;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Runtime.InteropServices.ComTypes;
-using System.Security.Cryptography;
-using System.Text;
+using System.Threading.Tasks;
+#if !CLONE_HERO
 using YARG.Core.Song;
 using YARG.Gameplay;
-using YARG.Menu.Persistent;
-using YARG.Song;
+#endif
 using YargArchipelagoCommon;
-using static YargArchipelagoCommon.CommonData;
 
-namespace YargArchipelagoPlugin
+namespace YargArchipelagoCommon
 {
-    public class BaseConnectionContainer 
-    {
-        public ArchipelagoSession Session;
-        public ArchipelagoSession GetSession() => Session;
-        public YargSlotData SlotData;
-        public bool ClientConnected => Session?.Socket != null && Session.Socket.Connected;
-        public Dictionary<long, BaseYargAPItem> ReceivedSongUnlockItems { get; } = new Dictionary<long, BaseYargAPItem>();
-        public Dictionary<SupportedInstrument, BaseYargAPItem> ReceivedInstruments { get; } = new Dictionary<SupportedInstrument, BaseYargAPItem>();
-        public HashSet<StaticYargAPItem> ApItemsRecieved { get; } = new HashSet<StaticYargAPItem>();
-
-        public Dictionary<StaticItems, ItemFlags> ItemPriorities = new Dictionary<StaticItems, ItemFlags>();
-        public bool HasActiveSession => GetSession() != null;
-        public bool IsSessionConnected => HasActiveSession && Session.Socket.Connected;
-
-        public bool GoalItemInPool(out bool Recieved, out BaseYargAPItem recieveInfo)
-        {
-            recieveInfo = null;
-            Recieved = false;
-            if (!IsSessionConnected) return false;
-            Recieved = ReceivedSongUnlockItems.TryGetValue(SlotData.GoalData.UnlockItemID, out recieveInfo);
-            // If we have not recieved the item, it was not in our starting items so it is in the pool
-            // If we have recieved it from someone other than the server, it was in the pool.
-            bool inPool = !Recieved || recieveInfo.SendingPlayerSlot > 0;
-            return inPool;
-        }
-
-        public void UpdateReceivedItems(Action<string> Logger)
-        {
-            Dictionary<StaticItems, int> ServerLocProxy = new Dictionary<StaticItems, int>();
-            foreach (var i in Session.Items.AllItemsReceived)
-            {
-                if (StaticItemsById.TryGetValue(i.ItemId, out var item))
-                {
-                    if (i.Player.Slot == 0)
-                    {
-                        if (!ServerLocProxy.ContainsKey(item)) ServerLocProxy[item] = 0;
-                        ServerLocProxy[item]++;
-                    }
-                    ApItemsRecieved.Add(new StaticYargAPItem(item, i.ItemId, i.Player.Slot, i.Player.Slot == 0 ? ServerLocProxy[item] : i.LocationId, i.LocationGame));
-                    if (!ItemPriorities.ContainsKey(item))
-                        ItemPriorities[item] = i.Flags;
-                }
-                else if (InstrumentItemsById.TryGetValue(i.ItemId, out var instrument))
-                    ReceivedInstruments[instrument] = new BaseYargAPItem(i.ItemId, i.Player.Slot, i.LocationId, i.LocationGame);
-                else if (SlotData.SongUnlockIds.Contains(i.ItemId))
-                    ReceivedSongUnlockItems[i.ItemId] = new BaseYargAPItem(i.ItemId, i.Player.Slot, i.LocationId, i.LocationGame);
-                else
-                    Logger($"Received unknown item {i.ItemName} [{i.ItemId}]");
-            }
-        }
-    }
     public class APConnectionContainer : BaseConnectionContainer
     {
-        private Random SeededRNG = null;
-
-        public BepInEx.Logging.ManualLogSource logger;
-        public HashSet<StaticYargAPItem> GetAllAquiredActionItems()
-        {
-            HashSet<StaticYargAPItem> Recieved = ApItemsRecieved;
-            HashSet<StaticYargAPItem> Purchased = seedConfig is null ? new HashSet<StaticYargAPItem>() : seedConfig.ApItemsPurchased;
-            return new HashSet<StaticYargAPItem>(Recieved.Union(Purchased));
-        }
-        public HashSet<long> CheckedLocations { get; } = new HashSet<long>();
         public DeathLinkService DeathLinkService { get; private set; } = null;
-
+        public override bool IsSessionConnected => !IsConnecting && SlotData != null && ClientConnected;
+        public bool IsConnecting { get; private set; }
+        public string StatusText { get; private set; } = "Disconnected";
+        public Dictionary<string, SongEntry> SongHashLookup { get; private set; } = new Dictionary<string, SongEntry>(StringComparer.OrdinalIgnoreCase);
+        public CrossGameDictionary CrossGameHashes { get; private set; } = new CrossGameDictionary();
+        public HashSet<long> CheckedLocations { get; } = new HashSet<long>();
         private DateTime CurrentSongStartTime = DateTime.Now;
         private GameManager CurrentlyPlaying = null;
+        private readonly ArchipelagoEventManager eventManager;
+        internal readonly ConcurrentQueue<Action> MainThreadActions = new();
+        private readonly Action<ArchipelagoEventManager> AddGameListeners;
+        private readonly Action<ArchipelagoEventManager> RemoveGameListeners;
+        private int ConnectionAttempt;
+        private ReceivedItemsHelper.ItemReceivedHandler ItemListener;
+        private LocationCheckHelper.CheckedLocationsUpdatedHandler LocationListener;
+        private MessageLogHelper.MessageReceivedHandler MessageListener;
+        private DeathLinkService.DeathLinkReceivedHandler DeathLinkListener;
+
+        public APConnectionContainer(ManualLogSource logSource, Action<ArchipelagoEventManager> addListeners, Action<ArchipelagoEventManager> removeListeners)
+        {
+            LogInfo = logSource.LogInfo;
+            LogWarning = logSource.LogWarning;
+            LogError = logSource.LogError;
+            eventManager = new ArchipelagoEventManager(this);
+            AddGameListeners = addListeners;
+            RemoveGameListeners = removeListeners;
+        }
+
+        public void Connect(ConnectionDetails connectionDetails, bool skipVersionCheck = false)
+        {
+            if (IsConnecting || IsSessionConnected)
+                return;
+            if (connectionDetails == null || string.IsNullOrWhiteSpace(connectionDetails.SlotName))
+            {
+                Report("Enter a slot name.");
+                return;
+            }
+
+            if (!ConnectionDetails.TryParseAddress(connectionDetails.Address, out var address, out var error))
+            {
+                Report(error);
+                return;
+            }
+
+            if (Session != null)
+                Disconnect(false);
+            var details = new ConnectionDetails
+            {
+                Address = connectionDetails.Address.Trim(),
+                SlotName = connectionDetails.SlotName.Trim(),
+                Password = connectionDetails.Password
+            };
+            var attempt = ++ConnectionAttempt;
+            IsConnecting = true;
+            StatusText = "Connecting...";
+            _ = Task.Run(() => TryConnectAsync(details, address, attempt, skipVersionCheck));
+        }
+
+        private void TryConnectAsync(ConnectionDetails details, Uri address, int attempt, bool skipVersionCheck)
+        {
+            ArchipelagoSession tempSession = null;
+            try
+            {
+                tempSession = ArchipelagoSessionFactory.CreateSession(address);
+                var result = tempSession.TryConnectAndLogin(APWorldData.Game, details.SlotName,
+                    ItemsHandlingFlags.AllItems, Version.Parse(Versions.Archipelago), password: details.Password);
+                if (result is LoginFailure failure)
+                {
+                    FailConnection(attempt, tempSession, string.Join("\n", failure.Errors));
+                    return;
+                }
+
+                var slotData = APSlotData.Parse(tempSession.DataStorage.GetSlotData());
+                var ClientVersion = Version.Parse(Versions.APWorld);
+                if (!skipVersionCheck && (slotData.APWorldVersion.Major != ClientVersion.Major ||
+                    slotData.APWorldVersion.Minor != ClientVersion.Minor))
+                {
+                    FailConnection(attempt, tempSession, $"Version mismatch: world {slotData.APWorldVersion}, client supports {ClientVersion.Major}.{ClientVersion.Minor}.x");
+                    return;
+                }
+
+                MainThreadActions.Enqueue(() => FinishConnection(attempt, tempSession, slotData, details));
+            }
+            catch (Exception e)
+            {
+                FailConnection(attempt, tempSession, e.Message);
+            }
+        }
+
+        private void FailConnection(int attempt, ArchipelagoSession session, string message)
+        {
+            CloseSocket(session);
+            MainThreadActions.Enqueue(() =>
+            {
+                if (attempt != ConnectionAttempt)
+                    return;
+                IsConnecting = false;
+                Report($"Failed to connect: {message}");
+            });
+        }
+
+        private void FinishConnection(int attempt, ArchipelagoSession session, APSlotData slotData, ConnectionDetails details)
+        {
+            if (attempt != ConnectionAttempt)
+            {
+                CloseSocket(session);
+                return;
+            }
+            try
+            {
+                if (!session.Socket.Connected)
+                {
+                    FailConnection(attempt, session, "The server disconnected during login.");
+                    return;
+                }
+                Session = session;
+                SlotData = slotData;
+                IsConnecting = false;
+                seedConfig = PersistantData.Load(this, ArchipelagoPlugin.DefaultItemLog.Value, ArchipelagoPlugin.DefaultShowChat.Value);
+                DeathLinkService = session.CreateDeathLinkService();
+                AddListeners();
+                UpdateDeathLinkTags();
+                UpdateReceivedItems();
+                BuildSongLookup();
+                ReadCrossGameDict();
+                CheckForMissingSongs();
+                details.Save();
+                OnConnected(details);
+            }
+            catch (Exception e)
+            {
+                Disconnect(false);
+                Report($"Failed to initialize connection: {e.Message}");
+            }
+        }
+
+        private void OnConnected(ConnectionDetails details)
+        {
+            File.WriteAllText(Path.Combine(APWorldData.DataFolder, "Debug.json"), JsonConvert.SerializeObject(SlotData, Formatting.Indented));
+            StatusText = $"Connected: {details.SlotName}@{details.Address}";
+            APToastManager.ToastSuccess($"Connected Archipelago!\n{details.SlotName}@{details.Address}");
+        }
+
+        public void Disconnect(bool showNotification = true)
+        {
+            ConnectionAttempt++;
+            IsConnecting = false;
+            RemoveListeners();
+            CloseSocket(Session);
+            DeathLinkService = null;
+            Session = null;
+            SlotData = null;
+            seedConfig = null;
+            ReceivedSongUnlockItems.Clear();
+            ReceivedInstruments.Clear();
+            ApItemsRecieved.Clear();
+            ItemPriorities.Clear();
+            CheckedLocations.Clear();
+            SongHashLookup.Clear();
+            ResetConnectionData();
+            StatusText = "Disconnected";
+            APPatches.HasAvailableAPSongUpdate = true;
+            if (showNotification)
+                Report("Disconnected from Archipelago");
+        }
+
+        private void ResetConnectionData()
+        {
+            eventManager.PendingTrapsFiller = false;
+        }
+
+        private void CloseSocket(ArchipelagoSession session)
+        {
+            try
+            {
+                if (session?.Socket != null)
+                    _ = session.Socket.DisconnectAsync();
+            }
+            catch (Exception e) { LogWarning?.Invoke($"Could not close Archipelago socket: {e.Message}"); }
+        }
+
+        private void AddListeners()
+        {
+            var session = Session;
+            ItemListener = _ => QueueSessionAction(session, UpdateReceivedItems);
+            LocationListener = _ => QueueSessionAction(session, UpdateReceivedItems);
+            MessageListener = message => QueueSessionAction(session, () => OnMessageReceived(message));
+            DeathLinkListener = deathLink => QueueSessionAction(session, () => eventManager.OnDeathLinkReceived(deathLink));
+            DeathLinkService.OnDeathLinkReceived += DeathLinkListener;
+            session.Hints.TrackHints(_ => QueueSessionAction(session, () => APPatches.HasAvailableAPSongUpdate = true));
+            session.Items.ItemReceived += ItemListener;
+            session.Locations.CheckedLocationsUpdated += LocationListener;
+            session.MessageLog.OnMessageReceived += MessageListener;
+
+            AddGameListeners(eventManager);
+        }
+
+        private void RemoveListeners()
+        {
+            RemoveGameListeners(eventManager);
+            ClearCurrentSong();
+            if (DeathLinkService != null) DeathLinkService.OnDeathLinkReceived -= DeathLinkListener;
+            if (Session == null)
+                return;
+            Session.Items.ItemReceived -= ItemListener;
+            Session.Locations.CheckedLocationsUpdated -= LocationListener;
+            Session.MessageLog.OnMessageReceived -= MessageListener;
+        }
+
+        public void TickMainThread()
+        {
+            while (MainThreadActions.TryDequeue(out var action))
+            {
+                try { action(); }
+                catch (Exception e) { LogError?.Invoke($"Archipelago update failed: {e}"); }
+            }
+            if (Session != null && !ClientConnected)
+            {
+                Disconnect(false);
+                Report("Lost connection to the Archipelago server");
+            }
+        }
+
+        private void QueueSessionAction(ArchipelagoSession session, Action action)
+        {
+            MainThreadActions.Enqueue(() =>
+            {
+                if (ReferenceEquals(Session, session))
+                    action();
+            });
+        }
+
         public void SetCurrentSong(GameManager game)
         {
             CurrentSongStartTime = DateTime.Now;
             CurrentlyPlaying = game;
         }
+
         public void ResetBuffer() => CurrentSongStartTime = DateTime.Now;
+
         public void ClearCurrentSong() => CurrentlyPlaying = null;
+
         public bool IsInSong(out GameManager song, out TimeSpan buffer)
         {
             song = null;
@@ -106,217 +275,22 @@ namespace YargArchipelagoPlugin
             return true;
         }
 
-        public Dictionary<string, SongEntry> SongHashLookup { get; private set; } = new Dictionary<string, SongEntry>();
-
-        private readonly ArchipelagoEventManager eventManager;
-
-        public PersistantData seedConfig { get; private set; } = null;
-        public bool IsConnecting { get; private set; } = false;
-
-        public SyncTimer APSyncTimer { get; private set; }
-        public APConnectionContainer(ManualLogSource logSource)
-        {
-            logger = logSource;
-            eventManager = new ArchipelagoEventManager(this);
-            APSyncTimer = new SyncTimer();
-            APSyncTimer.StartTimer();
-        }
-
-        private int GetAPSeed()
-        {
-            using (MD5 md5 = MD5.Create())
-            {
-                byte[] hash = md5.ComputeHash(Encoding.UTF8.GetBytes(Session.RoomState.Seed));
-                return BitConverter.ToInt32(hash, 0);
-            }
-        }
-        public void Connect(ConnectionDetails connectionDetails)
-        {
-            if (IsConnecting) return;
-            var (Ip, Port) = YargAPUtils.ParseIpAddress(connectionDetails.Address);
-            if (Ip is null) return;
-            var tempSession = ArchipelagoSessionFactory.CreateSession(Ip, Port);
-
-            UniTask.RunOnThreadPool(() => TryConnectAsync(connectionDetails, tempSession));
-        }
-
-        private async UniTask TryConnectAsync(ConnectionDetails connectionDetails, ArchipelagoSession tempSession)
-        {
-            IsConnecting = true;
-            var Result = tempSession.TryConnectAndLogin("YAYARG", connectionDetails.SlotName,
-                Archipelago.MultiClient.Net.Enums.ItemsHandlingFlags.AllItems, new Version(0, 6, 1), password: connectionDetails.Password);
-            if (Result is LoginFailure failure)
-            {
-                APToastManager.ToastError($"Failed to connect!\n{connectionDetails.SlotName}@{connectionDetails.Address}:\n" +
-                    $"{string.Join("\n", failure.Errors)}");
-                IsConnecting = false;
-                return;
-            }
-            Session = tempSession;
-            bool ValidData = true;
-            try
-            {
-                // This is the only really "dangerous" code here. if it tries to connect 
-                // to an old version of the APWorld it could try to parse bad data.
-                SlotData = YargSlotData.Parse(Session.DataStorage.GetSlotData());
-                var ClientVersion = Version.Parse(ArchipelagoPlugin.pluginVersion.Substring(2));
-                bool MatchingVersion = true;
-                if (SlotData.APWorldVersion.Major != ClientVersion.Major) MatchingVersion = false;
-                if (SlotData.APWorldVersion.Minor != ClientVersion.Minor) MatchingVersion = false;
-                if (!MatchingVersion)
-                {
-                    APToastManager.ToastError($"Version Missmatch!\nWorld Version {SlotData.APWorldVersion}\nClient Version {ClientVersion}");
-                    ValidData = false;
-                }
-            }
-            catch (Exception ex)
-            {
-                APToastManager.ToastError($"Failed to parse slot data!\n" +
-                    $"{connectionDetails.SlotName}@{connectionDetails.Address}:\n" +
-                    $"{ex.Message}\n" +
-                    $"{ex.GetType()}");
-                ValidData = false;
-            }
-
-            if (!ValidData)
-            {
-                Session = null;
-                SlotData = null;
-                IsConnecting = false;
-                return;
-            }
-
-            seedConfig = PersistantData.Load(this);
-            DeathLinkService = Session.CreateDeathLinkService();
-            SeededRNG = new Random(GetAPSeed());
-
-            await UniTask.SwitchToMainThread();
-
-            AddListeners();
-            eventManager.UpdateAPData();
-            UpdateDeathLinkTags();
-            BuildSongLookup();
-
-            APToastManager.ToastSuccess($"Connected Archipelago!\n{connectionDetails.SlotName}@{connectionDetails.Address}");
-            File.WriteAllText(Path.Combine(CommonData.DataFolder, "Debug.json"), JsonConvert.SerializeObject(SlotData, Formatting.Indented));
-            connectionDetails.Save();
-            IsConnecting = false;
-            CheckForMissingSongs();
-        }
-
-        private void CheckForMissingSongs()
-        {
-            HashSet<string> Missing = new HashSet<string>();
-            foreach(var i in SlotData.Songs)
-            {
-                if (!i.HadYargSongEntry(this, out _))
-                {
-                    var MainLocation = Session.Locations.GetLocationNameFromId(i.MainLocationID);
-                    var SongName = YargAPUtils.GetSongNameFromLocationString(MainLocation);
-                    Missing.Add(SongName);
-                }
-            }
-            if (Missing.Count > 0)
-            {
-                DialogManager.Instance.ShowMessage($"The following songs were in your AP seed but missing from yarg!",
-                    YargAPUtils.TruncateString(string.Join(", ", Missing), 1000));
-            }
-        }
-
-        public void Disconnect()
-        {
-            RemoveListeners();
-            if (Session?.Socket?.Connected ?? false)
-                Session.Socket.DisconnectAsync();
-            ReceivedSongUnlockItems.Clear();
-            ApItemsRecieved.Clear();
-            ReceivedInstruments.Clear();
-            CheckedLocations.Clear();
-            DeathLinkService = null;
-            SeededRNG = null;
-            SlotData = null;
-            seedConfig = null;
-            Session = null;
-            ArchipelagoEventManager.FlagSongLibraryForUpdate();
-        }
-
-        private bool _Listening = false;
-        public void AddListeners()
-        {
-            if (_Listening) return;
-            APSyncTimer.ConstantCallback += eventManager.VerifyServerConnection;
-            APSyncTimer.OnUpdateCallback += eventManager.UpdateAPData;
-
-            Session.Items.ItemReceived += eventManager.Items_ItemReceived;
-            Session.Locations.CheckedLocationsUpdated += eventManager.Locations_CheckedLocationsUpdated;
-            Session.MessageLog.OnMessageReceived += eventManager.RelayChatToYARG;
-            Session.MessageLog.OnMessageReceived += eventManager.UpdateChatHistory;
-
-            DeathLinkService.OnDeathLinkReceived += eventManager.OnDeathLinkReceived;
-
-            APPatches.OnCreateNormalView += eventManager.InsertAPSongs;
-            APPatches.OnSongStarted += eventManager.SetSong;
-            APPatches.OnSongEnded += eventManager.SetSong;
-            APPatches.OnRecordScore += eventManager.TryCheckSongLocations;
-            APPatches.OnRecordScore += eventManager.TryCheckSongGoalSong;
-            APPatches.OnSongFail += eventManager.FailedSong;
-            APPatches.OnSongContainersUpdated += BuildSongLookup;
-            APPatches.OnGameManagerUpdateThrottled += eventManager.ApplyPendingTrapsFiller;
-            _Listening = true;
-        }
-
-        public void RemoveListeners()
-        {
-            if (!_Listening) return;
-            APSyncTimer.ConstantCallback -= eventManager.VerifyServerConnection;
-            APSyncTimer.OnUpdateCallback -= eventManager.UpdateAPData;
-
-            Session.Items.ItemReceived -= eventManager.Items_ItemReceived;
-            Session.Locations.CheckedLocationsUpdated -= eventManager.Locations_CheckedLocationsUpdated;
-            Session.MessageLog.OnMessageReceived -= eventManager.RelayChatToYARG;
-            Session.MessageLog.OnMessageReceived -= eventManager.UpdateChatHistory;
-
-            DeathLinkService.OnDeathLinkReceived -= eventManager.OnDeathLinkReceived;
-
-            APPatches.OnCreateNormalView -= eventManager.InsertAPSongs;
-            APPatches.OnSongStarted -= eventManager.SetSong;
-            APPatches.OnSongEnded -= eventManager.SetSong;
-            APPatches.OnRecordScore -= eventManager.TryCheckSongLocations;
-            APPatches.OnRecordScore -= eventManager.TryCheckSongGoalSong;
-            APPatches.OnSongFail -= eventManager.FailedSong;
-            APPatches.OnSongContainersUpdated -= BuildSongLookup;
-            APPatches.OnGameManagerUpdateThrottled -= eventManager.ApplyPendingTrapsFiller;
-            _Listening = false;
-        }
-
         public void BuildSongLookup()
         {
-            foreach(var song in SongContainer.Songs)
-                SongHashLookup[Convert.ToBase64String(song.Hash.HashBytes)] = song;
-        }
-
-        public void UpdateCheckedLocations()
-        {
-            foreach (var i in Session.Locations.AllLocationsChecked)
-                CheckedLocations.Add(i);
-        }
-
-        public void UpdateDeathLinkTags()
-        {
-            if (!IsSessionConnected)
-                return;
-            if (seedConfig.DeathLinkMode > DeathLinkType.disabled)
-                DeathLinkService.EnableDeathLink();
-            else
-                DeathLinkService.DisableDeathLink();
+            SongHashLookup.Clear();
+            foreach(var song in EngineActions.GetSongLookup())
+                SongHashLookup[song.Key] = song.Value;
         }
 
         public List<SongAPData> GetAvailableSongs(Func<SongEntry, bool> Predicate = null) => GetAvailableSongs(Predicate, out _, out _);
+
         public List<SongAPData> GetAvailableSongs(Func<SongEntry, bool> Predicate, out List<SongAPData> MissingInstrument, out List<SongAPData> AllAvailable)
         {
             MissingInstrument = new List<SongAPData>();
             AllAvailable = new List<SongAPData>();
             List<SongAPData> SongEntries = new List<SongAPData>();
+            if (!IsSessionConnected)
+                return SongEntries;
             foreach (var i in SlotData.SongsByInstrument)
             {
                 var HasInstrument = ReceivedInstruments.ContainsKey(i.Key);
@@ -324,7 +298,7 @@ namespace YargArchipelagoPlugin
                 {
                     if (!ReceivedSongUnlockItems.ContainsKey(song.UnlockItemID)) continue;
                     if (!song.HasAvailableLocations(this)) continue;
-                    if (!song.HadYargSongEntry(this, out var entry)) continue;
+                    if (!SongHashLookup.TryGetValue(song.GetActiveHash(this), out var entry)) continue;
                     if (Predicate != null && !Predicate(entry)) continue;
                     AllAvailable.Add(song);
                     if (HasInstrument) SongEntries.Add(song);
@@ -334,97 +308,126 @@ namespace YargArchipelagoPlugin
             return SongEntries;
         }
 
-    }
-
-    public class PersistantData
-    {
-        private APConnectionContainer parent;
-        public HashSet<StaticYargAPItem> ApItemsUsed { get; } = new HashSet<StaticYargAPItem>();
-        public HashSet<StaticYargAPItem> ApItemsPurchased { get; } = new HashSet<StaticYargAPItem>();
-
-        public Dictionary<string, string> SongProxies { get; } = new Dictionary<string, string>();
-        public Dictionary<string, CompletionRequirements> AdjustedDifficulties { get; } = new Dictionary<string, CompletionRequirements>();
-
-        public bool ShowMissingInstruments = false;
-
-        public bool ShowAPMenu = false;
-
-        public bool ShowGoalStatus = false;
-
-        public bool ShowPoolInfo = false;
-
-        public bool InGameAPChat = true;
-
-        public ItemLog InGameItemLog = ItemLog.ToMe;
-
-        /// <summary>
-        /// This value tracks the current death link mode. It can be changed in game independently of the yaml.
-        /// </summary>
-        public DeathLinkType DeathLinkMode = DeathLinkType.disabled;
-
-        /// <summary>
-        /// This value tracks when deathlink should trigger. It can be changed in game independently of the yaml.
-        /// </summary>
-        public DeathLinkTriggerType DeathLinkTrigger = DeathLinkTriggerType.both;
-
-        /// <summary>
-        /// This value tracks the current energylink mode. It can be changed in game independently of the yaml.
-        /// </summary>
-        public EnergyLinkType EnergyLinkMode = EnergyLinkType.disabled;
-
-        public static PersistantData Load(APConnectionContainer container)
+        public void ReadCrossGameDict()
         {
-            if (!container.IsSessionConnected)
-                return null;
-            Directory.CreateDirectory(SeedConfigPath);
-            var ConfigFile = Directory.GetFiles(SeedConfigPath)
-                .FirstOrDefault(file => Path.GetFileName(file) == getSaveFileName(container));
-            if (ConfigFile is null)
-                return CreateNew();
-            try 
-            { 
-                var configData = JsonConvert.DeserializeObject<PersistantData>(File.ReadAllText(ConfigFile));
-                configData.parent = container;
-                container.logger.LogInfo($"Loaded Persistance Data\n{JsonConvert.SerializeObject(configData, Formatting.Indented)}");
-                return configData;
-            }
-            catch 
+            var CrossgameFile = Path.Combine(APWorldData.DataFolder, "CrossGameDictionary.json");
+            try
             {
-                return CreateNew();
+                CrossGameHashes = JsonConvert.DeserializeObject<CrossGameDictionary>(File.ReadAllText(CrossgameFile));
+            }
+            catch (Exception e)
+            {
+                LogWarning?.Invoke($"Failed to load CrossGameDictionary.json \n{e.Message}");
+            }
+        }
+
+        public string TryCorrectHash(BaseAPSong song) => TryCorrectHash(song.Hash, song.GetPool(SlotData).instrument.ToString());
+
+        public string TryCorrectHash(string hash, string instrument)
+        {
+#if CLONE_HERO
+            var hashes = CrossGameHashes?.YargToCloneHero;
+#else
+            var hashes = CrossGameHashes?.CloneHeroToYarg;
+#endif
+            if (!SongHashLookup.ContainsKey(hash) && hashes != null &&
+                hashes.TryGetValue(hash, out var instruments) &&
+                instruments.TryGetValue(instrument, out var replacement) && SongHashLookup.ContainsKey(replacement))
+                return replacement;
+            return hash;
+        }
+
+        private void CheckForMissingSongs()
+        {
+            SlotData.GoalData.Hash = TryCorrectHash(SlotData.GoalData);
+
+            foreach (var song in SlotData.Songs)
+                song.Hash = TryCorrectHash(song);
+
+            foreach (var key in seedConfig.SongProxies.Keys.Concat(seedConfig.AdjustedDifficulties.Keys).Distinct().ToArray())
+            {
+                var separator = key.LastIndexOf('[');
+                if (separator < 0 || !key.EndsWith("]") || !SlotData.Pools.TryGetValue(key.Substring(0, separator), out var pool)) continue;
+                var instrument = pool.instrument.ToString();
+                var hash = key.Substring(separator + 1, key.Length - separator - 2);
+                var replacementKey = $"{key.Substring(0, separator)}[{TryCorrectHash(hash, instrument)}]";
+
+                if (seedConfig.SongProxies.TryGetValue(key, out var proxyHash))
+                {
+                    seedConfig.SongProxies.Remove(key);
+                    seedConfig.SongProxies[replacementKey] = TryCorrectHash(proxyHash, instrument);
+                }
+                if (key != replacementKey && seedConfig.AdjustedDifficulties.TryGetValue(key, out var requirements))
+                {
+                    seedConfig.AdjustedDifficulties.Remove(key);
+                    seedConfig.AdjustedDifficulties[replacementKey] = requirements;
+                }
             }
 
-            PersistantData CreateNew() => new PersistantData
+            var invalidProxies = seedConfig.SongProxies.Where(proxy => !SongHashLookup.ContainsKey(proxy.Value)).Select(proxy => proxy.Key).ToArray();
+            foreach (var key in invalidProxies)
+                seedConfig.SongProxies.Remove(key);
+            if (invalidProxies.Length > 0)
+                seedConfig.Save();
+
+            HashSet<string> Missing = new HashSet<string>();
+            foreach(var i in SlotData.Songs)
             {
-                DeathLinkMode = container.SlotData.DeathLink,
-                EnergyLinkMode = container.SlotData.EnergyLink,
-                parent = container,
-                InGameItemLog = ArchipelagoPlugin.DefaultItemLog.Value,
-                InGameAPChat = ArchipelagoPlugin.DefaultShowChat.Value
-            };
-        }
-        public void Save()
-        {
-            if (!parent.IsSessionConnected) return;
-            Directory.CreateDirectory(SeedConfigPath);
-            var path = Path.Combine(SeedConfigPath, getSaveFileName(parent));
-            File.WriteAllText(path, JsonConvert.SerializeObject(this, Formatting.Indented));
-        }
-        private static string getSaveFileName(APConnectionContainer container) =>
-            $"{container.GetSession()?.RoomState?.Seed}_{container.GetSession()?.Players?.ActivePlayer?.Slot}_" +
-            $"{container.GetSession()?.Players?.ActivePlayer?.Slot}_{container.GetSession()?.Players?.ActivePlayer?.GetHashCode()}";
-
-        public bool SendDlOnSongFail()
-        {
-            if (DeathLinkMode <= DeathLinkType.disabled) return false;
-            if (DeathLinkTrigger == DeathLinkTriggerType.failed_requirements_only) return false;
-            return true;
-        }
-        public bool SendDlOnRequirements()
-        {
-            if (DeathLinkMode <= DeathLinkType.disabled) return false;
-            if (DeathLinkTrigger == DeathLinkTriggerType.song_fail_only) return false;
-            return true;
+                if (!SongHashLookup.ContainsKey(i.GetActiveHash(this)))
+                {
+                    var MainLocation = Session.Locations.GetLocationNameFromId(i.MainLocationID);
+                    var SongName = APUtils.GetSongNameFromLocationString(MainLocation);
+                    Missing.Add(SongName);
+                }
+            }
+            if (Missing.Count > 0)
+            {
+                ArchipelagoConnectionDialog.ShowMissingSongs(Missing);
+            }
         }
 
+        public new void UpdateReceivedItems()
+        {
+            if (Session == null || SlotData == null)
+                return;
+            ReceivedSongUnlockItems.Clear();
+            ReceivedInstruments.Clear();
+            ApItemsRecieved.Clear();
+            ItemPriorities.Clear();
+            base.UpdateReceivedItems();
+            UpdateCheckedLocations();
+            eventManager.PendingTrapsFiller = true;
+            APPatches.HasAvailableAPSongUpdate = true;
+            if (ApItemsRecieved.Any(x => x.Type == StaticItems.Victory))
+                Session.SetGoalAchieved();
+        }
+
+        public void UpdateCheckedLocations()
+        {
+            CheckedLocations.Clear();
+            CheckedLocations.UnionWith(Session.Locations.AllLocationsChecked);
+        }
+
+        public void UpdateDeathLinkTags()
+        {
+            if (!IsSessionConnected || DeathLinkService == null) return;
+            if (seedConfig.DeathLinkMode > DeathLinkType.disabled)
+                DeathLinkService.EnableDeathLink();
+            else
+                DeathLinkService.DisableDeathLink();
+        }
+
+        private void OnMessageReceived(LogMessage message)
+        {
+            eventManager.RelayChat(message);
+            eventManager.UpdateChatHistory(message);
+        }
+
+        private void Report(string message)
+        {
+            StatusText = message;
+            APToastManager.ToastInformation(message);
+        }
     }
+
 }

@@ -3,7 +3,6 @@ using System.IO;
 using YamlDotNet.Serialization;
 using YamlDotNet.Core;
 using YamlDotNet.Core.Events;
-using YargArchipelagoPlugin;
 
 namespace Yaml_Creator
 {

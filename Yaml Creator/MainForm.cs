@@ -1,4 +1,5 @@
-﻿using Newtonsoft.Json;
+﻿using YargArchipelagoCommon;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Data;
@@ -9,10 +10,9 @@ using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Text;
 using System.Windows.Forms;
-using YargArchipelagoPlugin;
 using static Yaml_Creator.SongData;
 using static Yaml_Creator.Utility;
-using static YargArchipelagoCommon.CommonData;
+using static YargArchipelagoCommon.APWorldData;
 
 namespace Yaml_Creator
 {
@@ -30,7 +30,7 @@ namespace Yaml_Creator
         {
             Game = game;
             InitializeComponent();
-            this.Text = $"{game} YAML Creator";
+            this.Text = $"{game} YAML Creator V{Versions.ForGame(game)}";
             YamlTT.AutoPopDelay = int.MaxValue;
 
             if (File.Exists(cache))
@@ -229,7 +229,7 @@ namespace Yaml_Creator
         {
             PrintingSongs = true;
             Dictionary<SongExportExtendedData, string> DisplayString = ExportFile.ToDictionary(x => x, x => AddTags(x));
-            var ActiveSongs = FormHelpers.FilterItems(ExportFile, txtActiveSongFilter.Text, x => DisplayString[x]);
+            var ActiveSongs = APUtils.FilterItems(ExportFile, txtActiveSongFilter.Text, x => DisplayString[x]);
             ActiveSongs = ActiveSongs.OrderBy(x => x.ToString()).ToArray();
             lbActiveSongs.Rows.Clear();
             foreach (var d in ActiveSongs)
@@ -873,8 +873,16 @@ namespace Yaml_Creator
             {
                 CurrentTypes = form.GetSelectedValues<DisplayTypes>().ToHashSet();
                 PrintActiveSongs(sender, e);
-                FormHelpers.ClearFilters();
+                APUtils.ClearFilters();
             }
+        }
+
+        private void btnTools_Click(object sender, EventArgs e)
+        {
+            ctxMenu.Items.Clear();
+            ctxMenu.Items.Add("Create Cross Game Song Hash File", null, (_, __) => CrossGameDictionary.Create());
+            ctxMenu.Items.Add("Repair Seed Song Data", null, (_, __) => MissingSongsRepair.Repair(ClientConnection));
+            ctxMenu.Show(btnTools, new Point(0, btnTools.Height));
         }
     }
 }

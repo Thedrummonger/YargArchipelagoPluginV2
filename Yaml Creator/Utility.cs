@@ -9,8 +9,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using YargArchipelagoCommon;
-using YargArchipelagoPlugin;
-using static YargArchipelagoCommon.CommonData;
+using static YargArchipelagoCommon.APWorldData;
 
 namespace Yaml_Creator
 {

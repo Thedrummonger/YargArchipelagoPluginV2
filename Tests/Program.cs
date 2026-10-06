@@ -5,7 +5,7 @@ using YargArchipelagoCommon;
 Console.WriteLine("Hello, World!");
 
 var Session = ArchipelagoSessionFactory.CreateSession("localhost");
-var result = Session.TryConnectAndLogin("YAYARG", "Player1", Archipelago.MultiClient.Net.Enums.ItemsHandlingFlags.AllItems, new Version(0, 6, 2));
+var result = Session.TryConnectAndLogin("YAYARG", "Player1", Archipelago.MultiClient.Net.Enums.ItemsHandlingFlags.AllItems, Version.Parse(Versions.Archipelago));
 
 if (result is LoginFailure loginFailure)
 {

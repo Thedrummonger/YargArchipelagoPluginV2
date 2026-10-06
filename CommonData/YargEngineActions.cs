@@ -7,10 +7,11 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
-using System.Text;
 using UnityEngine;
 using YARG;
 using YARG.Core;
+using YARG.Core.Game;
+using YARG.Scores;
 using YARG.Core.Audio;
 //Don't Let visual studios lie to me these are needed
 using YARG.Core.Engine;
@@ -28,27 +29,129 @@ using YARG.Menu.MusicLibrary;
 using YARG.Menu.Navigation;
 using YARG.Menu.Persistent;
 using YARG.Song;
+using YARG.Settings;
 using YargArchipelagoCommon;
-using static YargArchipelagoCommon.CommonData;
+using static YargArchipelagoCommon.APWorldData;
 
-namespace YargArchipelagoPlugin
+namespace YargArchipelagoCommon
 {
-    public static class YargEngineActions
+    public static class EngineActions
     {
+        public static bool IsSupportedInstrument(Instrument source, out SupportedInstrument? target)
+        {
+            if (Enum.TryParse<SupportedInstrument>(source.ToString(), out var result))
+            {
+                target = result;
+                return true;
+            }
+            target = null;
+            return false;
+        }
+
+        public static SupportedDifficulty GetSupportedDifficulty(Difficulty source)
+        {
+            if (source > Difficulty.Expert)
+                return SupportedDifficulty.Expert;
+            if (source < Difficulty.Easy)
+                return SupportedDifficulty.Easy;
+            return (SupportedDifficulty)(int)source; //Easy starts at 1, so does SupportedDifficulty. Beginner is 0 which the apworld does not support
+        }
+        public static IEnumerable<APPlayerResult> GetAPPlayerResults(this IEnumerable<BasePlayer> Players)
+        {
+            foreach (var player in Players)
+            {
+                IsSupportedInstrument(player.Player.Profile.CurrentInstrument, out var instrument);
+                if (player.Player.Profile.CurrentInstrument == Instrument.EliteDrums)
+                    instrument = SupportedInstrument.ProDrums;
+                yield return new APPlayerResult
+                {
+                    CurrentInstrument = instrument,
+                    CurrentDifficulty = GetSupportedDifficulty(player.Player.Profile.CurrentDifficulty),
+                    Stars = player.Stars,
+                    IsGoldStars = StarAmountHelper.GetStarsFromInt((int)player.Stars) == StarAmount.StarGold,
+                    IsFc = player.IsFc
+                };
+            }
+        }
+
+        public static string GetSongHash(SongEntry song) => Convert.ToBase64String(song.Hash.HashBytes);
+        public static string GetSongHash(GameManager gameManager) => GetSongHash(gameManager.Song);
+        public static string GetSongDisplayName(SongEntry song) => $"{song.Name} by {song.Artist}";
+        public static StringComparer SongHashComparer => StringComparer.Ordinal;
+
+
+        public static APSongResult GetSongResults(GameManager gameManager) => new APSongResult
+        {
+            Hash = Convert.ToBase64String(gameManager.Song.Hash.HashBytes),
+            Name = $"{gameManager.Song.Name} by {gameManager.Song.Artist}",
+            IsPractice = gameManager.IsPractice,
+            PlayerHasFailed = gameManager.PlayerHasFailed,
+            BandScore = gameManager.BandScore,
+            Players = gameManager.Players.GetAPPlayerResults().ToList()
+        };
+
+        public static void FailedSong(GameManager gameManager)
+        {
+            var parent = ArchipelagoPlugin.APcontainer;
+            if (!parent.IsSessionConnected || parent.seedConfig is null || !parent.seedConfig.SendDlOnSongFail())
+                return;
+
+            if (CanFailSong() && !gameManager.IsPractice && !gameManager.PlayerHasFailed)
+            {
+                parent.DeathLinkService?.SendDeathLink(new DeathLink(parent.GetSession().Players.ActivePlayer.Name, $"Failed Song {gameManager.Song.Name} by {gameManager.Song.Artist}"));
+            }
+        }
+
+        public static bool CanFailSong()
+        {
+            return SettingsManager.Settings.NoFail.Value == YARG.Gameplay.HUD.NoFailMode.Off;
+        }
+
+        public static string SongExportFile => Path.Combine(DataFolder, "SongExport.json");
+
+        private static readonly IEnumerable<Instrument> AllYargInstruments = Enum.GetValues(typeof(Instrument)).Cast<Instrument>();
+
+        public static SongExportData GetSongExportData(SongEntry song)
+        {
+            var Entry = new SongExportData()
+            {
+                Artist = RichTextUtils.StripRichTextTags(song.Artist),
+                Name = RichTextUtils.StripRichTextTags(song.Name),
+                SongChecksum = Convert.ToBase64String(song.Hash.HashBytes),
+                Difficulties = new Dictionary<SupportedInstrument, int>(),
+                Source = song.Source.Original,
+                Album = song.Album,
+                Genre = song.Genre,
+                Charter = song.Charter,
+                Time = Math.Round(song.SongLengthSeconds)
+            };
+            foreach (var instrument in AllYargInstruments)
+            {
+                if (!song.HasInstrument(instrument) || !IsSupportedInstrument(instrument, out var supportedInstrument))
+                    continue;
+                Entry.Difficulties[supportedInstrument.Value] = song[instrument].Intensity < 0 ? 0 : song[instrument].Intensity;
+            }
+            return Entry;
+        }
+
+        public static Dictionary<string, SongEntry> GetSongLookup()
+        {
+            var songs = new Dictionary<string, SongEntry>();
+            foreach (var song in SongContainer.Songs)
+                songs[Convert.ToBase64String(song.Hash.HashBytes)] = song;
+            return songs;
+        }
+
         public static void DumpAvailableSongs()
         {
             var SongData = GetYargSongExportData();
-            if (!Directory.Exists(DataFolder)) Directory.CreateDirectory(DataFolder);
-            File.WriteAllText(SongExportFile, JsonConvert.SerializeObject(SongData.Values.ToArray(), Formatting.Indented));
+            SongExportData.WriteToFile(SongExportFile, SongData.Values);
         }
         public static Dictionary<string, SongExportData> GetYargSongExportData()
         {
             Dictionary<string, SongExportData> SongData = new Dictionary<string, SongExportData>();
-            foreach(var song in SongContainer.Songs)
-            {
-                var Hash = Convert.ToBase64String(song.Hash.HashBytes);
-                SongData[Hash] = SongExportData.FromSongEntry(song);
-            }
+            foreach (var song in GetSongLookup())
+                SongData[song.Key] = GetSongExportData(song.Value);
             return SongData;
         }
 
@@ -88,7 +191,7 @@ namespace YargArchipelagoPlugin
                 () => menu.APRefreshAndReselect(true), ButtonInd++, "Refresh AP Song List"));
 
             if (GoalSongUnlocked && container.SlotData.GoalData.HasAvailableLocations(container)
-                 && container.SlotData.GoalData.HadYargSongEntry(container, out var GoalSong))
+                 && container.SlotData.GoalData.HasSongEntry(container, out var GoalSong))
             {
                 var Pool = container.SlotData.GoalData.PoolName;
                 var GoalHidden = collapsedHeaders.Contains("GOAL");
@@ -106,7 +209,7 @@ namespace YargArchipelagoPlugin
 
             if (AvailableMissingInst.Any())
                 listView.Insert(insertIndex++, new SortHeaderViewType("SONGS MISSING INSTRUMENTS", AvailableMissingInst.Count(), "missing instruments",
-                    [.. AvailableMissingInst.Select(x => x.GetYargSongEntry(container))], !container.seedConfig.ShowMissingInstruments, 
+                    [.. AvailableMissingInst.Select(x => x.GetSongEntry(container))], !container.seedConfig.ShowMissingInstruments, 
                     () => ToggleShowMissingInst(container, menu)));
 
             if (container.seedConfig.ShowMissingInstruments)
@@ -123,16 +226,16 @@ namespace YargArchipelagoPlugin
 
             if (container.seedConfig.ShowGoalStatus)
             {
-                listView.Insert(insertIndex++, new ButtonViewType($"Goal Conditions Met: {GoalSongUnlocked.ToYargColoredString()}",
-                    "MusicLibraryIcons[Recommended]", () => ShowGoalConditionStatus(container), ButtonInd++, "Show Goal Condition Status"));
+                listView.Insert(insertIndex++, new ButtonViewType($"Goal Conditions Met: {GoalSongUnlocked.ToColoredString()}",
+                    "MusicLibraryIcons[Recommended]", () => FormHelpers.ShowGoalConditionStatus(container), ButtonInd++, "Show Goal Condition Status"));
                 insertIndex = AddMacGuffinEntry(StaticItems.SongCompletion, "Setlist", container.SlotData.SetlistNeededForGoal, listView, container, insertIndex);
                 insertIndex = AddMacGuffinEntry(StaticItems.FamePoint, "Fame", container.SlotData.FamePointsForGoal, listView, container, insertIndex);
 
-                if (container.GoalItemInPool(out var GoalItemRecieved, out var recieveInfo))
+                if (container.GoalItemInPool(out var GoalItemRecieved, out _))
                     listView.Insert(insertIndex++, 
                         new ButtonViewType($"Goal Item", 
-                        "MusicLibraryIcons[Recommended]", () => ShowGoalRecieveMessage(container, GoalItemRecieved, recieveInfo), ButtonInd++, 
-                        (GoalItemRecieved ? "Found".ToYargColoredString(Color.green) : "Missing".ToYargColoredString(Color.red))));
+                        "MusicLibraryIcons[Recommended]", () => FormHelpers.ShowGoalRecieveMessage(container, GoalItemRecieved), ButtonInd++, 
+                        (GoalItemRecieved ? "Found".ToColoredString(Color.green) : "Missing".ToColoredString(Color.red))));
                 listView.Insert(insertIndex++, new ButtonViewType($"Reveal Goal Song", "MusicLibraryIcons[Recommended]", 
                     () => DialogManager.Instance.ShowMessage("GOAL SONG", container.SlotData.GoalData.GetDisplayName(container, true)), ButtonInd++, ""));
             }
@@ -152,7 +255,7 @@ namespace YargArchipelagoPlugin
                     var poolName = pool.Key;
                     var poolData = pool.Value;
                     listView.Insert(insertIndex++, new ButtonViewType($"{poolName.ToUpper()}", "MusicLibraryIcons[Recommended]",
-                        () => ShowPoolData(container, poolName), ButtonInd++, $"Show {poolName.ToUpper()} Requirements"));
+                        () => FormHelpers.ShowPoolData(container, poolName), ButtonInd++, $"Show {poolName.ToUpper()} Requirements"));
                 }
             }
 
@@ -179,27 +282,6 @@ namespace YargArchipelagoPlugin
             }
         }
 
-        private static void ShowGoalConditionStatus(APConnectionContainer container)
-        {
-            bool GoalMet = container.SlotData.GoalData.IsSongUnlocked(container);
-            string Header = GoalMet ?
-                "Goal Conditions Met!\nPlay your goal song to complete the seed!" :
-                "Goal Conditions NOT Met!\nComplete all the conditions below to unlock your goal song!";
-
-            StringBuilder Conditions = new StringBuilder();
-            if (container.GoalItemInPool(out bool ItemFound, out _))
-                Conditions.AppendLine($"Find Your Goal Unlock Item.")
-                        .AppendLine($"Found: {ItemFound}").AppendLine();
-            if (container.SlotData.SetlistNeededForGoal > 0)
-                Conditions.AppendLine($"Complete {container.SlotData.SetlistNeededForGoal} Songs.")
-                        .AppendLine($"Current Completion {container.ApItemsRecieved.Count(x => x.Type == StaticItems.SongCompletion)}").AppendLine();
-            if (container.SlotData.FamePointsForGoal > 0)
-                Conditions.AppendLine($"Find {container.SlotData.FamePointsForGoal} Fame Points.")
-                        .AppendLine($"Current Fame {container.ApItemsRecieved.Count(x => x.Type == StaticItems.FamePoint)}").AppendLine();
-
-            DialogManager.Instance.ShowMessage(Header, Conditions.ToString());
-        }
-
         private static void ToggleShowMissingInst(APConnectionContainer container, MusicLibraryMenu menu)
         {
             container.seedConfig.ShowMissingInstruments = !container.seedConfig.ShowMissingInstruments;
@@ -213,7 +295,7 @@ namespace YargArchipelagoPlugin
             var insertIndex = I;
             var current = C.ApItemsRecieved.Count(x => x.Type == Type);
             L.Insert(insertIndex++, new ButtonViewType($"{Name} Goal", "MusicLibraryIcons[Recommended]",
-                () => ShowMacGuffinStatus(current, Needed, Name), ButtonInd++, $"{current}/{Needed}"));
+                () => FormHelpers.ShowMacGuffinStatus(current, Needed, Name), ButtonInd++, $"{current}/{Needed}"));
             return insertIndex;
         }
 
@@ -241,9 +323,9 @@ namespace YargArchipelagoPlugin
                 string PoolName = pool.Key.ToUpper();
                 bool IsCollapsed = collapsedHeaders.Contains(PoolName);
                 if (Color.HasValue)
-                    PoolName = PoolName.ToYargColoredString(Color.Value);
+                    PoolName = PoolName.ToColoredString(Color.Value);
 
-                var poolSongs = pool.Select(e => (e.GetYargSongEntry(container), e)).OrderBy(s => s.Item1.Name, StringComparer.OrdinalIgnoreCase).ToArray();
+                var poolSongs = pool.Select(e => (e.GetSongEntry(container), e)).OrderBy(s => s.Item1.Name, StringComparer.OrdinalIgnoreCase).ToArray();
 
                 listView.Insert(insertIndex++, new SortHeaderViewType($"AP: {PoolName}", poolSongs.Length, "ap pool",
                     [.. poolSongs.Select(x => x.Item1)], IsCollapsed, () => { 
@@ -259,58 +341,6 @@ namespace YargArchipelagoPlugin
             return insertIndex;
         }
 
-        private static void ShowMacGuffinStatus(int Current, int Need, string Title)
-        {
-            if (Current < Need)
-                APToastManager.ToastError($"{Title} goal not met!\nHas: {Current}\nNeed:{Need}");
-            else
-                APToastManager.ToastSuccess($"{Title} goal met!\nHas: {Current}\nNeed:{Need}");
-        }
-
-        private static void ShowGoalRecieveMessage(APConnectionContainer container, bool Recieved, BaseYargAPItem recieveInfo)
-        {
-            if (!Recieved)
-            {
-                APToastManager.ToastError($"Your goal song unlock item has not been found!");
-                return;
-            }
-            var Team = container.GetSession().Players.ActivePlayer.Team;
-            var Player = container.GetSession().Players.GetPlayerInfo(Team, recieveInfo.SendingPlayerSlot);
-            var LocationInfo = container.GetSession().Locations.GetLocationNameFromId(recieveInfo.SendingPlayerLocation, recieveInfo.SendingPlayerGame);
-            DialogManager.Instance.ShowMessage("Goal Unlock Item Found!", $"Found by Player:\n{Player.Name}\n\nFrom Location:\n{LocationInfo}\n\nPlaying Game:\n{Player.Game}");
-        }
-
-        public static void ShowPoolData(APConnectionContainer container, string poolName)
-        {
-            if (!container.SlotData.Pools.TryGetValue(poolName, out var SongPool))
-                return;
-            ShowPoolData(container, $"SONG POOL: {poolName}" , SongPool);
-        }
-        public static void ShowPoolData(APConnectionContainer container, string Title, SongPool SongPool)
-        {
-
-            StringBuilder Result = new StringBuilder()
-                .AppendLine($"REQUIRED INSTRUMENT: {SongPool.instrument.GetDescription()}")
-                .AppendLine()
-                .AppendLine($"REWARD 1 REQUIREMENTS:")
-                .AppendLine($"Minimum Difficulty: {SongPool.completion_requirements.reward1_diff.GetDescription()}")
-                .AppendLine($"Minimum Score: {SongPool.completion_requirements.reward1_req.GetDescription()}")
-                .AppendLine()
-                .AppendLine($"REWARD 2 REQUIREMENTS:")
-                .AppendLine($"Minimum Difficulty: {SongPool.completion_requirements.reward2_diff.GetDescription()}")
-                .AppendLine($"Minimum Score: {SongPool.completion_requirements.reward2_req.GetDescription()}");
-            if (container.ReceivedInstruments.TryGetValue(SongPool.instrument, out var info))
-            {
-                var Player = info.GetPlayerInfo(container);
-                Result.AppendLine().AppendLine($"{SongPool.instrument.GetDescription()} Recieved from").Append(Player.Name);
-                if (Player.Slot > 0)
-                {
-                    var location = container.GetSession().Locations.GetLocationNameFromId(info.SendingPlayerLocation, Player.Game);
-                    Result.AppendLine($" Playing {Player.Game}").AppendLine($"at {location}");
-                }
-            }
-            DialogManager.Instance.ShowMessage(Title, Result.ToString());
-        }
         /// <summary>
         /// Grants star power to all active players when an Archipelago star power item is received.
         /// </summary>
@@ -318,7 +348,7 @@ namespace YargArchipelagoPlugin
         {
             if (!handler.IsInSong(out var current, out _))
                 return;
-            handler.logger.LogInfo($"Gaining Star Power");
+            handler.LogInfo?.Invoke($"Gaining Star Power");
             MethodInfo method = AccessTools.Method(typeof(BaseEngine), "GainStarPower");
             foreach (var player in current.Players)
                 method.Invoke(player.BaseEngine, new object[] { player.BaseEngine.TicksPerQuarterSpBar });
@@ -331,7 +361,7 @@ namespace YargArchipelagoPlugin
         {
             if (!handler.IsInSong(out var current, out _))
                 return;
-            handler.logger.LogInfo($"Reducing Rock Meter");
+            handler.LogInfo?.Invoke($"Reducing Rock Meter");
             foreach (var player in current.Players)
                 AddHappiness(player, -0.25f);
 
@@ -339,30 +369,21 @@ namespace YargArchipelagoPlugin
         /// <summary>
         /// Applies the effects of a received DeathLink, either reducing rock meter or forcing instant fail based on settings.
         /// </summary>
-        public static void ApplyDeathLink(APConnectionContainer handler, DeathLink deathLink)
+        public static bool ApplyDeathLink(APConnectionContainer handler)
         {
-            if (!handler.IsInSong(out var current, out _))
-                return;
-            try
+            if (!handler.IsInSong(out _, out _)) return false;
+            switch (handler.seedConfig.DeathLinkMode)
             {
-                handler.logger.LogInfo($"Applying Death Link");
-                switch (handler.seedConfig.DeathLinkMode)
-                {
-                    case CommonData.DeathLinkType.rock_meter:
-                        SetBandHappiness(handler, 0.02f);
-                        break;
-                    case CommonData.DeathLinkType.instant_fail:
-                        ForceFailSong(handler);
-                        break;
-                    default:
-                        return;
-                }
-                APToastManager.ToastInformation($"DeathLink Received!\n\n{deathLink?.Source ?? "Debug"} {deathLink?.Cause ?? "Command"}");
+                case DeathLinkType.rock_meter:
+                    SetBandHappiness(handler, 0.02f);
+                    break;
+                case DeathLinkType.instant_fail:
+                    ForceFailSong(handler);
+                    break;
+                default:
+                    return false;
             }
-            catch (Exception e)
-            {
-                handler.logger.LogError($"Failed to apply deathlink\n{e}");
-            }
+            return true;
         }
         /// <summary>
         /// Forces the current song to restart by opening the pause menu and triggering restart.
@@ -371,13 +392,14 @@ namespace YargArchipelagoPlugin
         {
             if (!handler.IsInSong(out var current, out _))
                 return;
+            handler.ResetBuffer();
             try
             {
                 MonoSingleton<GlobalVariables>.Instance.LoadScene(SceneIndex.Gameplay);
             }
             catch (Exception e)
             {
-                handler.logger.LogError($"Failed to force restart song\n{e}");
+                handler.LogError?.Invoke($"Failed to force restart song\n{e}");
             }
         }
         /// <summary>
@@ -532,12 +554,12 @@ namespace YargArchipelagoPlugin
                 return;
             try
             {
-                handler.logger.LogInfo($"Forcing Quit");
+                handler.LogInfo?.Invoke($"Forcing Quit");
                 current.ForceQuitSong();
             }
             catch (Exception e)
             {
-                handler.logger.LogInfo($"Failed to force exit song\n{e}");
+                handler.LogInfo?.Invoke($"Failed to force exit song\n{e}");
             }
         }
 
@@ -612,20 +634,7 @@ namespace YargArchipelagoPlugin
             IsPreventingSongFail = true;
 
             if (!gameManager.PlayerHasFailed && gameManager.CouldProductLocationCheck(ArchipelagoPlugin.APcontainer, out _))
-            {
-                var Pending = ArchipelagoPlugin.APcontainer.ApItemsRecieved
-                    .Where(x => x.Type == StaticItems.FailPrevention && !ArchipelagoPlugin.APcontainer.seedConfig.ApItemsUsed.Contains(x)).ToList();
-
-                if (Pending.Count > 0)
-                {
-                    YargEngineActions.PreventSongFail(__instance);
-                    var ToUse = Pending.First();
-                    var Player = ToUse.GetPlayerInfo(ArchipelagoPlugin.APcontainer);
-                    APToastManager.ToastSuccess($"{Player.Name} cheered you on!");
-                    ArchipelagoPlugin.APcontainer.seedConfig.ApItemsUsed.Add(ToUse);
-                    ArchipelagoPlugin.APcontainer.seedConfig.Save();
-                }
-            }
+                FillerItems.TryUseFailPrevention(ArchipelagoPlugin.APcontainer, () => PreventSongFail(__instance));
 
             IsPreventingSongFail = false;
 
